@@ -18,7 +18,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply service-finder-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply service-finder-db --remote",
-    "seed": "npx tsx scripts/seed-east-village.ts"
+    "seed": "npx tsx scripts/seed-east-village.ts",
+    "refresh": "npx tsx scripts/refresh-verifications.ts",
+    "import:bmf": "npx tsx scripts/import-irs-bmf.ts"
   },
   "dependencies": {
     "astro": "^5.0.0",
