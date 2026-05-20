@@ -1,0 +1,194 @@
+---
+import Base from '../../layouts/Base.astro';
+import TrustBadge from '../../components/TrustBadge.astro';
+import OpportunityCard from '../../components/OpportunityCard.astro';
+import { parseCategories, getOrgOpportunities } from '../../lib/search';
+import type { OrgSearchRow, OpportunityRow } from '../../lib/search';
+import { trustTier, TRUST_TIER_LABEL } from '../../lib/score';
+
+const { slug } = Astro.params;
+
+if (!slug) return Astro.redirect('/search');
+
+let org: OrgSearchRow | null = null;
+let opps: OpportunityRow[] = [];
+
+try {
+  const db = Astro.locals.runtime?.env?.DB;
+  if (db) {
+    const result = await db
+      .prepare(`SELECT * FROM organizations WHERE slug = ? AND status = 'published' LIMIT 1`)
+      .bind(slug)
+      .all<OrgSearchRow>();
+    org = result.results[0] ?? null;
+
+    if (org) {
+      opps = await getOrgOpportunities(db, org.id);
+    }
+  }
+} catch {
+  // DB unavailable
+}
+
+if (!org) return Astro.redirect('/search');
+
+const categories = parseCategories(org.categories);
+const tier = trustTier(org.reputability_cached);
+
+const verificationBadges = [
+  org.is_irs_501c3 && { label: 'IRS 501(c)(3)', detail: org.irs_status === 'PUBLIC_CHARITY' ? 'Public Charity' : org.irs_status ?? 'Tax-exempt', icon: '🏛️' },
+  org.admin_verified_by && { label: 'Staff Verified', detail: 'Friends Seminary Service Office', icon: '🎓' },
+  org.is_americorps_grantee && { label: 'AmeriCorps Grantee', detail: 'Federal service program partner', icon: '🇺🇸' },
+  org.charity_nav_stars && { label: `${org.charity_nav_stars}-Star Rating`, detail: 'Charity Navigator', icon: '⭐' },
+].filter(Boolean) as Array<{ label: string; detail: string; icon: string }>;
+---
+
+<Base
+  title={org.name}
+  description={org.description ?? org.mission ?? `Volunteer with ${org.name} in NYC's East Village.`}
+>
+  <div class="mx-auto max-w-4xl px-4 py-10">
+    <!-- Header -->
+    <div class="mb-8">
+      <a href="/search" class="mb-4 inline-flex items-center gap-1 text-sm text-green-500 hover:text-green-300 transition-colors">
+        ← Back to search
+      </a>
+
+      <div class="flex flex-wrap items-start justify-between gap-4 mt-4">
+        <div>
+          <h1 class="text-3xl font-bold text-white sm:text-4xl">{org.name}</h1>
+          {org.neighborhood && (
+            <p class="mt-1 text-sm text-green-400">{org.neighborhood}</p>
+          )}
+        </div>
+        <TrustBadge score={org.reputability_cached} />
+      </div>
+
+      {categories.length > 0 && (
+        <div class="mt-4 flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <span class="rounded-full bg-green-900 px-3 py-1 text-xs text-green-300 capitalize">
+              {cat.replace(/_/g, ' ')}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <div class="grid gap-8 lg:grid-cols-3">
+      <!-- Main content -->
+      <div class="lg:col-span-2 space-y-8">
+        <!-- Mission -->
+        {(org.mission || org.description) && (
+          <section aria-label="About this organization">
+            <h2 class="mb-3 text-lg font-semibold text-white">Mission</h2>
+            <p class="text-green-300 leading-relaxed">
+              {org.mission ?? org.description}
+            </p>
+            {org.mission && org.description && org.description !== org.mission && (
+              <p class="mt-3 text-sm text-green-400 leading-relaxed">{org.description}</p>
+            )}
+          </section>
+        )}
+
+        <!-- Opportunities -->
+        <section aria-label="Volunteer opportunities">
+          <h2 class="mb-4 text-lg font-semibold text-white">
+            Volunteer Opportunities
+            {opps.length > 0 && (
+              <span class="ml-2 rounded-full bg-green-800 px-2.5 py-0.5 text-sm font-normal text-green-300">
+                {opps.length}
+              </span>
+            )}
+          </h2>
+
+          {opps.length > 0 ? (
+            <div class="space-y-4">
+              {opps.map((opp) => <OpportunityCard opp={opp} />)}
+            </div>
+          ) : (
+            <div class="rounded-xl border border-green-800/40 bg-green-900/20 px-6 py-8 text-center">
+              <p class="text-green-400 text-sm">No opportunities listed yet.</p>
+              {org.website && (
+                <a
+                  href={org.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="mt-3 inline-block text-sm text-green-500 hover:text-green-300 transition-colors"
+                >
+                  Visit {org.name}'s website →
+                </a>
+              )}
+            </div>
+          )}
+        </section>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="space-y-6" aria-label="Organization details">
+        <!-- Trust & Verification -->
+        {verificationBadges.length > 0 && (
+          <div class="rounded-2xl border border-green-800/50 bg-green-900/30 p-5">
+            <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-green-500">
+              Verification
+            </h3>
+            <ul class="space-y-3">
+              {verificationBadges.map(({ label, detail, icon }) => (
+                <li class="flex items-start gap-3">
+                  <span class="text-xl mt-0.5" aria-hidden="true">{icon}</span>
+                  <div>
+                    <p class="text-sm font-medium text-white">{label}</p>
+                    <p class="text-xs text-green-400">{detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <!-- Contact -->
+        <div class="rounded-2xl border border-green-800/50 bg-green-900/30 p-5 space-y-3">
+          <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-green-500">
+            Contact
+          </h3>
+          {org.website && (
+            <a
+              href={org.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-2 text-sm text-green-300 hover:text-white transition-colors break-all"
+            >
+              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+              </svg>
+              {org.website.replace(/^https?:\/\//, '')}
+            </a>
+          )}
+          {org.phone && (
+            <a
+              href={`tel:${org.phone}`}
+              class="flex items-center gap-2 text-sm text-green-300 hover:text-white transition-colors"
+            >
+              <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 8V5z"/>
+              </svg>
+              {org.phone}
+            </a>
+          )}
+          {org.address_line1 && (
+            <p class="flex items-start gap-2 text-sm text-green-300">
+              <svg class="h-4 w-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <span>{org.address_line1}{org.city ? `, ${org.city}` : ''}{org.state ? `, ${org.state}` : ''}</span>
+            </p>
+          )}
+          {!org.website && !org.phone && !org.address_line1 && (
+            <p class="text-sm text-green-500">No contact info available.</p>
+          )}
+        </div>
+      </aside>
+    </div>
+  </div>
+</Base>

@@ -9,20 +9,21 @@ import { lookupByEin as ppLookup, searchByName, is501c3, irsStatus } from './lib
 import { fetchGrantees, buildEinIndex } from './lib/americorps';
 import { lookupByEin as cnLookup, scoreToStars } from './lib/charity-nav';
 
+// D1 REST API returns raw SQL column names (snake_case)
 interface OrgRow {
   id: number;
   name: string;
   slug: string;
   ein: string | null;
-  isIrs501c3: number;
-  irsStatus: string | null;
-  isAmericorpsGrantee: number;
-  charityNavScore: number | null;
-  charityNavStars: number | null;
-  logoR2Key: string | null;
-  addressLine1: string | null;
-  adminVerifiedBy: string | null;
-  domainFirstSeen: string | null;
+  is_irs_501c3: number;
+  irs_status: string | null;
+  is_americorps_grantee: number;
+  charity_nav_score: number | null;
+  charity_nav_stars: number | null;
+  logo_r2_key: string | null;
+  address_line1: string | null;
+  admin_verified_by: string | null;
+  domain_first_seen: string | null;
 }
 
 async function logRun(orgId: number, source: string, ok: boolean, payload: unknown, error?: string) {
@@ -32,18 +33,43 @@ async function logRun(orgId: number, source: string, ok: boolean, payload: unkno
   );
 }
 
+// EINs confirmed via gaycenter.org / IRS EO for orgs ProPublica name-search can't find
+const KNOWN_EINS: Record<string, string> = {
+  'bowery mission': '13-5562164',
+  // Legal name: "Lesbian & Gay Community Services Center, Inc." — EIN from gaycenter.org
+  'lgbt community center': '13-3217805',
+  'lesbian': '13-3217805',
+};
+
 async function resolveEin(org: OrgRow): Promise<string | null> {
+  // KNOWN_EINS takes priority — corrects any wrong EIN already stored
+  const nameLower = org.name.toLowerCase().replace(/^the\s+/, '');
+  for (const [key, ein] of Object.entries(KNOWN_EINS)) {
+    if (nameLower.includes(key) || key.includes(nameLower.slice(0, 10))) {
+      if (org.ein !== ein) {
+        await d1Query('UPDATE organizations SET ein = ? WHERE id = ?', [ein, org.id]);
+        console.log(`   🔍 ${org.ein ? 'Corrected' : 'Hardcoded'} EIN for ${org.name}: ${ein}`);
+      }
+      return ein;
+    }
+  }
+
   if (org.ein) return org.ein;
 
-  // Try to find via ProPublica name search
+  // Try to find via ProPublica name search — only accept NY results with a close name match
   try {
     const results = await searchByName(org.name);
-    if (results.length > 0) {
-      const match = results[0];
+    const orgNameLower = org.name.toLowerCase().replace(/^the\s+/, '');
+    const match = results.find((r) =>
+      r.name.toLowerCase().replace(/^the\s+/, '').includes(orgNameLower.slice(0, 8)) ||
+      orgNameLower.includes(r.name.toLowerCase().replace(/^the\s+/, '').slice(0, 8))
+    ) ?? results[0];
+
+    if (match) {
       const ein = String(match.ein).padStart(9, '0');
       const formatted = `${ein.slice(0, 2)}-${ein.slice(2)}`;
       await d1Query('UPDATE organizations SET ein = ? WHERE id = ?', [formatted, org.id]);
-      console.log(`   🔍 Found EIN for ${org.name}: ${formatted}`);
+      console.log(`   🔍 Found EIN for ${org.name}: ${formatted} (matched "${match.name}")`);
       return formatted;
     }
   } catch (e) {
@@ -61,8 +87,8 @@ async function refreshProPublica(org: OrgRow, ein: string): Promise<Partial<OrgR
     }
     await logRun(org.id, 'propublica', true, data);
     return {
-      isIrs501c3: is501c3(data) ? 1 : 0,
-      irsStatus: irsStatus(data),
+      is_irs_501c3: is501c3(data) ? 1 : 0,
+      irs_status: irsStatus(data),
     };
   } catch (e) {
     await logRun(org.id, 'propublica', false, null, String(e));
@@ -80,8 +106,8 @@ async function refreshCharityNav(org: OrgRow, ein: string): Promise<Partial<OrgR
     }
     await logRun(org.id, 'charity_navigator', true, data);
     return {
-      charityNavScore: data.currentRating.score,
-      charityNavStars: scoreToStars(data.currentRating.score),
+      charity_nav_score: data.currentRating.score,
+      charity_nav_stars: scoreToStars(data.currentRating.score),
     };
   } catch (e) {
     await logRun(org.id, 'charity_navigator', false, null, String(e));
@@ -91,17 +117,17 @@ async function refreshCharityNav(org: OrgRow, ein: string): Promise<Partial<OrgR
 
 function computeScore(org: OrgRow, stats: { nReviews: number; avgRating: number; openReports: number }): number {
   let score = 30;
-  if (org.isIrs501c3) score += 20;
-  if (org.isIrs501c3 && org.irsStatus !== 'REVOKED') score += 5;
-  if (org.isAmericorpsGrantee) score += 15;
-  if (org.charityNavStars) score += org.charityNavStars * 4;
-  if (org.adminVerifiedBy) score += 10;
-  if (org.domainFirstSeen) {
-    const years = (Date.now() - new Date(org.domainFirstSeen).getTime()) / (1000 * 60 * 60 * 24 * 365);
+  if (org.is_irs_501c3) score += 20;
+  if (org.is_irs_501c3 && org.irs_status !== 'REVOKED') score += 5;
+  if (org.is_americorps_grantee) score += 15;
+  if (org.charity_nav_stars) score += org.charity_nav_stars * 4;
+  if (org.admin_verified_by) score += 10;
+  if (org.domain_first_seen) {
+    const years = (Date.now() - new Date(org.domain_first_seen).getTime()) / (1000 * 60 * 60 * 24 * 365);
     score += Math.min(5, Math.floor(years));
   }
-  if (org.logoR2Key) score += 2;
-  if (org.addressLine1) score += 2;
+  if (org.logo_r2_key) score += 2;
+  if (org.address_line1) score += 2;
   if (stats.nReviews >= 3) {
     const signal = (stats.avgRating - 3.0) * 10;
     score += Math.max(-10, Math.min(10, signal));
@@ -146,7 +172,7 @@ async function main() {
     const cleanEin = ein.replace('-', '').padStart(9, '0');
     const grantee = americorpsIndex.get(cleanEin);
     const americorpsUpdates = grantee
-      ? { isAmericorpsGrantee: 1, americorpsProgram: grantee.program_name ?? null }
+      ? { is_americorps_grantee: 1, americorps_program: grantee.program_name ?? null }
       : {};
     if (grantee) {
       await logRun(org.id, 'americorps', true, grantee);
@@ -185,18 +211,18 @@ async function main() {
         updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
       [
-        merged.isIrs501c3 ?? org.isIrs501c3,
-        merged.irsStatus ?? org.irsStatus,
-        (merged as Record<string, unknown>).isAmericorpsGrantee ?? org.isAmericorpsGrantee,
-        (merged as Record<string, unknown>).americorpsProgram ?? null,
-        merged.charityNavScore ?? org.charityNavScore,
-        merged.charityNavStars ?? org.charityNavStars,
+        merged.is_irs_501c3 ?? org.is_irs_501c3,
+        merged.irs_status ?? org.irs_status,
+        (merged as Record<string, unknown>).is_americorps_grantee ?? org.is_americorps_grantee,
+        (merged as Record<string, unknown>).americorps_program ?? null,
+        merged.charity_nav_score ?? org.charity_nav_score,
+        merged.charity_nav_stars ?? org.charity_nav_stars,
         repScore,
         org.id,
       ]
     );
 
-    console.log(`   ✓  Score: ${repScore}/100 | IRS 501c3: ${merged.isIrs501c3 ?? org.isIrs501c3} | AmeriCorps: ${(merged as Record<string, unknown>).isAmericorpsGrantee ?? org.isAmericorpsGrantee}\n`);
+    console.log(`   ✓  Score: ${repScore}/100 | IRS 501c3: ${merged.is_irs_501c3 ?? org.is_irs_501c3} | AmeriCorps: ${(merged as Record<string, unknown>).is_americorps_grantee ?? org.is_americorps_grantee}\n`);
 
     // Polite delay to avoid rate limits
     await new Promise((r) => setTimeout(r, 500));

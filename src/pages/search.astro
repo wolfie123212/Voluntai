@@ -1,0 +1,68 @@
+---
+import Base from '../layouts/Base.astro';
+import SearchBar from '../components/SearchBar.astro';
+import OrgCard from '../components/OrgCard.astro';
+import { searchOrgs } from '../lib/search';
+import type { OrgSearchRow } from '../lib/search';
+
+const url = new URL(Astro.request.url);
+const q = url.searchParams.get('q') ?? '';
+
+let orgs: OrgSearchRow[] = [];
+let error = false;
+
+try {
+  const db = Astro.locals.runtime?.env?.DB;
+  if (db) {
+    orgs = await searchOrgs(db, { q, limit: 20 });
+  }
+} catch {
+  error = true;
+}
+
+const pageTitle = q ? `"${q}" — Search` : 'Find Opportunities';
+const resultSummary = q
+  ? `${orgs.length} organization${orgs.length !== 1 ? 's' : ''} matching "${q}"`
+  : `${orgs.length} verified organization${orgs.length !== 1 ? 's' : ''} in the East Village`;
+---
+
+<Base title={pageTitle} description={`Volunteer opportunities in NYC's East Village. ${resultSummary}.`}>
+  <!-- Search header -->
+  <div class="border-b border-green-900 bg-green-950/80 px-4 py-6">
+    <div class="mx-auto max-w-6xl">
+      <SearchBar q={q} />
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-6xl px-4 py-8">
+    <!-- Result count -->
+    <p class="mb-6 text-sm text-green-400">
+      {error
+        ? 'Search unavailable right now — try again shortly.'
+        : resultSummary}
+    </p>
+
+    {orgs.length > 0 ? (
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {orgs.map((org) => <OrgCard org={org} />)}
+      </div>
+    ) : !error && (
+      <div class="flex flex-col items-center gap-4 py-20 text-center">
+        <span class="text-5xl" aria-hidden="true">🔍</span>
+        <p class="text-lg font-medium text-white">
+          {q ? `No results for "${q}"` : 'No organizations found'}
+        </p>
+        <p class="text-sm text-green-400 max-w-xs">
+          {q
+            ? 'Try a different search — like "food", "youth", or "seniors".'
+            : 'Check back soon as we add more organizations.'}
+        </p>
+        {q && (
+          <a href="/search" class="mt-2 rounded-lg bg-green-800 px-4 py-2 text-sm text-green-200 hover:bg-green-700 transition-colors">
+            Clear search
+          </a>
+        )}
+      </div>
+    )}
+  </div>
+</Base>

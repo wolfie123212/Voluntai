@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="About" description="About Voluntai — a verified volunteer directory for NYC's East Village.">
+  <div class="mx-auto max-w-2xl px-4 py-16">
+    <h1 class="text-3xl font-bold text-white mb-6">About Voluntai</h1>
+
+    <div class="space-y-6 text-green-300 leading-relaxed">
+      <p>
+        Voluntai is a verified volunteer-service directory built for New York City's East Village,
+        Lower East Side, and Alphabet City neighborhoods (ZIP codes 10003, 10009, and 10002).
+      </p>
+
+      <p>
+        Every organization listed on Voluntai is cross-checked against IRS tax-exempt records,
+        ProPublica's Nonprofit Explorer, and AmeriCorps grantee data. Organizations are also
+        reviewed by the Friends Seminary Service Office before being featured.
+      </p>
+
+      <h2 class="text-xl font-semibold text-white mt-8 mb-3">How trust scores work</h2>
+      <p>
+        Each organization receives a trust score based on multiple verification sources:
+        IRS 501(c)(3) status, Charity Navigator ratings, AmeriCorps grantee status,
+        domain age, and admin verification. Scores range from 0–100 and are updated nightly.
+      </p>
+
+      <div class="rounded-2xl border border-green-800/50 bg-green-900/20 p-6 space-y-3">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-xs font-semibold bg-green-400 text-green-950">⭐ Highly Trusted</span>
+          <span class="text-sm">80+ points — multiple independent verifications</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-xs font-semibold bg-green-600 text-white">✓ Trusted</span>
+          <span class="text-sm">60–79 points — IRS verified + admin reviewed</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-xs font-semibold bg-green-800 text-green-200">✓ Verified</span>
+          <span class="text-sm">40–59 points — basic verification complete</span>
+        </div>
+      </div>
+
+      <h2 class="text-xl font-semibold text-white mt-8 mb-3">Contact</h2>
+      <p>
+        Built by a student at <strong class="text-white">Friends Seminary</strong> in New York City.
+        For questions or to list your organization, email
+        <a href="mailto:contact@voluntai.com" class="text-green-400 hover:text-green-300 underline underline-offset-2">contact@voluntai.com</a>.
+      </p>
+    </div>
+  </div>
+</Base>

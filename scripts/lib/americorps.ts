@@ -3,8 +3,13 @@
 
 const AMERICORPS_BASE = 'https://data.americorps.gov/resource';
 
-// Dataset IDs for AmeriCorps grantees — verify current IDs at data.americorps.gov
-const GRANTEE_DATASET_ID = 'x8s3-5dih'; // AmeriCorps grantees — update if dataset changes
+// Known dataset IDs — AmeriCorps occasionally reorganizes their open data portal.
+// If all fail, the refresh script skips AmeriCorps checks gracefully.
+const GRANTEE_DATASET_IDS = [
+  'uua4-22bw', // Current Grantee Resources
+  'qmye-b73f', // AmeriCorps State & National Grantees
+  'x8s3-5dih', // Legacy grantee dataset
+];
 
 export interface AmericorpsGrantee {
   organization_name: string;
@@ -14,10 +19,15 @@ export interface AmericorpsGrantee {
 }
 
 export async function fetchGrantees(): Promise<AmericorpsGrantee[]> {
-  const url = `${AMERICORPS_BASE}/${GRANTEE_DATASET_ID}.json?$limit=50000`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`AmeriCorps API error ${res.status}`);
-  return await res.json() as AmericorpsGrantee[];
+  for (const id of GRANTEE_DATASET_IDS) {
+    const url = `${AMERICORPS_BASE}/${id}.json?$limit=50000`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json() as AmericorpsGrantee[];
+      if (Array.isArray(data) && data.length > 0) return data;
+    }
+  }
+  throw new Error('AmeriCorps grantee dataset unavailable — all known dataset IDs returned 404. Check data.americorps.gov for the current ID and update scripts/lib/americorps.ts.');
 }
 
 export function buildEinIndex(grantees: AmericorpsGrantee[]): Map<string, AmericorpsGrantee> {

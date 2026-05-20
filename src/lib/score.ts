@@ -1,5 +1,21 @@
 import type { Organization } from './db/schema';
 
+export type TrustTier = 'highly-trusted' | 'trusted' | 'verified' | 'listed';
+
+export function trustTier(score: number | null | undefined): TrustTier {
+  if (!score || score < 40) return 'listed';
+  if (score >= 80) return 'highly-trusted';
+  if (score >= 60) return 'trusted';
+  return 'verified';
+}
+
+export const TRUST_TIER_LABEL: Record<TrustTier, string> = {
+  'highly-trusted': 'Highly Trusted',
+  'trusted': 'Trusted',
+  'verified': 'Verified',
+  'listed': 'Listed',
+};
+
 // Reputability formula v1 — see BUILD_PLAN.md §7
 export function computeReputabilityScore(
   org: Pick<

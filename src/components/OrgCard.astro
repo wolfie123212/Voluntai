@@ -1,0 +1,45 @@
+---
+import TrustBadge from './TrustBadge.astro';
+import { parseCategories } from '../lib/search';
+import type { OrgSearchRow } from '../lib/search';
+
+interface Props {
+  org: OrgSearchRow;
+  opportunityCount?: number;
+}
+
+const { org, opportunityCount } = Astro.props;
+const categories = parseCategories(org.categories);
+const snippet = org.description
+  ? org.description.slice(0, 120) + (org.description.length > 120 ? '…' : '')
+  : org.mission?.slice(0, 120) ?? '';
+---
+
+<a
+  href={`/orgs/${org.slug}`}
+  class="group flex flex-col gap-4 rounded-2xl border border-green-800/50 bg-green-900/40 p-6 hover:border-green-600/70 hover:bg-green-900/60 transition-all"
+>
+  <div class="flex items-start justify-between gap-3">
+    <h2 class="text-lg font-semibold text-white group-hover:text-green-300 transition-colors leading-snug">
+      {org.name}
+    </h2>
+    <TrustBadge score={org.reputability_cached} />
+  </div>
+
+  {snippet && (
+    <p class="text-sm text-green-300 leading-relaxed line-clamp-2">{snippet}</p>
+  )}
+
+  <div class="flex flex-wrap items-center gap-2 mt-auto">
+    {categories.slice(0, 3).map((cat) => (
+      <span class="rounded-full bg-green-950 px-2.5 py-0.5 text-xs text-green-400 capitalize">
+        {cat.replace(/_/g, ' ')}
+      </span>
+    ))}
+    {opportunityCount != null && (
+      <span class="ml-auto text-xs text-green-500">
+        {opportunityCount} {opportunityCount === 1 ? 'opportunity' : 'opportunities'}
+      </span>
+    )}
+  </div>
+</a>

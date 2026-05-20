@@ -6,7 +6,8 @@ interface Props {
   description?: string;
 }
 
-const { title, description = 'Find volunteer opportunities near you in NYC.' } = Astro.props;
+const { title, description = 'Find verified volunteer opportunities in NYC\'s East Village.' } = Astro.props;
+const currentPath = new URL(Astro.request.url).pathname;
 ---
 
 <!doctype html>
@@ -15,21 +16,56 @@ const { title, description = 'Find volunteer opportunities near you in NYC.' } =
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <title>{title} — Voluntai</title>
+    <title>{title === 'Home' ? 'Voluntai — Volunteer in the East Village' : `${title} — Voluntai`}</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
-  <body>
+  <body class="min-h-screen bg-green-950 text-white antialiased">
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    <header role="banner">
-      <nav aria-label="Main navigation">
-        <a href="/" aria-label="Voluntai home">Voluntai</a>
+
+    <header class="sticky top-0 z-50 border-b border-green-900 bg-green-950/95 backdrop-blur">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3" aria-label="Main navigation">
+        <a href="/" class="flex items-center gap-2 font-bold text-white hover:text-green-300 transition-colors" aria-label="Voluntai home">
+          <span class="text-xl">🌿</span>
+          <span class="text-lg tracking-tight">Voluntai</span>
+        </a>
+        <div class="flex items-center gap-6 text-sm">
+          <a
+            href="/search"
+            class={`font-medium transition-colors ${currentPath === '/search' ? 'text-green-300' : 'text-green-400 hover:text-white'}`}
+          >
+            Find Opportunities
+          </a>
+          <a
+            href="/about"
+            class={`font-medium transition-colors ${currentPath === '/about' ? 'text-green-300' : 'text-green-400 hover:text-white'}`}
+          >
+            About
+          </a>
+        </div>
       </nav>
     </header>
+
     <main id="main-content" tabindex="-1">
       <slot />
     </main>
-    <footer role="contentinfo">
-      <p>&copy; {new Date().getFullYear()} Voluntai. A nonprofit service directory.</p>
+
+    <footer class="border-t border-green-900 bg-green-950 py-10 mt-16">
+      <div class="mx-auto max-w-6xl px-4">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="font-semibold text-white">🌿 Voluntai</p>
+            <p class="mt-1 text-sm text-green-500">A nonprofit volunteer directory for NYC's East Village.</p>
+          </div>
+          <div class="text-sm text-green-600 space-y-1 sm:text-right">
+            <p>Verified by Friends Seminary Service Office</p>
+            <p>Not affiliated with any listed organization.</p>
+            <p>&copy; {new Date().getFullYear()} Voluntai</p>
+          </div>
+        </div>
+      </div>
     </footer>
   </body>
 </html>

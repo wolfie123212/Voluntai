@@ -1,8 +1,118 @@
 ---
 import Base from '../layouts/Base.astro';
+import SearchBar from '../components/SearchBar.astro';
+import OrgCard from '../components/OrgCard.astro';
+import type { OrgSearchRow } from '../lib/search';
+
+let featuredOrgs: OrgSearchRow[] = [];
+
+try {
+  const db = Astro.locals.runtime?.env?.DB;
+  if (db) {
+    const result = await db
+      .prepare(`SELECT * FROM organizations WHERE status = 'published' ORDER BY reputability_cached DESC LIMIT 3`)
+      .all<OrgSearchRow>();
+    featuredOrgs = result.results;
+  }
+} catch {
+  // DB unavailable in local dev without wrangler — show empty state
+}
+
+const CATEGORIES = [
+  { label: 'Food & Hunger', icon: '🍽️', q: 'food' },
+  { label: 'Seniors', icon: '🤝', q: 'seniors' },
+  { label: 'Youth', icon: '🎓', q: 'youth' },
+  { label: 'Housing', icon: '🏠', q: 'housing' },
+  { label: 'Animals', icon: '🐾', q: 'animals' },
+  { label: 'Health', icon: '💚', q: 'health' },
+];
 ---
 
-<Base title="Home" description="Find volunteer opportunities in the East Village and NYC.">
-  <h1>Voluntai</h1>
-  <p>Find volunteer opportunities near you. — Phase 2 builds this out.</p>
+<Base title="Home">
+  <!-- Hero -->
+  <section class="relative flex min-h-[70vh] flex-col items-center justify-center px-4 py-24 text-center">
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-900 via-green-950 to-green-950" aria-hidden="true"></div>
+
+    <p class="mb-4 rounded-full border border-green-800 bg-green-900/50 px-4 py-1 text-sm text-green-400">
+      East Village · Lower East Side · Alphabet City
+    </p>
+
+    <h1 class="max-w-2xl text-5xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
+      Serve your community in<br/>
+      <span class="text-green-400">your neighborhood</span>
+    </h1>
+
+    <p class="mt-6 max-w-xl text-lg text-green-300">
+      Discover verified volunteer opportunities — from feeding families
+      to mentoring youth — with organizations you can trust.
+    </p>
+
+    <div class="mt-10 w-full max-w-xl">
+      <SearchBar large={true} />
+    </div>
+
+    <p class="mt-4 text-xs text-green-600">
+      All organizations verified through IRS, ProPublica, and Friends Seminary Service Office
+    </p>
+  </section>
+
+  <!-- Categories -->
+  <section class="mx-auto max-w-6xl px-4 py-8" aria-label="Browse by category">
+    <div class="grid grid-cols-3 gap-3 sm:grid-cols-6">
+      {CATEGORIES.map(({ label, icon, q }) => (
+        <a
+          href={`/search?q=${q}`}
+          class="flex flex-col items-center gap-2 rounded-2xl border border-green-800/50 bg-green-900/30 px-3 py-4 text-center hover:border-green-600/70 hover:bg-green-900/60 transition-all"
+        >
+          <span class="text-2xl" aria-hidden="true">{icon}</span>
+          <span class="text-xs font-medium text-green-300">{label}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Featured orgs -->
+  {featuredOrgs.length > 0 && (
+    <section class="mx-auto max-w-6xl px-4 py-12" aria-label="Featured organizations">
+      <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-white">Featured Organizations</h2>
+        <a href="/search" class="text-sm text-green-400 hover:text-green-300 transition-colors">
+          View all →
+        </a>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {featuredOrgs.map((org) => (
+          <OrgCard org={org} />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Trust section -->
+  <section class="mx-auto max-w-6xl px-4 py-12" aria-label="How we verify organizations">
+    <div class="rounded-2xl border border-green-800/50 bg-green-900/20 p-8 text-center">
+      <h2 class="text-xl font-semibold text-white">Every organization is verified</h2>
+      <p class="mt-2 text-green-400 max-w-lg mx-auto text-sm">
+        We cross-reference IRS records, ProPublica nonprofit data, and AmeriCorps grantee lists
+        so you know exactly who you're volunteering with.
+      </p>
+      <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div class="flex flex-col items-center gap-2">
+          <span class="text-3xl" aria-hidden="true">🏛️</span>
+          <p class="font-medium text-white text-sm">IRS 501(c)(3) Check</p>
+          <p class="text-xs text-green-500">Confirmed tax-exempt status via ProPublica</p>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <span class="text-3xl" aria-hidden="true">🎓</span>
+          <p class="font-medium text-white text-sm">School Verified</p>
+          <p class="text-xs text-green-500">Friends Seminary Service Office partners</p>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <span class="text-3xl" aria-hidden="true">⭐</span>
+          <p class="font-medium text-white text-sm">Trust Score</p>
+          <p class="text-xs text-green-500">Multi-source reputation index, updated nightly</p>
+        </div>
+      </div>
+    </div>
+  </section>
 </Base>
