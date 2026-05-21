@@ -28,3 +28,6 @@ binding = "AI"
 [vars]
 ENVIRONMENT = "production"
 APP_BASE_URL = "https://voluntai.com"
+TURNSTILE_SITE_KEY = "0x4AAAAAADTbzcSoc942LGUw"
+GOOGLE_CLIENT_ID = "983676025175-ni94nqreq81jnn76d1beqom2fttjejfr.apps.googleusercontent.com"
+RESEND_FROM_EMAIL = "noreply@voluntai.com"

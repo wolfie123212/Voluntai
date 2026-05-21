@@ -1,0 +1,127 @@
+---
+import Base from '../layouts/Base.astro';
+import { verifyTurnstile } from '../lib/turnstile';
+
+const env = Astro.locals.runtime?.env;
+const siteKey = env?.TURNSTILE_SITE_KEY ?? '';
+const type = new URL(Astro.request.url).searchParams.get('type') ?? 'general';
+const isTakedown = type === 'takedown';
+
+let error = '';
+let success = false;
+
+if (Astro.request.method === 'POST' && env) {
+  const form = await Astro.request.formData();
+  const reason = String(form.get('reason') ?? '').trim();
+  const details = String(form.get('details') ?? '').slice(0, 4000).trim();
+  const reporterEmail = String(form.get('email') ?? '').trim();
+  const reporterName = String(form.get('name') ?? '').trim();
+  const reviewId = form.get('review_id') ? parseInt(String(form.get('review_id'))) : undefined;
+  const orgId = form.get('org_id') ? parseInt(String(form.get('org_id'))) : undefined;
+  const turnstileToken = String(form.get('cf-turnstile-response') ?? '');
+
+  if (!reason) {
+    error = 'Please select a reason.';
+  } else {
+    const turnstileOk = await verifyTurnstile(turnstileToken, env.TURNSTILE_SECRET_KEY);
+    if (!turnstileOk) {
+      error = 'CAPTCHA verification failed. Please try again.';
+    } else {
+      await env.DB
+        .prepare(`INSERT INTO reports (review_id, org_id, reporter_email, reporter_name, reason, details)
+                  VALUES (?, ?, ?, ?, ?, ?)`)
+        .bind(reviewId ?? null, orgId ?? null, reporterEmail || null, reporterName || null, reason, details || null)
+        .run();
+      success = true;
+    }
+  }
+}
+
+const REASONS = [
+  { value: 'defamation', label: 'Defamation / false statement of fact' },
+  { value: 'dmca', label: 'Copyright infringement (DMCA)' },
+  { value: 'harassment', label: 'Harassment or threats' },
+  { value: 'pii', label: 'Personal information exposed' },
+  { value: 'spam', label: 'Spam or fake review' },
+  { value: 'inaccurate', label: 'Inaccurate organization info' },
+  { value: 'other', label: 'Other' },
+];
+---
+
+<Base title={isTakedown ? 'Takedown Request' : 'Contact'}>
+  <div class="mx-auto max-w-xl px-4 py-16">
+    <div class="rounded-2xl border border-green-800/50 bg-green-900/30 p-8">
+      {success ? (
+        <div class="text-center">
+          <div class="mb-4 text-5xl" aria-hidden="true">📬</div>
+          <h1 class="mb-3 text-2xl font-bold text-white">Report received</h1>
+          <p class="text-green-300">
+            We'll review your {isTakedown ? 'takedown request' : 'report'} within 7 days and follow up at the email you provided.
+          </p>
+          <p class="mt-4 text-sm text-green-500">
+            For urgent matters email <a href="mailto:takedown@voluntai.com" class="underline hover:text-green-300">takedown@voluntai.com</a> directly.
+          </p>
+        </div>
+      ) : (
+        <>
+          <h1 class="mb-2 text-2xl font-bold text-white">
+            {isTakedown ? 'Takedown / Report Request' : 'Contact Us'}
+          </h1>
+          <p class="mb-8 text-sm text-green-400">
+            {isTakedown
+              ? 'Use this form to report content that violates our policies, infringes copyright, or is defamatory. We respond within 7 days.'
+              : 'Questions, feedback, or content concerns — we\'re here.'}
+          </p>
+
+          {error && (
+            <div class="mb-6 rounded-xl border border-red-800/50 bg-red-900/30 px-4 py-3 text-sm text-red-300" role="alert">
+              {error}
+            </div>
+          )}
+
+          <form method="post" class="space-y-5" novalidate>
+            <div>
+              <label for="reason" class="mb-1.5 block text-sm font-medium text-green-300">
+                Reason <span class="text-red-400">*</span>
+              </label>
+              <select id="reason" name="reason" required
+                class="w-full rounded-xl border border-green-700 bg-green-900/50 px-4 py-2.5 text-white focus:border-green-500 focus:outline-none">
+                <option value="">Select a reason…</option>
+                {REASONS.map((r) => <option value={r.value}>{r.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label for="details" class="mb-1.5 block text-sm font-medium text-green-300">Details</label>
+              <textarea id="details" name="details" rows="5" maxlength="4000"
+                class="w-full rounded-xl border border-green-700 bg-green-900/50 px-4 py-2.5 text-white placeholder-green-600 focus:border-green-500 focus:outline-none resize-y"
+                placeholder="Describe the issue, include any URLs or review IDs…"></textarea>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label for="name" class="mb-1.5 block text-sm font-medium text-green-300">Your name</label>
+                <input id="name" name="name" type="text" autocomplete="name"
+                  class="w-full rounded-xl border border-green-700 bg-green-900/50 px-4 py-2.5 text-white placeholder-green-600 focus:border-green-500 focus:outline-none"
+                  placeholder="Optional" />
+              </div>
+              <div>
+                <label for="email" class="mb-1.5 block text-sm font-medium text-green-300">Your email</label>
+                <input id="email" name="email" type="email" autocomplete="email"
+                  class="w-full rounded-xl border border-green-700 bg-green-900/50 px-4 py-2.5 text-white placeholder-green-600 focus:border-green-500 focus:outline-none"
+                  placeholder="For follow-up" />
+              </div>
+            </div>
+
+            <div class="cf-turnstile" data-sitekey={siteKey} data-theme="dark"></div>
+
+            <button type="submit"
+              class="w-full rounded-xl bg-green-500 py-3 font-semibold text-green-950 hover:bg-green-400 transition-colors">
+              Submit
+            </button>
+          </form>
+        </>
+      )}
+    </div>
+  </div>
+</Base>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

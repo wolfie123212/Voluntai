@@ -1,0 +1,198 @@
+---
+import Base from '../../layouts/Base.astro';
+import { createAuth } from '../../lib/auth';
+
+const ADMIN_EMAIL = 'wolfbusterwhite@gmail.com';
+const env = Astro.locals.runtime?.env;
+
+if (!env) return Astro.redirect('/signin');
+
+// Auth: Cloudflare Access header (prod) or session (dev)
+const cfEmail = Astro.request.headers.get('Cf-Access-Authenticated-User-Email');
+let adminEmail = cfEmail === ADMIN_EMAIL ? cfEmail : null;
+
+if (!adminEmail) {
+  const auth = createAuth(env);
+  const session = await auth.api.getSession({ headers: Astro.request.headers });
+  if (session?.user?.email === ADMIN_EMAIL) adminEmail = session.user.email;
+}
+
+if (!adminEmail) return Astro.redirect('/');
+
+// Pending reviews
+interface PendingReview {
+  id: number;
+  org_name: string;
+  org_slug: string;
+  user_email: string;
+  rating: number;
+  body: string | null;
+  volunteered_in_year: number;
+  moderation_flags: string | null;
+  created_at: string;
+}
+
+interface OpenReport {
+  id: number;
+  review_id: number | null;
+  org_id: number | null;
+  org_name: string | null;
+  reason: string;
+  details: string | null;
+  reporter_email: string | null;
+  status: string;
+  created_at: string;
+}
+
+const { results: pendingReviews } = await env.DB
+  .prepare(`SELECT r.id, r.rating, r.body, r.volunteered_in_year, r.moderation_flags, r.created_at,
+                   o.name as org_name, o.slug as org_slug, u.email as user_email
+            FROM reviews r
+            JOIN organizations o ON o.id = r.org_id
+            JOIN users u ON u.id = r.user_id
+            WHERE r.status = 'pending'
+            ORDER BY r.created_at ASC`)
+  .all<PendingReview>();
+
+const { results: openReports } = await env.DB
+  .prepare(`SELECT rp.id, rp.review_id, rp.org_id, rp.reason, rp.details, rp.reporter_email, rp.status, rp.created_at,
+                   o.name as org_name
+            FROM reports rp
+            LEFT JOIN organizations o ON o.id = rp.org_id
+            WHERE rp.status IN ('open','in_review')
+            ORDER BY rp.created_at ASC`)
+  .all<OpenReport>();
+
+function flagLabel(flags: string | null): string {
+  if (!flags) return '';
+  try { return (JSON.parse(flags) as string[]).join(', '); }
+  catch { return flags; }
+}
+---
+
+<Base title="Moderation Queue">
+  <div class="mx-auto max-w-4xl px-4 py-10">
+    <div class="mb-8 flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-white">Moderation Queue</h1>
+      <span class="rounded-full bg-green-900 px-3 py-1 text-sm text-green-400">Admin: {adminEmail}</span>
+    </div>
+
+    <!-- Pending reviews -->
+    <section class="mb-12">
+      <h2 class="mb-4 text-lg font-semibold text-white">
+        Pending Reviews
+        <span class="ml-2 rounded-full bg-yellow-900/50 px-2.5 py-0.5 text-sm font-normal text-yellow-300">
+          {pendingReviews.length}
+        </span>
+      </h2>
+
+      {pendingReviews.length === 0 ? (
+        <p class="text-sm text-green-500">No pending reviews. 🎉</p>
+      ) : (
+        <div class="space-y-4">
+          {pendingReviews.map((r) => (
+            <div class="rounded-xl border border-green-800/40 bg-green-900/20 p-5" data-review-id={r.id}>
+              <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                <div>
+                  <a href={`/orgs/${r.org_slug}`} class="font-medium text-white hover:text-green-300">{r.org_name}</a>
+                  <p class="text-xs text-green-500">{r.user_email} · {'★'.repeat(r.rating)} · {r.volunteered_in_year}</p>
+                  {r.moderation_flags && (
+                    <p class="mt-1 text-xs text-yellow-400">⚠ Flagged: {flagLabel(r.moderation_flags)}</p>
+                  )}
+                </div>
+                <p class="text-xs text-green-600">{new Date(r.created_at).toLocaleString()}</p>
+              </div>
+
+              {r.body && <p class="mb-4 text-sm text-green-200 leading-relaxed whitespace-pre-wrap">{r.body}</p>}
+
+              <div class="flex flex-wrap gap-2">
+                <button
+                  onclick={`adminAction('/api/admin/reviews/${r.id}/publish', {}, this)`}
+                  class="rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 transition-colors">
+                  ✓ Publish
+                </button>
+                <button
+                  onclick={`adminAction('/api/admin/reviews/${r.id}/reject', {reason:'Does not meet guidelines'}, this)`}
+                  class="rounded-lg bg-yellow-900/50 px-4 py-2 text-sm font-medium text-yellow-300 hover:bg-yellow-900 transition-colors">
+                  ✗ Reject
+                </button>
+                <button
+                  onclick={`adminAction('/api/admin/reviews/${r.id}/remove', {reason:'Defamation/policy violation'}, this)`}
+                  class="rounded-lg bg-red-900/50 px-4 py-2 text-sm font-medium text-red-300 hover:bg-red-900/80 transition-colors">
+                  🗑 Remove
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <!-- Open reports -->
+    <section>
+      <h2 class="mb-4 text-lg font-semibold text-white">
+        Open Reports
+        <span class="ml-2 rounded-full bg-red-900/50 px-2.5 py-0.5 text-sm font-normal text-red-300">
+          {openReports.length}
+        </span>
+      </h2>
+
+      {openReports.length === 0 ? (
+        <p class="text-sm text-green-500">No open reports. 🎉</p>
+      ) : (
+        <div class="space-y-4">
+          {openReports.map((rp) => (
+            <div class="rounded-xl border border-red-800/30 bg-red-900/10 p-5">
+              <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                <div>
+                  <p class="font-medium text-white">
+                    {rp.review_id ? `Review #${rp.review_id}` : rp.org_name ?? `Org #${rp.org_id}`}
+                  </p>
+                  <p class="text-sm text-red-300">Reason: {rp.reason}</p>
+                  {rp.reporter_email && <p class="text-xs text-green-500">From: {rp.reporter_email}</p>}
+                </div>
+                <p class="text-xs text-green-600">{new Date(rp.created_at).toLocaleString()}</p>
+              </div>
+              {rp.details && <p class="mb-4 text-sm text-green-300">{rp.details}</p>}
+              <div class="flex gap-2">
+                <button
+                  onclick={`adminAction('/api/admin/reports/${rp.id}/resolve', {status:'actioned',notes:'Resolved'}, this)`}
+                  class="rounded-lg bg-green-800 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors">
+                  ✓ Resolve
+                </button>
+                <button
+                  onclick={`adminAction('/api/admin/reports/${rp.id}/resolve', {status:'dismissed',notes:'Dismissed'}, this)`}
+                  class="rounded-lg bg-green-900/50 px-4 py-2 text-sm font-medium text-green-400 hover:bg-green-900 transition-colors">
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  </div>
+</Base>
+
+<script>
+async function adminAction(url: string, body: Record<string, string>, btn: HTMLButtonElement) {
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      const card = btn.closest('[data-review-id], [class*="border-red"]') as HTMLElement;
+      if (card) card.style.opacity = '0.4';
+    } else {
+      alert('Action failed — check the console.');
+    }
+  } catch (e) {
+    alert('Network error.');
+  }
+}
+(window as any).adminAction = adminAction;
+</script>

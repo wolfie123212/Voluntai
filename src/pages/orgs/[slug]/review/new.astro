@@ -1,0 +1,174 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import { createAuth } from '../../../../lib/auth';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/search');
+
+const env = Astro.locals.runtime?.env;
+const siteKey = env?.TURNSTILE_SITE_KEY ?? '';
+
+// Auth required
+if (!env) return Astro.redirect(`/signin?redirect=/orgs/${slug}/review/new`);
+
+const auth = createAuth(env);
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+
+if (!session?.user) return Astro.redirect(`/signin?redirect=/orgs/${slug}/review/new`);
+
+// Load org
+interface OrgRow { id: number; name: string; slug: string; }
+const org = await env.DB
+  .prepare(`SELECT id, name, slug FROM organizations WHERE slug = ? AND status = 'published' LIMIT 1`)
+  .bind(slug)
+  .first<OrgRow>();
+
+if (!org) return Astro.redirect('/search');
+
+// Load opportunities for optional dropdown
+interface OppRow { id: number; title: string; }
+const { results: opps } = await env.DB
+  .prepare(`SELECT id, title FROM opportunities WHERE org_id = ? AND status = 'published'`)
+  .bind(org.id)
+  .all<OppRow>();
+
+let error = '';
+let success = false;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+
+  // POST to reviews API (handles Turnstile + moderation + rate limit)
+  const payload = {
+    orgId: org.id,
+    rating: parseInt(String(form.get('rating') ?? '0')),
+    reviewBody: String(form.get('body') ?? '').slice(0, 2000),
+    volunteeredInYear: parseInt(String(form.get('volunteered_in_year') ?? '0')),
+    opportunityId: form.get('opportunity_id') ? parseInt(String(form.get('opportunity_id'))) : null,
+    turnstileToken: String(form.get('cf-turnstile-response') ?? ''),
+  };
+
+  const apiReq = new Request(`${env.APP_BASE_URL}/api/reviews`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Cookie: Astro.request.headers.get('cookie') ?? '',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const apiRes = await fetch(apiReq);
+  const result = await apiRes.json() as { ok?: boolean; error?: string; message?: string };
+
+  if (result.ok) {
+    success = true;
+  } else {
+    error = result.error ?? 'Something went wrong. Please try again.';
+  }
+}
+
+const currentYear = new Date().getFullYear();
+---
+
+<Base title={`Review ${org.name}`}>
+  <div class="mx-auto max-w-xl px-4 py-12">
+    <a href={`/orgs/${slug}`} class="mb-6 inline-flex items-center gap-1 text-sm text-green-500 hover:text-green-300 transition-colors">
+      ← {org.name}
+    </a>
+
+    <div class="rounded-2xl border border-green-800/50 bg-green-900/30 p-8">
+      {success ? (
+        <div class="text-center">
+          <div class="mb-4 text-5xl" aria-hidden="true">✅</div>
+          <h1 class="mb-3 text-2xl font-bold text-white">Review submitted</h1>
+          <p class="text-green-300">
+            Your review has been received. It may appear immediately or after a short review by our team.
+          </p>
+          <a href={`/orgs/${slug}`} class="mt-8 inline-block rounded-xl bg-green-700 px-6 py-3 text-sm font-medium text-white hover:bg-green-600 transition-colors">
+            Back to {org.name}
+          </a>
+        </div>
+      ) : (
+        <>
+          <h1 class="mb-2 text-2xl font-bold text-white">Review {org.name}</h1>
+          <p class="mb-8 text-sm text-green-400">Share your experience as a volunteer.</p>
+
+          {error && (
+            <div class="mb-6 rounded-xl border border-red-800/50 bg-red-900/30 px-4 py-3 text-sm text-red-300" role="alert" aria-live="polite">
+              {error}
+            </div>
+          )}
+
+          <form method="post" class="space-y-6" novalidate>
+            <!-- Rating -->
+            <fieldset>
+              <legend class="mb-2 text-sm font-medium text-green-300">Rating <span class="text-red-400">*</span></legend>
+              <div class="flex gap-2" role="group">
+                {[1,2,3,4,5].map((n) => (
+                  <label class="cursor-pointer">
+                    <input type="radio" name="rating" value={n} required class="sr-only peer" />
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl border border-green-700 text-lg text-green-600 peer-checked:border-green-400 peer-checked:text-green-400 hover:border-green-500 hover:text-green-400 transition-colors">
+                      {n}★
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <!-- Year volunteered -->
+            <div>
+              <label for="volunteered_in_year" class="mb-1.5 block text-sm font-medium text-green-300">
+                Year you volunteered <span class="text-red-400">*</span>
+              </label>
+              <select id="volunteered_in_year" name="volunteered_in_year" required
+                class="w-full rounded-xl border border-green-700 bg-green-900/50 px-4 py-2.5 text-white focus:border-green-500 focus:outline-none">
+                <option value="">Select year…</option>
+                {Array.from({ length: 10 }, (_, i) => currentYear - i).map((y) => (
+                  <option value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+
+            <!-- Opportunity (optional) -->
+            {opps.length > 0 && (
+              <div>
+                <label for="opportunity_id" class="mb-1.5 block text-sm font-medium text-green-300">
+                  Which opportunity? <span class="text-green-500">(optional)</span>
+                </label>
+                <select id="opportunity_id" name="opportunity_id"
+                  class="w-full rounded-xl border border-green-700 bg-green-900/50 px-4 py-2.5 text-white focus:border-green-500 focus:outline-none">
+                  <option value="">Any / general</option>
+                  {opps.map((o) => <option value={o.id}>{o.title}</option>)}
+                </select>
+              </div>
+            )}
+
+            <!-- Review body -->
+            <div>
+              <label for="body" class="mb-1.5 block text-sm font-medium text-green-300">
+                Your experience <span class="text-green-500">(optional, max 2000 chars)</span>
+              </label>
+              <textarea id="body" name="body" rows="5" maxlength="2000"
+                class="w-full rounded-xl border border-green-700 bg-green-900/50 px-4 py-2.5 text-white placeholder-green-600 focus:border-green-500 focus:outline-none resize-y"
+                placeholder="What did you do? What was it like?"></textarea>
+              <!-- Required copy per BUILD_PLAN §8.5 -->
+              <p class="mt-2 text-xs text-green-600">
+                Share your honest experience. Stick to what you saw and did. Avoid accusations you can't back up — defamatory or harassing reviews will be removed. Your post is governed by our <a href="/terms" class="underline hover:text-green-400">Terms</a>.
+              </p>
+            </div>
+
+            <!-- Turnstile -->
+            <div class="cf-turnstile" data-sitekey={siteKey} data-theme="dark"></div>
+
+            <button type="submit"
+              class="w-full rounded-xl bg-green-500 py-3 font-semibold text-green-950 hover:bg-green-400 transition-colors">
+              Submit review
+            </button>
+          </form>
+        </>
+      )}
+    </div>
+  </div>
+</Base>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>

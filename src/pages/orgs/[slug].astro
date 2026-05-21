@@ -5,6 +5,7 @@ import OpportunityCard from '../../components/OpportunityCard.astro';
 import { parseCategories, getOrgOpportunities } from '../../lib/search';
 import type { OrgSearchRow, OpportunityRow } from '../../lib/search';
 import { trustTier, TRUST_TIER_LABEL } from '../../lib/score';
+import { createAuth } from '../../lib/auth';
 
 const { slug } = Astro.params;
 
@@ -13,8 +14,21 @@ if (!slug) return Astro.redirect('/search');
 let org: OrgSearchRow | null = null;
 let opps: OpportunityRow[] = [];
 
+interface ReviewRow {
+  id: number;
+  rating: number;
+  body: string | null;
+  volunteered_in_year: number;
+  created_at: string;
+  reviewer_name: string | null;
+}
+
+let reviews: ReviewRow[] = [];
+let session: { user?: { id?: string } } | null = null;
+
 try {
-  const db = Astro.locals.runtime?.env?.DB;
+  const env = Astro.locals.runtime?.env;
+  const db = env?.DB;
   if (db) {
     const result = await db
       .prepare(`SELECT * FROM organizations WHERE slug = ? AND status = 'published' LIMIT 1`)
@@ -24,6 +38,23 @@ try {
 
     if (org) {
       opps = await getOrgOpportunities(db, org.id);
+
+      const reviewResult = await db
+        .prepare(`SELECT r.id, r.rating, r.body, r.volunteered_in_year, r.created_at,
+                         u.display_name as reviewer_name
+                  FROM reviews r
+                  JOIN users u ON u.id = r.user_id
+                  WHERE r.org_id = ? AND r.status = 'published'
+                  ORDER BY r.created_at DESC
+                  LIMIT 50`)
+        .bind(org.id)
+        .all<ReviewRow>();
+      reviews = reviewResult.results;
+    }
+
+    if (env) {
+      const auth = createAuth(env);
+      session = await auth.api.getSession({ headers: Astro.request.headers });
     }
   }
 } catch {
@@ -119,6 +150,56 @@ const verificationBadges = [
                   Visit {org.name}'s website →
                 </a>
               )}
+            </div>
+          )}
+        </section>
+
+        <!-- Reviews -->
+        <section aria-label="Volunteer reviews">
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-white">
+              Reviews
+              {reviews.length > 0 && (
+                <span class="ml-2 rounded-full bg-green-800 px-2.5 py-0.5 text-sm font-normal text-green-300">
+                  {reviews.length}
+                </span>
+              )}
+            </h2>
+            <a
+              href={session?.user ? `/orgs/${slug}/review/new` : `/signin?redirect=/orgs/${slug}/review/new`}
+              class="rounded-xl bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 transition-colors"
+            >
+              Write a review
+            </a>
+          </div>
+
+          {reviews.length === 0 ? (
+            <div class="rounded-xl border border-green-800/40 bg-green-900/20 px-6 py-8 text-center">
+              <p class="text-green-400 text-sm">No reviews yet. Be the first to share your experience.</p>
+            </div>
+          ) : (
+            <div class="space-y-4">
+              {reviews.map((r) => (
+                <div class="rounded-xl border border-green-800/40 bg-green-900/20 p-5">
+                  <div class="flex items-start justify-between gap-3 mb-2">
+                    <div>
+                      <span class="text-green-400 text-sm">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
+                      <span class="ml-2 text-xs text-green-500">{r.volunteered_in_year}</span>
+                    </div>
+                    <p class="text-xs text-green-600">{new Date(r.created_at).toLocaleDateString()}</p>
+                  </div>
+                  {r.body && <p class="text-sm text-green-300 leading-relaxed">{r.body}</p>}
+                  {r.reviewer_name && (
+                    <p class="mt-2 text-xs text-green-500">— {r.reviewer_name}</p>
+                  )}
+                  <a
+                    href={`/contact?type=takedown&review_id=${r.id}`}
+                    class="mt-2 inline-block text-xs text-green-700 hover:text-green-500 transition-colors"
+                  >
+                    Report this review
+                  </a>
+                </div>
+              ))}
             </div>
           )}
         </section>

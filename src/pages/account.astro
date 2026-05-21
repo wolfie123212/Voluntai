@@ -1,0 +1,143 @@
+---
+import Base from '../layouts/Base.astro';
+import { createAuth } from '../lib/auth';
+
+const env = Astro.locals.runtime?.env;
+
+if (!env) return Astro.redirect('/signin');
+
+const auth = createAuth(env);
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+
+if (!session?.user) return Astro.redirect('/signin?redirect=/account');
+
+const user = session.user;
+
+// Fetch user's published reviews
+interface ReviewRow {
+  id: number;
+  org_id: number;
+  org_name: string;
+  org_slug: string;
+  rating: number;
+  body: string | null;
+  volunteered_in_year: number;
+  status: string;
+  created_at: string;
+}
+
+let reviews: ReviewRow[] = [];
+try {
+  const result = await env.DB
+    .prepare(`SELECT r.id, r.org_id, r.rating, r.body, r.volunteered_in_year, r.status, r.created_at,
+                     o.name as org_name, o.slug as org_slug
+              FROM reviews r
+              JOIN organizations o ON o.id = r.org_id
+              WHERE r.user_id = ? AND r.status IN ('published','pending')
+              ORDER BY r.created_at DESC`)
+    .bind(user.id)
+    .all<ReviewRow>();
+  reviews = result.results;
+} catch { /* DB unavailable */ }
+
+// Handle POST for display name update
+let updateMsg = '';
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = form.get('action');
+
+  if (action === 'update_name') {
+    const name = String(form.get('name') ?? '').trim();
+    if (name) {
+      await env.DB.prepare('UPDATE users SET display_name = ? WHERE id = ?').bind(name, user.id).run();
+      updateMsg = 'Display name updated.';
+    }
+  }
+
+  if (action === 'sign_out') {
+    const authReq = new Request(`${env.APP_BASE_URL}/api/auth/sign-out`, {
+      method: 'POST',
+      headers: Astro.request.headers,
+    });
+    const authRes = await auth.handler(authReq);
+    for (const [k, v] of authRes.headers.entries()) {
+      if (k.toLowerCase() === 'set-cookie') Astro.response.headers.append('Set-Cookie', v);
+    }
+    return Astro.redirect('/');
+  }
+}
+
+function stars(n: number) { return '★'.repeat(n) + '☆'.repeat(5 - n); }
+---
+
+<Base title="My Account">
+  <div class="mx-auto max-w-2xl px-4 py-12">
+    <div class="mb-8 flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-white">My Account</h1>
+      <form method="post">
+        <input type="hidden" name="action" value="sign_out" />
+        <button type="submit" class="rounded-lg border border-green-800 px-4 py-2 text-sm text-green-400 hover:border-green-600 hover:text-white transition-colors">
+          Sign out
+        </button>
+      </form>
+    </div>
+
+    <!-- Profile -->
+    <section class="mb-8 rounded-2xl border border-green-800/50 bg-green-900/30 p-6">
+      <h2 class="mb-4 text-lg font-semibold text-white">Profile</h2>
+      <p class="mb-4 text-sm text-green-400">{user.email}</p>
+
+      {updateMsg && (
+        <p class="mb-4 rounded-lg bg-green-800/50 px-3 py-2 text-sm text-green-300" role="status">{updateMsg}</p>
+      )}
+
+      <form method="post" class="flex gap-3">
+        <input type="hidden" name="action" value="update_name" />
+        <input
+          name="name"
+          type="text"
+          defaultValue={(user as unknown as { displayName?: string }).displayName ?? (user as any).name ?? ''}
+          placeholder="Display name"
+          class="flex-1 rounded-xl border border-green-700 bg-green-900/50 px-4 py-2 text-sm text-white placeholder-green-600 focus:border-green-500 focus:outline-none"
+        />
+        <button type="submit" class="rounded-xl bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 transition-colors">
+          Update
+        </button>
+      </form>
+    </section>
+
+    <!-- Reviews -->
+    <section>
+      <h2 class="mb-4 text-lg font-semibold text-white">My Reviews</h2>
+
+      {reviews.length === 0 ? (
+        <div class="rounded-2xl border border-green-800/40 bg-green-900/20 px-6 py-10 text-center">
+          <p class="text-green-400 text-sm">You haven't left any reviews yet.</p>
+          <a href="/search" class="mt-3 inline-block text-sm text-green-500 hover:text-green-300 transition-colors">
+            Browse organizations →
+          </a>
+        </div>
+      ) : (
+        <div class="space-y-4">
+          {reviews.map((r) => (
+            <div class="rounded-xl border border-green-800/40 bg-green-900/20 p-5">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <a href={`/orgs/${r.org_slug}`} class="font-medium text-white hover:text-green-300 transition-colors">
+                    {r.org_name}
+                  </a>
+                  <p class="mt-0.5 text-sm text-green-400">{stars(r.rating)} · {r.volunteered_in_year}</p>
+                </div>
+                <span class={`rounded-full px-2.5 py-0.5 text-xs font-medium ${r.status === 'published' ? 'bg-green-800 text-green-200' : 'bg-yellow-900/50 text-yellow-300'}`}>
+                  {r.status === 'pending' ? 'Under review' : 'Published'}
+                </span>
+              </div>
+              {r.body && <p class="mt-3 text-sm text-green-300 leading-relaxed">{r.body}</p>}
+              <p class="mt-2 text-xs text-green-600">{new Date(r.created_at).toLocaleDateString()}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  </div>
+</Base>

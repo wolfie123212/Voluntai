@@ -6,7 +6,17 @@ export interface Env {
   DB: D1Database;
   IMAGES: R2Bucket;
   CACHE: KVNamespace;
+  SESSION: KVNamespace;
   AI: Ai;
   ENVIRONMENT: string;
   APP_BASE_URL: string;
+  // Public vars (wrangler.toml [vars])
+  TURNSTILE_SITE_KEY: string;
+  GOOGLE_CLIENT_ID: string;
+  RESEND_FROM_EMAIL: string;
+  // Secrets (wrangler secret put)
+  BETTER_AUTH_SECRET: string;
+  TURNSTILE_SECRET_KEY: string;
+  GOOGLE_CLIENT_SECRET: string;
+  RESEND_API_KEY: string;
 }
