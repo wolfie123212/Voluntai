@@ -1,6 +1,6 @@
 > **DRAFT — NOT LEGAL ADVICE.** Before launch, Wolfgang must register the designated DMCA agent with the U.S. Copyright Office at copyright.gov/dmca-agent ($6 fee) and have an attorney review this page.
 
-# DMCA Policy — Cityserv
+# DMCA Policy — CityServ
 
 ## Designated Agent
 

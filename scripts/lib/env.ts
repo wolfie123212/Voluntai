@@ -32,6 +32,6 @@ export const config = {
   get accountId() { return get('CLOUDFLARE_ACCOUNT_ID'); },
   get databaseId() { return get('CLOUDFLARE_D1_DATABASE_ID'); },
   get apiToken() { return get('CLOUDFLARE_API_TOKEN'); },
-  propublicaUserAgent: process.env.PROPUBLICA_USER_AGENT ?? 'Cityserv/0.1 (contact@cityserv.org)',
+  propublicaUserAgent: process.env.PROPUBLICA_USER_AGENT ?? 'CityServ/0.1 (contact@cityserv.org)',
   charityNavApiKey: process.env.CHARITY_NAV_API_KEY ?? '',
 };

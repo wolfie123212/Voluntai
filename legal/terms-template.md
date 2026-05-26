@@ -1,10 +1,10 @@
 > **DRAFT — NOT LEGAL ADVICE.** This template was generated based on common UGC platform clauses. Before launch, Wolfgang must have a New York–licensed attorney review and finalize these documents.
 
-# Terms & Conditions — Cityserv
+# Terms & Conditions — CityServ
 
 *Last updated: [DATE]*
 
-Cityserv ("we," "us," "our") operates cityserv.org ("Site"). By using the Site you agree to these Terms.
+CityServ ("we," "us," "our") operates cityserv.org ("Site"). By using the Site you agree to these Terms.
 
 ## 1. Acceptance and Eligibility
 
@@ -16,7 +16,7 @@ You may hold only one account. You may not share account credentials. You are re
 
 ## 3. User Content License
 
-By submitting a review or other content ("User Content") you grant Cityserv a perpetual, royalty-free, worldwide, sublicensable, irrevocable license to host, display, distribute, and otherwise use that content in connection with operating the Site.
+By submitting a review or other content ("User Content") you grant CityServ a perpetual, royalty-free, worldwide, sublicensable, irrevocable license to host, display, distribute, and otherwise use that content in connection with operating the Site.
 
 ## 4. Acceptable Use
 
@@ -42,7 +42,7 @@ TO THE FULLEST EXTENT PERMITTED BY LAW, OUR TOTAL LIABILITY TO YOU SHALL NOT EXC
 
 ## 9. Indemnification
 
-You agree to indemnify and hold harmless Cityserv and its officers from any claims arising from your use of the Site or your User Content.
+You agree to indemnify and hold harmless CityServ and its officers from any claims arising from your use of the Site or your User Content.
 
 ## 10. Governing Law and Venue
 
@@ -54,7 +54,7 @@ These Terms are governed by the laws of the State of New York without regard to 
 
 ## 12. Section 230 Reservation
 
-Cityserv is an "interactive computer service" as defined in 47 U.S.C. § 230 and is not the publisher or speaker of User Content submitted by users.
+CityServ is an "interactive computer service" as defined in 47 U.S.C. § 230 and is not the publisher or speaker of User Content submitted by users.
 
 ## 13. Anti-SLAPP Notice
 
@@ -62,7 +62,7 @@ Reviews submitted on this platform constitute public-interest speech protected u
 
 ## 14. Miscellaneous
 
-If any provision is found unenforceable it shall be severed and the remainder shall continue in effect. These Terms constitute the entire agreement between you and Cityserv. We may update these Terms with notice for material changes.
+If any provision is found unenforceable it shall be severed and the remainder shall continue in effect. These Terms constitute the entire agreement between you and CityServ. We may update these Terms with notice for material changes.
 
 ## 15. Contact
 

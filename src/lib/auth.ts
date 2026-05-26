@@ -24,7 +24,7 @@ export function createAuth(env: Env) {
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.APP_BASE_URL ?? 'https://cityserv.pages.dev',
     trustedOrigins: [
-      'https://cityserv.com',
+      'https://cityserv.org',
       'https://cityserv.pages.dev',
       'http://localhost:4321',
     ],
@@ -35,9 +35,9 @@ export function createAuth(env: Env) {
       sendVerificationEmail: async ({ user, url }: { user: { email: string }; url: string }) => {
         await sendEmail(env, {
           to: user.email,
-          subject: 'Verify your Cityserv email',
+          subject: 'Verify your CityServ email',
           html: emailHtml('Verify your email', `
-            <p style="color:#86efac">Thanks for signing up for Cityserv!</p>
+            <p style="color:#86efac">Thanks for signing up for CityServ!</p>
             <p style="margin:24px 0">
               <a href="${url}" style="background:#16a34a;color:white;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:600;display:inline-block">
                 Verify my email →
@@ -50,7 +50,7 @@ export function createAuth(env: Env) {
       sendResetPasswordEmail: async ({ user, url }: { user: { email: string }; url: string }) => {
         await sendEmail(env, {
           to: user.email,
-          subject: 'Reset your Cityserv password',
+          subject: 'Reset your CityServ password',
           html: emailHtml('Reset your password', `
             <p style="margin:24px 0">
               <a href="${url}" style="background:#16a34a;color:white;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:600;display:inline-block">
@@ -97,7 +97,7 @@ async function sendEmail(
 ) {
   const resend = new Resend(env.RESEND_API_KEY);
   await resend.emails.send({
-    from: env.RESEND_FROM_EMAIL ?? 'noreply@cityserv.com',
+    from: env.RESEND_FROM_EMAIL ?? 'noreply@cityserv.org',
     to: opts.to,
     subject: opts.subject,
     html: opts.html,
@@ -107,11 +107,11 @@ async function sendEmail(
 function emailHtml(title: string, body: string): string {
   return `<!DOCTYPE html><html><body style="margin:0;padding:40px 20px;font-family:Inter,system-ui,sans-serif;background:#052e16">
     <div style="max-width:480px;margin:0 auto;background:#14532d;border-radius:16px;padding:32px">
-      <p style="margin:0 0 24px;font-size:22px;font-weight:700;color:#4ade80">🌿 Cityserv</p>
+      <p style="margin:0 0 24px;font-size:22px;font-weight:700;color:#4ade80">🌿 CityServ</p>
       <h1 style="margin:0 0 16px;font-size:20px;color:white">${title}</h1>
       ${body}
       <p style="margin:24px 0 0;color:#166534;font-size:12px;border-top:1px solid #166534;padding-top:16px">
-        Cityserv · NYC volunteer service directory · cityserv.com
+        CityServ · NYC volunteer service directory · cityserv.org
       </p>
     </div>
   </body></html>`;

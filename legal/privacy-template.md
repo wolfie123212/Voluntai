@@ -1,6 +1,6 @@
 > **DRAFT — NOT LEGAL ADVICE.** This template was generated based on common UGC platform clauses. Before launch, Wolfgang must have a New York–licensed attorney review and finalize these documents.
 
-# Privacy Policy — Cityserv
+# Privacy Policy — CityServ
 
 *Last updated: [DATE]*
 
