@@ -1,12 +1,12 @@
 > **DRAFT — NOT LEGAL ADVICE.** Before launch, Wolfgang must register the designated DMCA agent with the U.S. Copyright Office at copyright.gov/dmca-agent ($6 fee) and have an attorney review this page.
 
-# DMCA Policy — Voluntai
+# DMCA Policy — Cityserv
 
 ## Designated Agent
 
 Name: [AGENT_NAME — Wolfgang White or designated contact]
 Address: [ADDRESS]
-Email: takedown@voluntai.com
+Email: takedown@cityserv.org
 Phone: [PHONE]
 
 ## How to Submit a Takedown Notice
@@ -20,7 +20,7 @@ To report copyright infringement under 17 U.S.C. § 512, your written notice mus
 5. A statement that you have a good faith belief the use is not authorized.
 6. A statement, under penalty of perjury, that the information is accurate and you are the copyright owner or authorized to act on their behalf.
 
-Send notices to: takedown@voluntai.com
+Send notices to: takedown@cityserv.org
 
 ## Counter-Notices
 

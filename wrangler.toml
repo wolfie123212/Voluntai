@@ -1,4 +1,4 @@
-name = "voluntai"
+name = "cityserv"
 compatibility_date = "2026-05-01"
 compatibility_flags = ["nodejs_compat"]
 
@@ -27,7 +27,7 @@ binding = "AI"
 
 [vars]
 ENVIRONMENT = "production"
-APP_BASE_URL = "https://voluntai.com"
+APP_BASE_URL = "https://cityserv.org"
 TURNSTILE_SITE_KEY = "0x4AAAAAADTbzcSoc942LGUw"
 GOOGLE_CLIENT_ID = "983676025175-ni94nqreq81jnn76d1beqom2fttjejfr.apps.googleusercontent.com"
-RESEND_FROM_EMAIL = "noreply@voluntai.com"
+RESEND_FROM_EMAIL = "noreply@cityserv.org"

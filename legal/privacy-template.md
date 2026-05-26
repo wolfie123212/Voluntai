@@ -1,6 +1,6 @@
 > **DRAFT — NOT LEGAL ADVICE.** This template was generated based on common UGC platform clauses. Before launch, Wolfgang must have a New York–licensed attorney review and finalize these documents.
 
-# Privacy Policy — Voluntai
+# Privacy Policy — Cityserv
 
 *Last updated: [DATE]*
 
@@ -32,7 +32,7 @@ Data is retained until account deletion plus 90 days for backup recovery. IP log
 
 ## Your Rights
 
-You may request access, correction, or deletion of your personal data by emailing privacy@voluntai.com. We honor CCPA/CPRA-style rights regardless of your state of residence.
+You may request access, correction, or deletion of your personal data by emailing privacy@cityserv.org. We honor CCPA/CPRA-style rights regardless of your state of residence.
 
 ## Children
 
@@ -44,4 +44,4 @@ Data is encrypted in transit (TLS). We use Cloudflare WAF and access controls to
 
 ## Contact
 
-privacy@voluntai.com
+privacy@cityserv.org

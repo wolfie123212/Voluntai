@@ -1,4 +1,4 @@
-# Voluntai
+# Cityserv
 
 Read `BUILD_PLAN.md` for the full spec. It is the source of truth.
 
