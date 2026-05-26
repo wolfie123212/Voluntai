@@ -10,17 +10,17 @@ const { score, showLabel = true } = Astro.props;
 const tier = trustTier(score);
 
 const styles: Record<string, string> = {
-  'highly-trusted': 'bg-green-400 text-green-950',
-  'trusted': 'bg-green-600 text-white',
-  'verified': 'bg-green-800 text-green-200',
-  'listed': '',
+  'highly-trusted': 'bg-(--leaf) text-white',
+  'trusted':        'bg-(--forest-light) text-white',
+  'verified':       'bg-(--cream-dark) border border-(--border) text-(--forest)',
+  'listed':         '',
 };
 
-const style = styles[tier];
+const style = styles[tier] ?? '';
 ---
 
 {tier !== 'listed' && (
-  <span class={`inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-xs font-semibold tracking-wide ${style}`}>
+  <span class={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${style}`}>
     {tier === 'highly-trusted' || tier === 'trusted' ? (
       <svg class="h-3 w-3" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
         <path d="M6 0L7.5 4.5H12L8.25 7.5L9.75 12L6 9L2.25 12L3.75 7.5L0 4.5H4.5Z"/>

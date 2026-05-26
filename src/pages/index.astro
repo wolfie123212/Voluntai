@@ -1,11 +1,26 @@
 ---
 import Base from '../layouts/Base.astro';
-import SearchBar from '../components/SearchBar.astro';
+import HeroA from '../components/HeroA.astro';
+import HeroB from '../components/HeroB.astro';
+import HeroC from '../components/HeroC.astro';
 import OrgCard from '../components/OrgCard.astro';
 import type { OrgSearchRow } from '../lib/search';
 
-let featuredOrgs: OrgSearchRow[] = [];
+// Time-based hero — server-side NYC timezone, no client JS needed
+const nyHour = parseInt(
+  new Date().toLocaleString('en-US', {
+    timeZone: 'America/New_York',
+    hour: 'numeric',
+    hour12: false,
+  })
+);
+// Morning 6–11: HeroB (bright blue sky)
+// Day 11–19: HeroA (golden hour glow)
+// Night 19–6: HeroC (dusk / stars)
+const heroVariant: 'A' | 'B' | 'C' =
+  nyHour >= 6 && nyHour < 11 ? 'B' : nyHour >= 11 && nyHour < 19 ? 'A' : 'C';
 
+let featuredOrgs: OrgSearchRow[] = [];
 try {
   const db = Astro.locals.runtime?.env?.DB;
   if (db) {
@@ -15,104 +30,196 @@ try {
     featuredOrgs = result.results;
   }
 } catch {
-  // DB unavailable in local dev without wrangler — show empty state
+  // DB unavailable in local dev without wrangler
 }
 
 const CATEGORIES = [
-  { label: 'Food & Hunger', icon: '🍽️', q: 'food' },
-  { label: 'Seniors', icon: '🤝', q: 'seniors' },
-  { label: 'Youth', icon: '🎓', q: 'youth' },
-  { label: 'Housing', icon: '🏠', q: 'housing' },
-  { label: 'Animals', icon: '🐾', q: 'animals' },
-  { label: 'Health', icon: '💚', q: 'health' },
+  { label: 'Food & Hunger',  icon: '🍽️', q: 'food'    },
+  { label: 'Seniors',        icon: '🤝', q: 'seniors' },
+  { label: 'Youth',          icon: '🎓', q: 'youth'   },
+  { label: 'Housing',        icon: '🏠', q: 'housing' },
+  { label: 'Animals',        icon: '🐾', q: 'animals' },
+  { label: 'Health',         icon: '💚', q: 'health'  },
+];
+
+const HOW_IT_WORKS = [
+  {
+    icon: '🔍',
+    title: 'Search & filter',
+    body: 'Browse by cause, schedule, or neighborhood. Every listing is hand-reviewed.',
+  },
+  {
+    icon: '✅',
+    title: 'Trust at a glance',
+    body: 'IRS 501(c)(3) status, reputability score, and community reviews — right on each org page.',
+  },
+  {
+    icon: '🤝',
+    title: 'Sign up directly',
+    body: "No middleman. Each \"Sign up\" button goes straight to the organization's own registration page.",
+  },
 ];
 ---
 
-<Base title="Home">
-  <!-- Hero -->
-  <section class="relative flex min-h-[70vh] flex-col items-center justify-center px-4 py-24 text-center">
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-900 via-green-950 to-green-950" aria-hidden="true"></div>
+<Base title="Home" heroNav={true}>
 
-    <p class="mb-4 rounded-full border border-green-800 bg-green-900/50 px-4 py-1 text-sm text-green-400">
-      East Village · Lower East Side · Alphabet City
-    </p>
+  <!-- ── HERO ─────────────────────────────────────────────────── -->
+  <section class="relative min-h-[88vh] flex flex-col items-center justify-center text-center overflow-hidden" aria-label="Hero">
 
-    <h1 class="max-w-2xl text-5xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
-      Serve your community in<br/>
-      <span class="text-green-400">your neighborhood</span>
-    </h1>
-
-    <p class="mt-6 max-w-xl text-lg text-green-300">
-      Discover verified volunteer opportunities — from feeding families
-      to mentoring youth — with organizations you can trust.
-    </p>
-
-    <div class="mt-10 w-full max-w-xl">
-      <SearchBar large={true} />
+    <!-- Illustrated background (time-based) -->
+    <div class="absolute inset-0 w-full h-full" aria-hidden="true">
+      {heroVariant === 'A' && <HeroA />}
+      {heroVariant === 'B' && <HeroB />}
+      {heroVariant === 'C' && <HeroC />}
     </div>
 
-    <p class="mt-4 text-xs text-green-600">
-      All organizations verified through IRS, ProPublica, and Friends Seminary Service Office
-    </p>
-  </section>
+    <!-- Subtle dark overlay for text legibility -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-transparent" aria-hidden="true"></div>
 
-  <!-- Categories -->
-  <section class="mx-auto max-w-6xl px-4 py-8" aria-label="Browse by category">
-    <div class="grid grid-cols-3 gap-3 sm:grid-cols-6">
-      {CATEGORIES.map(({ label, icon, q }) => (
-        <a
-          href={`/search?q=${q}`}
-          class="flex flex-col items-center gap-2 rounded-2xl border border-green-800/50 bg-green-900/30 px-3 py-4 text-center hover:border-green-600/70 hover:bg-green-900/60 transition-all"
+    <!-- Content -->
+    <div class="relative z-10 px-4 flex flex-col items-center">
+      <span class="inline-block rounded-full border border-white/30 bg-white/15 backdrop-blur-sm px-4 py-1.5 text-[13px] font-medium text-white mb-6">
+        🌿 East Village · Lower East Side · Alphabet City
+      </span>
+
+      <h1 class="max-w-2xl text-[clamp(2.25rem,6vw,3.75rem)] font-extrabold leading-[1.05] tracking-tight text-white" style="text-shadow: 0 2px 24px rgba(0,0,0,0.35)">
+        Serve your city.<br/>Find your cause.
+      </h1>
+
+      <p class="mt-5 max-w-[460px] text-[1.1rem] leading-relaxed text-white/85" style="text-shadow: 0 1px 10px rgba(0,0,0,0.3)">
+        Verified volunteer opportunities in NYC's East Village —
+        trusted, real, and ready for you.
+      </p>
+
+      <!-- Search bar -->
+      <form action="/search" method="get" class="mt-8 flex w-full max-w-[480px] items-center gap-2 rounded-full border border-white/30 bg-white/15 backdrop-blur-md px-5 py-2.5 shadow-lg" role="search" aria-label="Search volunteer opportunities">
+        <svg class="h-4 w-4 shrink-0 text-white/60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
+        </svg>
+        <input
+          type="search"
+          name="q"
+          placeholder="Search opportunities…"
+          class="flex-1 bg-transparent text-[15px] text-white placeholder-white/55 outline-none min-w-0"
+          aria-label="Keyword search"
+        />
+        <button
+          type="submit"
+          class="shrink-0 rounded-full bg-white px-5 py-2 text-[14px] font-semibold text-(--forest) transition-opacity hover:opacity-90"
         >
-          <span class="text-2xl" aria-hidden="true">{icon}</span>
-          <span class="text-xs font-medium text-green-300">{label}</span>
-        </a>
-      ))}
+          Find →
+        </button>
+      </form>
+
+      <p class="mt-4 text-[11px] text-white/55">
+        Verified by IRS, ProPublica &amp; Friends Seminary Service Office
+      </p>
     </div>
   </section>
 
-  <!-- Featured orgs -->
-  {featuredOrgs.length > 0 && (
-    <section class="mx-auto max-w-6xl px-4 py-12" aria-label="Featured organizations">
-      <div class="mb-6 flex items-center justify-between">
-        <h2 class="text-xl font-semibold text-white">Featured Organizations</h2>
-        <a href="/search" class="text-sm text-green-400 hover:text-green-300 transition-colors">
-          View all →
-        </a>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {featuredOrgs.map((org) => (
-          <OrgCard org={org} />
+  <!-- ── CATEGORIES ────────────────────────────────────────────── -->
+  <section class="bg-(--cream) py-12 px-4" aria-label="Browse by category">
+    <div class="mx-auto max-w-6xl">
+      <p class="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-(--text-muted)">Browse by cause</p>
+      <div class="grid grid-cols-3 gap-3 sm:grid-cols-6">
+        {CATEGORIES.map(({ label, icon, q }) => (
+          <a
+            href={`/search?q=${q}`}
+            class="group flex flex-col items-center gap-2 rounded-2xl border border-(--border) bg-white px-3 py-5 text-center shadow-[var(--shadow)] transition-all hover:-translate-y-0.5 hover:border-(--leaf) hover:shadow-[var(--shadow-lg)]"
+          >
+            <span class="text-2xl" aria-hidden="true">{icon}</span>
+            <span class="text-[11px] font-semibold text-(--forest-light) group-hover:text-(--forest) transition-colors">{label}</span>
+          </a>
         ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURED ORGS ─────────────────────────────────────────── -->
+  {featuredOrgs.length > 0 && (
+    <section class="bg-(--cream-dark) py-16 px-4" aria-label="Featured organizations">
+      <div class="mx-auto max-w-6xl">
+        <div class="mb-8 flex items-end justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-(--text-muted) mb-1">Trusted partners</p>
+            <h2 class="text-2xl font-bold text-(--forest)">Featured Organizations</h2>
+          </div>
+          <a href="/search" class="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-(--forest-light) hover:text-(--forest) transition-colors">
+            View all
+            <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
+          </a>
+        </div>
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {featuredOrgs.map((org) => (
+            <OrgCard org={org} />
+          ))}
+        </div>
+        <div class="mt-6 text-center sm:hidden">
+          <a href="/search" class="inline-flex items-center gap-1 text-sm font-medium text-(--forest-light) hover:text-(--forest) transition-colors">
+            View all organizations →
+          </a>
+        </div>
       </div>
     </section>
   )}
 
-  <!-- Trust section -->
-  <section class="mx-auto max-w-6xl px-4 py-12" aria-label="How we verify organizations">
-    <div class="rounded-2xl border border-green-800/50 bg-green-900/20 p-8 text-center">
-      <h2 class="text-xl font-semibold text-white">Every organization is verified</h2>
-      <p class="mt-2 text-green-400 max-w-lg mx-auto text-sm">
-        We cross-reference IRS records, ProPublica nonprofit data, and AmeriCorps grantee lists
-        so you know exactly who you're volunteering with.
-      </p>
-      <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
-        <div class="flex flex-col items-center gap-2">
-          <span class="text-3xl" aria-hidden="true">🏛️</span>
-          <p class="font-medium text-white text-sm">IRS 501(c)(3) Check</p>
-          <p class="text-xs text-green-500">Confirmed tax-exempt status via ProPublica</p>
-        </div>
-        <div class="flex flex-col items-center gap-2">
-          <span class="text-3xl" aria-hidden="true">🎓</span>
-          <p class="font-medium text-white text-sm">School Verified</p>
-          <p class="text-xs text-green-500">Friends Seminary Service Office partners</p>
-        </div>
-        <div class="flex flex-col items-center gap-2">
-          <span class="text-3xl" aria-hidden="true">⭐</span>
-          <p class="font-medium text-white text-sm">Trust Score</p>
-          <p class="text-xs text-green-500">Multi-source reputation index, updated nightly</p>
-        </div>
+  <!-- ── HOW IT WORKS ──────────────────────────────────────────── -->
+  <section class="bg-(--cream) py-16 px-4" aria-label="How CityServ works">
+    <div class="mx-auto max-w-6xl">
+      <div class="mb-10 text-center">
+        <p class="text-xs font-semibold uppercase tracking-widest text-(--text-muted) mb-1">Simple &amp; transparent</p>
+        <h2 class="text-2xl font-bold text-(--forest)">How CityServ works</h2>
+      </div>
+      <div class="grid gap-6 sm:grid-cols-3">
+        {HOW_IT_WORKS.map(({ icon, title, body }) => (
+          <div class="rounded-2xl border border-(--border) bg-white p-7 shadow-[var(--shadow)] text-center">
+            <div class="mb-4 flex items-center justify-center">
+              <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-(--cream) text-2xl shadow-inner">
+                {icon}
+              </div>
+            </div>
+            <h3 class="font-semibold text-(--forest) mb-2">{title}</h3>
+            <p class="text-sm text-(--text-muted) leading-relaxed">{body}</p>
+          </div>
+        ))}
       </div>
     </div>
   </section>
+
+  <!-- ── TRUST BANNER ──────────────────────────────────────────── -->
+  <section class="bg-(--forest) py-16 px-4" aria-label="Verification promise">
+    <div class="mx-auto max-w-3xl text-center">
+      <div class="mb-5 flex items-center justify-center gap-2">
+        <span class="inline-block h-px w-10 bg-(--leaf-light) opacity-50"></span>
+        <span class="text-(--leaf-light) text-xs font-semibold uppercase tracking-widest">Our promise</span>
+        <span class="inline-block h-px w-10 bg-(--leaf-light) opacity-50"></span>
+      </div>
+      <h2 class="text-2xl font-bold text-white mb-4">Every organization is verified</h2>
+      <p class="text-(--leaf-light) text-sm leading-relaxed max-w-md mx-auto">
+        We cross-reference IRS records, ProPublica nonprofit data, and AmeriCorps grantee lists
+        before any organization appears on CityServ.
+      </p>
+      <div class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[
+          { icon: '🏛️', title: 'IRS 501(c)(3)',    sub: 'Tax-exempt status via ProPublica' },
+          { icon: '🎓', title: 'School verified',   sub: 'Friends Seminary Service Office' },
+          { icon: '⭐', title: 'Trust score',        sub: 'Multi-source index, updated nightly' },
+        ].map(({ icon, title, sub }) => (
+          <div class="rounded-xl border border-white/10 bg-white/5 px-5 py-6">
+            <div class="text-2xl mb-3" aria-hidden="true">{icon}</div>
+            <p class="font-semibold text-white text-sm mb-1">{title}</p>
+            <p class="text-[11px] text-(--leaf-light) opacity-80">{sub}</p>
+          </div>
+        ))}
+      </div>
+      <a
+        href="/about"
+        class="mt-8 inline-flex items-center gap-1.5 rounded-full border border-white/20 px-5 py-2.5 text-sm font-medium text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+      >
+        Learn how we verify
+        <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
+      </a>
+    </div>
+  </section>
+
 </Base>

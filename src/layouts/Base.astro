@@ -4,9 +4,10 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  heroNav?: boolean; // transparent nav for pages with illustrated hero
 }
 
-const { title, description = 'Find verified volunteer opportunities in NYC\'s East Village.' } = Astro.props;
+const { title, description = 'Find verified volunteer opportunities in NYC\'s East Village.', heroNav = false } = Astro.props;
 const currentPath = new URL(Astro.request.url).pathname;
 ---
 
@@ -20,29 +21,68 @@ const currentPath = new URL(Astro.request.url).pathname;
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   </head>
-  <body class="min-h-screen bg-green-950 text-white antialiased">
+  <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <header class="sticky top-0 z-50 border-b border-green-900 bg-green-950/95 backdrop-blur">
+    <header class:list={[
+      'sticky top-0 z-50 transition-all duration-300',
+      heroNav
+        ? 'bg-transparent border-b border-white/10'
+        : 'bg-white/90 backdrop-blur border-b border-(--border) shadow-sm'
+    ]}>
       <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3" aria-label="Main navigation">
-        <a href="/" class="flex items-center gap-2 font-bold text-white hover:text-green-300 transition-colors" aria-label="CityServ home">
-          <span class="text-xl">🌿</span>
-          <span class="text-lg tracking-tight">CityServ</span>
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-2.5 font-bold transition-opacity hover:opacity-80" aria-label="CityServ home">
+          <div class:list={[
+            'flex h-8 w-8 items-center justify-center rounded-lg text-sm font-black',
+            heroNav ? 'bg-white text-(--forest)' : 'bg-(--forest) text-white'
+          ]}>
+            CS
+          </div>
+          <span class:list={[
+            'text-[15px] font-700 tracking-tight',
+            heroNav ? 'text-white' : 'text-(--forest)'
+          ]}>
+            CityServ
+          </span>
         </a>
-        <div class="flex items-center gap-6 text-sm">
+
+        <!-- Nav links -->
+        <div class="flex items-center gap-1">
           <a
             href="/search"
-            class={`font-medium transition-colors ${currentPath === '/search' ? 'text-green-300' : 'text-green-400 hover:text-white'}`}
+            class:list={[
+              'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              heroNav
+                ? currentPath === '/search' ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                : currentPath === '/search' ? 'bg-(--cream) text-(--forest)' : 'text-(--forest-light) hover:bg-(--cream) hover:text-(--forest)'
+            ]}
           >
             Find Opportunities
           </a>
           <a
             href="/about"
-            class={`font-medium transition-colors ${currentPath === '/about' ? 'text-green-300' : 'text-green-400 hover:text-white'}`}
+            class:list={[
+              'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              heroNav
+                ? currentPath === '/about' ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                : currentPath === '/about' ? 'bg-(--cream) text-(--forest)' : 'text-(--forest-light) hover:bg-(--cream) hover:text-(--forest)'
+            ]}
           >
             About
+          </a>
+          <a
+            href="/account"
+            class:list={[
+              'ml-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all',
+              heroNav
+                ? 'bg-white text-(--forest) hover:bg-white/90'
+                : 'bg-(--forest) text-white hover:bg-(--forest-mid)'
+            ]}
+          >
+            Sign in
           </a>
         </div>
       </nav>
@@ -52,18 +92,51 @@ const currentPath = new URL(Astro.request.url).pathname;
       <slot />
     </main>
 
-    <footer class="border-t border-green-900 bg-green-950 py-10 mt-16">
+    <footer class="border-t border-(--border) bg-white py-12 mt-0">
       <div class="mx-auto max-w-6xl px-4">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p class="font-semibold text-white">🌿 CityServ</p>
-            <p class="mt-1 text-sm text-green-500">A nonprofit volunteer directory for NYC's East Village.</p>
+        <div class="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+          <div class="max-w-xs">
+            <div class="flex items-center gap-2.5 mb-3">
+              <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-(--forest) text-white text-xs font-black">CS</div>
+              <span class="font-bold text-(--forest)">CityServ</span>
+            </div>
+            <p class="text-sm text-(--text-muted) leading-relaxed">
+              A verified volunteer directory for NYC's East Village, Lower East Side, and Alphabet City.
+            </p>
+            <p class="mt-3 text-xs text-(--leaf-light)">Verified by Friends Seminary Service Office</p>
           </div>
-          <div class="text-sm text-green-600 space-y-1 sm:text-right">
-            <p>Verified by Friends Seminary Service Office</p>
-            <p>Not affiliated with any listed organization.</p>
-            <p>&copy; {new Date().getFullYear()} CityServ</p>
+
+          <div class="grid grid-cols-2 gap-8 text-sm sm:grid-cols-3">
+            <div>
+              <p class="font-semibold text-(--forest) mb-3">Explore</p>
+              <div class="space-y-2">
+                <a href="/search" class="block text-(--text-muted) hover:text-(--forest) transition-colors">Find Opportunities</a>
+                <a href="/search?q=food" class="block text-(--text-muted) hover:text-(--forest) transition-colors">Food & Hunger</a>
+                <a href="/search?q=seniors" class="block text-(--text-muted) hover:text-(--forest) transition-colors">Senior Services</a>
+                <a href="/search?q=youth" class="block text-(--text-muted) hover:text-(--forest) transition-colors">Youth Programs</a>
+              </div>
+            </div>
+            <div>
+              <p class="font-semibold text-(--forest) mb-3">About</p>
+              <div class="space-y-2">
+                <a href="/about" class="block text-(--text-muted) hover:text-(--forest) transition-colors">How it works</a>
+                <a href="/contact" class="block text-(--text-muted) hover:text-(--forest) transition-colors">Contact us</a>
+                <a href="/contact?type=takedown" class="block text-(--text-muted) hover:text-(--forest) transition-colors">Report content</a>
+              </div>
+            </div>
+            <div>
+              <p class="font-semibold text-(--forest) mb-3">Legal</p>
+              <div class="space-y-2">
+                <a href="/terms" class="block text-(--text-muted) hover:text-(--forest) transition-colors">Terms</a>
+                <a href="/privacy" class="block text-(--text-muted) hover:text-(--forest) transition-colors">Privacy</a>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <div class="mt-10 border-t border-(--border) pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p class="text-xs text-(--text-muted)">&copy; {new Date().getFullYear()} CityServ. Not affiliated with any listed organization.</p>
+          <p class="text-xs text-(--text-muted)">Made with 🌿 in New York City</p>
         </div>
       </div>
     </footer>

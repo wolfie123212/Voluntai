@@ -24,45 +24,104 @@ const pageTitle = q ? `"${q}" — Search` : 'Find Opportunities';
 const resultSummary = q
   ? `${orgs.length} organization${orgs.length !== 1 ? 's' : ''} matching "${q}"`
   : `${orgs.length} verified organization${orgs.length !== 1 ? 's' : ''} in the East Village`;
+
+const QUICK_FILTERS = [
+  { label: 'Food & Hunger', q: 'food' },
+  { label: 'Seniors',       q: 'seniors' },
+  { label: 'Youth',         q: 'youth' },
+  { label: 'Housing',       q: 'housing' },
+  { label: 'Animals',       q: 'animals' },
+  { label: 'Health',        q: 'health' },
+];
 ---
 
 <Base title={pageTitle} description={`Volunteer opportunities in NYC's East Village. ${resultSummary}.`}>
-  <!-- Search header -->
-  <div class="border-b border-green-900 bg-green-950/80 px-4 py-6">
-    <div class="mx-auto max-w-6xl">
-      <SearchBar q={q} />
+
+  <!-- ── SEARCH HEADER ─────────────────────────────────────────── -->
+  <div class="bg-white border-b border-(--border) px-4 py-6 shadow-sm">
+    <div class="mx-auto max-w-3xl">
+      <!-- Breadcrumb -->
+      <p class="text-xs text-(--text-muted) mb-3">
+        <a href="/" class="hover:text-(--forest) transition-colors">Home</a>
+        <span class="mx-1.5 opacity-40">›</span>
+        Find Opportunities
+      </p>
+      <SearchBar q={q} large={true} />
+
+      <!-- Quick filter chips -->
+      <div class="mt-4 flex flex-wrap gap-2" aria-label="Quick filters">
+        {QUICK_FILTERS.map(({ label, q: fq }) => (
+          <a
+            href={`/search?q=${fq}`}
+            class:list={[
+              'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+              q === fq
+                ? 'border-(--forest) bg-(--forest) text-white'
+                : 'border-(--border) bg-(--cream) text-(--forest-light) hover:border-(--leaf) hover:text-(--forest)'
+            ]}
+          >
+            {label}
+          </a>
+        ))}
+        {q && !QUICK_FILTERS.some(f => f.q === q) && (
+          <span class="rounded-full border border-(--amber) bg-(--amber)/10 px-3 py-1 text-xs font-medium text-(--forest)">
+            "{q}"
+          </span>
+        )}
+      </div>
     </div>
   </div>
 
-  <div class="mx-auto max-w-6xl px-4 py-8">
-    <!-- Result count -->
-    <p class="mb-6 text-sm text-green-400">
-      {error
-        ? 'Search unavailable right now — try again shortly.'
-        : resultSummary}
-    </p>
+  <!-- ── RESULTS ───────────────────────────────────────────────── -->
+  <div class="bg-(--cream) min-h-[60vh] px-4 py-10">
+    <div class="mx-auto max-w-6xl">
 
-    {orgs.length > 0 ? (
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {orgs.map((org) => <OrgCard org={org} />)}
-      </div>
-    ) : !error && (
-      <div class="flex flex-col items-center gap-4 py-20 text-center">
-        <span class="text-5xl" aria-hidden="true">🔍</span>
-        <p class="text-lg font-medium text-white">
-          {q ? `No results for "${q}"` : 'No organizations found'}
-        </p>
-        <p class="text-sm text-green-400 max-w-xs">
-          {q
-            ? 'Try a different search — like "food", "youth", or "seniors".'
-            : 'Check back soon as we add more organizations.'}
+      <!-- Result count -->
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <p class="text-sm text-(--text-muted)">
+          {error
+            ? '⚠️ Search unavailable right now — try again shortly.'
+            : resultSummary}
         </p>
         {q && (
-          <a href="/search" class="mt-2 rounded-lg bg-green-800 px-4 py-2 text-sm text-green-200 hover:bg-green-700 transition-colors">
-            Clear search
+          <a
+            href="/search"
+            class="shrink-0 inline-flex items-center gap-1 rounded-full border border-(--border) bg-white px-3 py-1 text-xs text-(--text-muted) hover:text-(--forest) hover:border-(--leaf) transition-colors"
+          >
+            <svg class="h-3 w-3" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 4.586L10.293.293a1 1 0 111.414 1.414L7.414 6l4.293 4.293a1 1 0 01-1.414 1.414L6 7.414l-4.293 4.293a1 1 0 01-1.414-1.414L4.586 6 .293 1.707A1 1 0 011.707.293L6 4.586z"/></svg>
+            Clear
           </a>
         )}
       </div>
-    )}
+
+      {orgs.length > 0 ? (
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {orgs.map((org) => <OrgCard org={org} />)}
+        </div>
+      ) : !error && (
+        <div class="flex flex-col items-center gap-4 py-24 text-center">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-(--border) shadow-[var(--shadow)] text-3xl" aria-hidden="true">
+            🔍
+          </div>
+          <p class="text-lg font-semibold text-(--forest)">
+            {q ? `No results for "${q}"` : 'No organizations found'}
+          </p>
+          <p class="text-sm text-(--text-muted) max-w-xs leading-relaxed">
+            {q
+              ? 'Try a different keyword — like "food", "youth", or "seniors".'
+              : 'Check back soon as we add more verified organizations.'}
+          </p>
+          {q && (
+            <a
+              href="/search"
+              class="mt-2 rounded-full border border-(--border) bg-white px-5 py-2 text-sm font-medium text-(--forest) hover:border-(--leaf) hover:shadow-[var(--shadow)] transition-all"
+            >
+              Browse all organizations
+            </a>
+          )}
+        </div>
+      )}
+    </div>
   </div>
+
 </Base>
