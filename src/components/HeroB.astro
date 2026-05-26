@@ -1,0 +1,182 @@
+---
+// Option B — Morning Fresh
+// Bright blue sky, vivid greens, crisp and energetic — early morning in Central Park
+---
+<svg viewBox="0 0 1440 560" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" class="w-full h-full" aria-hidden="true">
+  <defs>
+    <linearGradient id="skyB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1A6EA8"/>
+      <stop offset="50%" stop-color="#5AAED4"/>
+      <stop offset="85%" stop-color="#A8D8F0"/>
+      <stop offset="100%" stop-color="#C8ECF8"/>
+    </linearGradient>
+    <radialGradient id="sunB" cx="30%" cy="20%" r="20%">
+      <stop offset="0%" stop-color="#FFFBE0" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#FFFBE0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="buildingB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3A5E7A"/>
+      <stop offset="100%" stop-color="#284A62"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="1440" height="560" fill="url(#skyB)"/>
+  <rect width="1440" height="560" fill="url(#sunB)"/>
+
+  <!-- Sun -->
+  <circle cx="432" cy="112" r="38" fill="#FFFBE0" opacity="0.9"/>
+  <circle cx="432" cy="112" r="55" fill="#FFFBE0" opacity="0.3"/>
+  <circle cx="432" cy="112" r="75" fill="#FFFBE0" opacity="0.15"/>
+
+  <!-- Clouds (bright white, crisp morning) -->
+  <g opacity="0.9">
+    <ellipse cx="750" cy="80" rx="85" ry="28" fill="white"/>
+    <ellipse cx="800" cy="65" rx="68" ry="32" fill="white"/>
+    <ellipse cx="705" cy="86" rx="52" ry="24" fill="white"/>
+    <ellipse cx="840" cy="78" rx="40" ry="22" fill="white"/>
+
+    <ellipse cx="1200" cy="100" rx="70" ry="24" fill="white" opacity="0.85"/>
+    <ellipse cx="1245" cy="88" rx="55" ry="28" fill="white" opacity="0.85"/>
+    <ellipse cx="1162" cy="106" rx="42" ry="20" fill="white" opacity="0.85"/>
+  </g>
+
+  <!-- Birds -->
+  <g fill="none" stroke="#1A4A6A" stroke-width="1.5" stroke-linecap="round" opacity="0.7">
+    <path d="M600 130 Q604 126 608 130"/>
+    <path d="M616 120 Q620 116 624 120"/>
+    <path d="M628 134 Q632 130 636 134"/>
+    <path d="M1050 110 Q1054 106 1058 110"/>
+    <path d="M1065 122 Q1069 118 1073 122"/>
+  </g>
+
+  <!-- City — blue/gray steel NYC feel -->
+  <g fill="#3A5E6A" opacity="0.6">
+    <rect x="390" y="300" width="35" height="80"/>
+    <rect x="428" y="282" width="42" height="98"/>
+    <rect x="473" y="262" width="38" height="118"/>
+    <rect x="514" y="248" width="48" height="132"/>
+  </g>
+
+  <g fill="url(#buildingB)">
+    <rect x="555" y="260" width="46" height="120"/>
+    <rect x="604" y="238" width="54" height="142"/>
+    <rect x="661" y="215" width="50" height="165"/>
+    <rect x="657" y="205" width="58" height="12"/>
+
+    <!-- Tallest center -->
+    <rect x="714" y="162" width="65" height="218"/>
+    <rect x="721" y="145" width="51" height="19"/>
+    <rect x="729" y="130" width="35" height="17"/>
+    <polygon points="746,96 737,132 755,132"/>
+
+    <rect x="782" y="178" width="58" height="202"/>
+    <rect x="784" y="168" width="54" height="12"/>
+
+    <rect x="843" y="200" width="50" height="180"/>
+    <rect x="896" y="218" width="52" height="162"/>
+    <rect x="951" y="235" width="46" height="145"/>
+    <rect x="1000" y="250" width="50" height="130"/>
+    <rect x="1053" y="263" width="42" height="117"/>
+    <rect x="1098" y="275" width="48" height="105"/>
+  </g>
+
+  <g fill="#3A5E6A" opacity="0.6">
+    <rect x="1148" y="288" width="40" height="92"/>
+    <rect x="1191" y="300" width="36" height="80"/>
+    <rect x="1230" y="312" width="30" height="68"/>
+  </g>
+
+  <!-- Windows (blue-white morning light) -->
+  <g fill="#A8D8F0" opacity="0.4">
+    {Array.from({length: 6}).map((_, row) =>
+      Array.from({length: 4}).map((_, col) => (
+        <rect x={719 + col * 14} y={175 + row * 24} width="8" height="12" rx="1"/>
+      ))
+    )}
+  </g>
+
+  <!-- Ground (vivid spring green) -->
+  <rect x="0" y="375" width="1440" height="185" fill="#2E7D10"/>
+  <ellipse cx="720" cy="375" rx="830" ry="48" fill="#3E9E18"/>
+  <ellipse cx="720" cy="368" rx="680" ry="24" fill="#52B820" opacity="0.6"/>
+
+  <!-- Mid background trees (left) -->
+  <g opacity="0.8">
+    <rect x="300" y="305" width="11" height="72" fill="#1A3A0A" rx="2"/>
+    <ellipse cx="306" cy="288" rx="32" ry="36" fill="#2A5A12"/>
+    <ellipse cx="294" cy="278" rx="26" ry="30" fill="#3A7A1E"/>
+    <ellipse cx="320" cy="275" rx="24" ry="28" fill="#3A7A1E"/>
+
+    <rect x="352" y="315" width="10" height="62" fill="#1A3A0A" rx="2"/>
+    <ellipse cx="357" cy="300" rx="27" ry="31" fill="#2A5A12"/>
+    <ellipse cx="346" cy="291" rx="21" ry="26" fill="#3A7A1E"/>
+  </g>
+
+  <!-- Mid background trees (right) -->
+  <g opacity="0.8">
+    <rect x="1128" y="305" width="11" height="72" fill="#1A3A0A" rx="2"/>
+    <ellipse cx="1134" cy="288" rx="32" ry="36" fill="#2A5A12"/>
+    <ellipse cx="1122" cy="278" rx="26" ry="30" fill="#3A7A1E"/>
+    <ellipse cx="1148" cy="275" rx="24" ry="28" fill="#3A7A1E"/>
+
+    <rect x="1079" y="315" width="10" height="62" fill="#1A3A0A" rx="2"/>
+    <ellipse cx="1084" cy="300" rx="27" ry="31" fill="#2A5A12"/>
+    <ellipse cx="1073" cy="291" rx="21" ry="26" fill="#3A7A1E"/>
+  </g>
+
+  <!-- LEFT FOREGROUND TREES (vivid spring green) -->
+  <rect x="20" y="228" width="20" height="202" fill="#183A08" rx="4"/>
+  <ellipse cx="30" cy="205" rx="66" ry="70" fill="#183A08"/>
+  <ellipse cx="10" cy="192" rx="54" ry="60" fill="#265A10"/>
+  <ellipse cx="56" cy="188" rx="50" ry="56" fill="#225010"/>
+  <ellipse cx="30" cy="175" rx="48" ry="58" fill="#347020"/>
+  <ellipse cx="6" cy="185" rx="38" ry="48" fill="#347020"/>
+  <ellipse cx="58" cy="178" rx="35" ry="46" fill="#429028"/>
+  <ellipse cx="30" cy="162" rx="30" ry="40" fill="#52A832"/>
+
+  <rect x="150" y="250" width="16" height="178" fill="#183A08" rx="3"/>
+  <ellipse cx="158" cy="228" rx="58" ry="62" fill="#183A08"/>
+  <ellipse cx="140" cy="216" rx="47" ry="54" fill="#265A10"/>
+  <ellipse cx="178" cy="212" rx="43" ry="50" fill="#225010"/>
+  <ellipse cx="158" cy="200" rx="41" ry="54" fill="#347020"/>
+  <ellipse cx="138" cy="212" rx="33" ry="44" fill="#429028"/>
+
+  <rect x="255" y="268" width="13" height="148" fill="#183A08" rx="2"/>
+  <ellipse cx="262" cy="250" rx="46" ry="50" fill="#183A08"/>
+  <ellipse cx="247" cy="240" rx="38" ry="44" fill="#265A10"/>
+  <ellipse cx="278" cy="236" rx="35" ry="42" fill="#347020"/>
+  <ellipse cx="262" cy="226" rx="34" ry="44" fill="#429028"/>
+
+  <!-- RIGHT FOREGROUND TREES -->
+  <rect x="1400" y="228" width="20" height="202" fill="#183A08" rx="4"/>
+  <ellipse cx="1410" cy="205" rx="66" ry="70" fill="#183A08"/>
+  <ellipse cx="1390" cy="192" rx="54" ry="60" fill="#265A10"/>
+  <ellipse cx="1436" cy="188" rx="50" ry="56" fill="#225010"/>
+  <ellipse cx="1410" cy="175" rx="48" ry="58" fill="#347020"/>
+  <ellipse cx="1386" cy="185" rx="38" ry="48" fill="#347020"/>
+  <ellipse cx="1438" cy="178" rx="35" ry="46" fill="#429028"/>
+  <ellipse cx="1410" cy="162" rx="30" ry="40" fill="#52A832"/>
+
+  <rect x="1274" y="250" width="16" height="178" fill="#183A08" rx="3"/>
+  <ellipse cx="1282" cy="228" rx="58" ry="62" fill="#183A08"/>
+  <ellipse cx="1264" cy="216" rx="47" ry="54" fill="#265A10"/>
+  <ellipse cx="1302" cy="212" rx="43" ry="50" fill="#225010"/>
+  <ellipse cx="1282" cy="200" rx="41" ry="54" fill="#347020"/>
+  <ellipse cx="1262" cy="212" rx="33" ry="44" fill="#429028"/>
+
+  <rect x="1170" y="268" width="13" height="148" fill="#183A08" rx="2"/>
+  <ellipse cx="1177" cy="250" rx="46" ry="50" fill="#183A08"/>
+  <ellipse cx="1162" cy="240" rx="38" ry="44" fill="#265A10"/>
+  <ellipse cx="1193" cy="236" rx="35" ry="42" fill="#347020"/>
+  <ellipse cx="1177" cy="226" rx="34" ry="44" fill="#429028"/>
+
+  <!-- Bottom fade -->
+  <defs>
+    <linearGradient id="fadeB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F7F4EF" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#F7F4EF" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="420" width="1440" height="140" fill="url(#fadeB)"/>
+</svg>

@@ -1,0 +1,213 @@
+---
+// Option A — Golden Hour
+// Warm sunset: amber/peach sky, deep green trees, warm city silhouette
+---
+<svg viewBox="0 0 1440 560" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" class="w-full h-full" aria-hidden="true">
+  <defs>
+    <linearGradient id="skyA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4A8FAD"/>
+      <stop offset="45%" stop-color="#F0C98A"/>
+      <stop offset="75%" stop-color="#F5A85A"/>
+      <stop offset="100%" stop-color="#E8904A"/>
+    </linearGradient>
+    <radialGradient id="sunA" cx="50%" cy="68%" r="35%">
+      <stop offset="0%" stop-color="#FFE8A0" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#FFCC66" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FFCC66" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="groundA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4A9A20"/>
+      <stop offset="100%" stop-color="#2D6010"/>
+    </linearGradient>
+    <linearGradient id="buildingA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5A7A5A"/>
+      <stop offset="100%" stop-color="#3A5A3A"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="1440" height="560" fill="url(#skyA)"/>
+  <rect width="1440" height="560" fill="url(#sunA)"/>
+
+  <!-- Clouds -->
+  <g opacity="0.65">
+    <ellipse cx="220" cy="95" rx="72" ry="24" fill="#FFF5E0"/>
+    <ellipse cx="262" cy="82" rx="58" ry="28" fill="#FFF5E0"/>
+    <ellipse cx="178" cy="100" rx="44" ry="20" fill="#FFF5E0"/>
+    <ellipse cx="1050" cy="75" rx="68" ry="22" fill="#FFF5E0"/>
+    <ellipse cx="1092" cy="63" rx="52" ry="26" fill="#FFF5E0"/>
+    <ellipse cx="1015" cy="80" rx="40" ry="18" fill="#FFF5E0"/>
+    <ellipse cx="700" cy="55" rx="48" ry="16" fill="#FFF5E0" opacity="0.5"/>
+    <ellipse cx="740" cy="46" rx="38" ry="18" fill="#FFF5E0" opacity="0.5"/>
+  </g>
+
+  <!-- Birds (tiny v shapes) -->
+  <g fill="none" stroke="#3A5A3A" stroke-width="1.5" stroke-linecap="round" opacity="0.6">
+    <path d="M480 110 Q484 106 488 110"/>
+    <path d="M494 103 Q498 99 502 103"/>
+    <path d="M508 112 Q512 108 516 112"/>
+    <path d="M900 90 Q904 86 908 90"/>
+    <path d="M915 98 Q919 94 923 98"/>
+  </g>
+
+  <!-- City skyline — background, muted -->
+  <g fill="#6B8B5A" opacity="0.55">
+    <rect x="390" y="305" width="38" height="75"/>
+    <rect x="430" y="285" width="45" height="95"/>
+    <rect x="477" y="268" width="40" height="112"/>
+    <rect x="519" y="250" width="52" height="130"/>
+    <rect x="574" y="232" width="46" height="148"/>
+  </g>
+
+  <!-- City skyline — main -->
+  <g fill="url(#buildingA)">
+    <!-- Left cluster -->
+    <rect x="560" y="268" width="44" height="112"/>
+    <!-- Water tower -->
+    <rect x="570" y="258" width="10" height="12"/>
+    <rect x="567" y="252" width="16" height="8" rx="2"/>
+
+    <rect x="607" y="245" width="52" height="135"/>
+    <rect x="662" y="220" width="48" height="160"/>
+    <!-- Antenna -->
+    <rect x="684" y="205" width="3" height="16"/>
+
+    <!-- Tallest - Empire State style -->
+    <rect x="713" y="175" width="62" height="205"/>
+    <!-- Setbacks -->
+    <rect x="720" y="155" width="48" height="22"/>
+    <rect x="728" y="138" width="32" height="19"/>
+    <!-- Spire -->
+    <polygon points="744,105 735,140 753,140"/>
+
+    <rect x="778" y="188" width="55" height="192"/>
+    <!-- Water tower -->
+    <rect x="790" y="178" width="9" height="11"/>
+    <rect x="787" y="172" width="15" height="8" rx="2"/>
+
+    <rect x="836" y="205" width="48" height="175"/>
+    <rect x="887" y="222" width="55" height="158"/>
+    <rect x="945" y="238" width="46" height="142"/>
+    <!-- Antenna -->
+    <rect x="966" y="225" width="3" height="14"/>
+
+    <rect x="994" y="252" width="42" height="128"/>
+    <rect x="1039" y="265" width="50" height="115"/>
+    <rect x="1092" y="278" width="40" height="102"/>
+
+    <!-- Right cluster fade -->
+  </g>
+  <g fill="#6B8B5A" opacity="0.55">
+    <rect x="1134" y="290" width="44" height="90"/>
+    <rect x="1181" y="305" width="38" height="75"/>
+    <rect x="1222" y="318" width="32" height="62"/>
+  </g>
+
+  <!-- Windows hint on tallest buildings -->
+  <g fill="#FFE8A0" opacity="0.35">
+    {Array.from({length: 6}).map((_, row) =>
+      Array.from({length: 4}).map((_, col) => (
+        <rect x={720 + col * 13} y={190 + row * 22} width="7" height="10" rx="1"/>
+      ))
+    )}
+    {Array.from({length: 5}).map((_, row) =>
+      Array.from({length: 3}).map((_, col) => (
+        <rect x={783 + col * 14} y={200 + row * 24} width="7" height="10" rx="1"/>
+      ))
+    )}
+  </g>
+
+  <!-- Ground -->
+  <rect x="0" y="378" width="1440" height="182" fill="#3A7A18"/>
+  <ellipse cx="720" cy="378" rx="820" ry="45" fill="#4A9A22"/>
+
+  <!-- Ground highlight -->
+  <ellipse cx="720" cy="370" rx="700" ry="22" fill="#5AB828" opacity="0.5"/>
+
+  <!-- Mid background trees (left) -->
+  <g opacity="0.75">
+    <rect x="298" y="308" width="10" height="70" fill="#2A4A15" rx="2"/>
+    <ellipse cx="303" cy="292" rx="30" ry="34" fill="#3A6A1A"/>
+    <ellipse cx="293" cy="282" rx="24" ry="28" fill="#4A7A22"/>
+    <ellipse cx="315" cy="279" rx="22" ry="26" fill="#4A7A22"/>
+
+    <rect x="348" y="318" width="9" height="60" fill="#2A4A15" rx="2"/>
+    <ellipse cx="353" cy="303" rx="26" ry="30" fill="#3A6A1A"/>
+    <ellipse cx="342" cy="294" rx="20" ry="25" fill="#4A7A22"/>
+  </g>
+
+  <!-- Mid background trees (right) -->
+  <g opacity="0.75">
+    <rect x="1130" y="308" width="10" height="70" fill="#2A4A15" rx="2"/>
+    <ellipse cx="1135" cy="292" rx="30" ry="34" fill="#3A6A1A"/>
+    <ellipse cx="1125" cy="282" rx="24" ry="28" fill="#4A7A22"/>
+    <ellipse cx="1147" cy="279" rx="22" ry="26" fill="#4A7A22"/>
+
+    <rect x="1082" y="318" width="9" height="60" fill="#2A4A15" rx="2"/>
+    <ellipse cx="1087" cy="303" rx="26" ry="30" fill="#3A6A1A"/>
+    <ellipse cx="1076" cy="294" rx="20" ry="25" fill="#4A7A22"/>
+  </g>
+
+  <!-- LEFT FOREGROUND TREES -->
+  <!-- Tree L1 (far left, large oak) -->
+  <rect x="22" y="235" width="18" height="195" fill="#1E3A10" rx="4"/>
+  <ellipse cx="31" cy="212" rx="62" ry="66" fill="#1E3A10"/>
+  <ellipse cx="12" cy="200" rx="50" ry="56" fill="#2D5A18"/>
+  <ellipse cx="55" cy="195" rx="46" ry="52" fill="#285215"/>
+  <ellipse cx="31" cy="182" rx="44" ry="55" fill="#3A6E20"/>
+  <ellipse cx="8" cy="190" rx="35" ry="44" fill="#3A6E20"/>
+  <ellipse cx="56" cy="185" rx="32" ry="42" fill="#4A8228"/>
+
+  <!-- Tree L2 (mid left) -->
+  <rect x="148" y="255" width="15" height="165" fill="#1E3A10" rx="3"/>
+  <ellipse cx="156" cy="235" rx="54" ry="58" fill="#1E3A10"/>
+  <ellipse cx="138" cy="224" rx="44" ry="50" fill="#2D5A18"/>
+  <ellipse cx="174" cy="220" rx="40" ry="46" fill="#285215"/>
+  <ellipse cx="156" cy="208" rx="38" ry="50" fill="#3A6E20"/>
+  <ellipse cx="136" cy="218" rx="30" ry="40" fill="#4A8228"/>
+
+  <!-- Tree L3 (closer to center, shorter) -->
+  <rect x="255" y="272" width="12" height="138" fill="#1E3A10" rx="2"/>
+  <ellipse cx="261" cy="255" rx="44" ry="48" fill="#1E3A10"/>
+  <ellipse cx="246" cy="245" rx="36" ry="42" fill="#2D5A18"/>
+  <ellipse cx="276" cy="241" rx="33" ry="40" fill="#3A6E20"/>
+  <ellipse cx="261" cy="232" rx="32" ry="42" fill="#4A8228"/>
+
+  <!-- RIGHT FOREGROUND TREES -->
+  <!-- Tree R1 (far right, large oak) -->
+  <rect x="1400" y="235" width="18" height="195" fill="#1E3A10" rx="4"/>
+  <ellipse cx="1409" cy="212" rx="62" ry="66" fill="#1E3A10"/>
+  <ellipse cx="1390" cy="200" rx="50" ry="56" fill="#2D5A18"/>
+  <ellipse cx="1432" cy="195" rx="46" ry="52" fill="#285215"/>
+  <ellipse cx="1409" cy="182" rx="44" ry="55" fill="#3A6E20"/>
+  <ellipse cx="1386" cy="190" rx="35" ry="44" fill="#3A6E20"/>
+  <ellipse cx="1433" cy="185" rx="32" ry="42" fill="#4A8228"/>
+
+  <!-- Tree R2 (mid right) -->
+  <rect x="1278" y="255" width="15" height="165" fill="#1E3A10" rx="3"/>
+  <ellipse cx="1286" cy="235" rx="54" ry="58" fill="#1E3A10"/>
+  <ellipse cx="1268" cy="224" rx="44" ry="50" fill="#2D5A18"/>
+  <ellipse cx="1304" cy="220" rx="40" ry="46" fill="#285215"/>
+  <ellipse cx="1286" cy="208" rx="38" ry="50" fill="#3A6E20"/>
+  <ellipse cx="1266" cy="218" rx="30" ry="40" fill="#4A8228"/>
+
+  <!-- Tree R3 (closer to center) -->
+  <rect x="1172" y="272" width="12" height="138" fill="#1E3A10" rx="2"/>
+  <ellipse cx="1178" cy="255" rx="44" ry="48" fill="#1E3A10"/>
+  <ellipse cx="1163" cy="245" rx="36" ry="42" fill="#2D5A18"/>
+  <ellipse cx="1193" cy="241" rx="33" ry="40" fill="#3A6E20"/>
+  <ellipse cx="1178" cy="232" rx="32" ry="42" fill="#4A8228"/>
+
+  <!-- Foreground grass tufts -->
+  <ellipse cx="150" cy="420" rx="90" ry="18" fill="#5ABF25" opacity="0.6"/>
+  <ellipse cx="400" cy="410" rx="70" ry="14" fill="#5ABF25" opacity="0.5"/>
+  <ellipse cx="1050" cy="412" rx="75" ry="15" fill="#5ABF25" opacity="0.5"/>
+  <ellipse cx="1300" cy="418" rx="88" ry="17" fill="#5ABF25" opacity="0.6"/>
+
+  <!-- Bottom fade to blend with page -->
+  <linearGradient id="fadeA" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#F7F4EF" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#F7F4EF" stop-opacity="1"/>
+  </linearGradient>
+  <rect x="0" y="420" width="1440" height="140" fill="url(#fadeA)"/>
+</svg>
