@@ -1,0 +1,243 @@
+---
+import Base from '../layouts/Base.astro';
+
+const LAST_UPDATED = 'August 2026';
+---
+
+<Base title="Privacy Policy" description="Privacy Policy for CityServ — how we collect, use, and protect your data.">
+  <div class="bg-(--cream) min-h-screen py-12 px-4">
+    <div class="mx-auto max-w-3xl">
+
+      <!-- Header -->
+      <div class="mb-10">
+        <nav class="text-xs text-(--text-muted) mb-6">
+          <a href="/" class="hover:text-(--forest) transition-colors">Home</a>
+          <span class="mx-1.5 opacity-40">›</span>
+          <span class="text-(--forest)">Privacy Policy</span>
+        </nav>
+        <h1 class="text-3xl font-bold text-(--forest)">Privacy Policy</h1>
+        <p class="mt-2 text-sm text-(--text-muted)">Last updated: {LAST_UPDATED}</p>
+        <p class="mt-4 text-sm text-(--text-muted) leading-relaxed max-w-xl">
+          CityServ is a free, nonprofit volunteer directory for New York City's East Village. This policy explains what personal information we collect, why we collect it, and how you can control it. We keep this short and plain on purpose.
+        </p>
+      </div>
+
+      <!-- Quick summary -->
+      <div class="mb-8 rounded-2xl border border-(--border) bg-white p-6 shadow-[var(--shadow)]">
+        <p class="text-xs font-semibold uppercase tracking-widest text-(--text-muted) mb-4">The short version</p>
+        <div class="grid gap-3 sm:grid-cols-3">
+          {[
+            { icon: '🚫', title: 'We never sell your data', sub: 'Not to anyone, ever' },
+            { icon: '📍', title: 'No ad tracking', sub: 'Cloudflare analytics uses no cookies' },
+            { icon: '🗑️', title: 'Delete anytime', sub: 'Email us and we remove your account' },
+          ].map(({ icon, title, sub }) => (
+            <div class="rounded-xl border border-(--border) bg-(--cream) px-4 py-4 text-center">
+              <div class="text-2xl mb-2" aria-hidden="true">{icon}</div>
+              <p class="text-sm font-semibold text-(--forest)">{title}</p>
+              <p class="text-xs text-(--text-muted) mt-0.5">{sub}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Table of Contents -->
+      <nav class="mb-8 rounded-2xl border border-(--border) bg-white p-6 shadow-[var(--shadow)]" aria-label="Table of contents">
+        <p class="text-xs font-semibold uppercase tracking-widest text-(--text-muted) mb-3">Contents</p>
+        <ol class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 text-sm">
+          <li><a href="#p1" class="text-(--forest-light) hover:text-(--forest) transition-colors">1. What We Collect</a></li>
+          <li><a href="#p2" class="text-(--forest-light) hover:text-(--forest) transition-colors">2. Why We Collect It</a></li>
+          <li><a href="#p3" class="text-(--forest-light) hover:text-(--forest) transition-colors">3. How We Use It</a></li>
+          <li><a href="#p4" class="text-(--forest-light) hover:text-(--forest) transition-colors">4. Sharing &amp; Disclosure</a></li>
+          <li><a href="#p5" class="text-(--forest-light) hover:text-(--forest) transition-colors">5. Third-Party Services</a></li>
+          <li><a href="#p6" class="text-(--forest-light) hover:text-(--forest) transition-colors">6. Data Retention</a></li>
+          <li><a href="#p7" class="text-(--forest-light) hover:text-(--forest) transition-colors">7. Your Rights</a></li>
+          <li><a href="#p8" class="text-(--forest-light) hover:text-(--forest) transition-colors">8. Children</a></li>
+          <li><a href="#p9" class="text-(--forest-light) hover:text-(--forest) transition-colors">9. Security</a></li>
+          <li><a href="#p10" class="text-(--forest-light) hover:text-(--forest) transition-colors">10. Changes to This Policy</a></li>
+          <li><a href="#p11" class="text-(--forest-light) hover:text-(--forest) transition-colors">11. Contact</a></li>
+        </ol>
+      </nav>
+
+      <!-- Content -->
+      <div class="rounded-2xl border border-(--border) bg-white p-8 shadow-[var(--shadow)] space-y-8">
+
+        <section id="p1">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">1. What We Collect</h2>
+          <div class="rounded-xl border border-(--border) bg-(--cream) p-5">
+            <ul class="space-y-3 text-sm text-(--text-muted) leading-relaxed">
+              {[
+                { label: 'Email address', when: 'When you create an account or sign up with Google' },
+                { label: 'Display name', when: 'When you create an account (you choose this)' },
+                { label: 'Year of birth', when: 'At account creation — used only to verify age eligibility (16+)' },
+                { label: 'Google profile info', when: 'Only if you sign up with Google (name and email from your Google account)' },
+                { label: 'Review content', when: 'Text and rating you submit for a volunteer organization' },
+                { label: 'IP address and browser type', when: 'Recorded only at the moment of review submission for legal compliance and abuse prevention — never shown publicly, never used for tracking' },
+                { label: 'Site usage data', when: 'Via Cloudflare Web Analytics — privacy-preserving, no cookies, no cross-site tracking, no fingerprinting' },
+              ].map(({ label, when }) => (
+                <li class="flex items-start gap-2.5">
+                  <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-(--leaf)"></span>
+                  <span><strong class="text-(--forest)">{label}</strong> — {when}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p class="mt-3 text-sm text-(--text-muted) leading-relaxed">
+            We do <strong class="text-(--forest)">not</strong> collect payment information, location data beyond what you voluntarily share in a review, or any health or financial information.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="p2">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">2. Why We Collect It</h2>
+          <ul class="space-y-2 text-sm text-(--text-muted) leading-relaxed">
+            {[
+              'To operate your account and authenticate you securely',
+              'To verify that account holders are at least 16 years old',
+              'To send transactional emails (email verification, password resets)',
+              'To prevent spam, abuse, and fake reviews',
+              'To comply with legal obligations and respond to lawful requests',
+              'To understand aggregate site usage so we can improve CityServ',
+            ].map(item => (
+              <li class="flex items-start gap-2.5">
+                <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-(--leaf)"></span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="p3">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">3. How We Use It</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            We use your data only for the purposes listed above. We do not build advertising profiles, track you across other websites, or use your data for any commercial purpose. Your reviews are published under your chosen display name. Your email address is never shown publicly.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="p4">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">4. Sharing &amp; Disclosure</h2>
+          <div class="rounded-xl border border-green-200 bg-green-50 px-5 py-4 mb-4">
+            <p class="text-sm text-green-800 font-semibold">We never sell, rent, or trade your personal data.</p>
+          </div>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            We disclose personal data only in these circumstances: (a) to the third-party service providers listed in Section 5, who process data on our behalf under data processing agreements; (b) when required by valid legal process, such as a court order or subpoena; (c) to protect the rights, property, or safety of CityServ, our users, or the public; or (d) with your explicit consent.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="p5">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">5. Third-Party Services</h2>
+          <div class="grid gap-3 sm:grid-cols-2">
+            {[
+              { name: 'Cloudflare', role: 'Hosting, CDN, DDoS protection, and privacy-preserving analytics. Data stored on Cloudflare infrastructure.', url: 'https://www.cloudflare.com/privacypolicy/' },
+              { name: 'Resend', role: 'Sends transactional emails (verification links, password resets). Receives your email address for delivery only.', url: 'https://resend.com/privacy' },
+              { name: 'Cloudflare Turnstile', role: 'Bot-prevention CAPTCHA. No cookies, does not track you across sites.', url: 'https://www.cloudflare.com/privacypolicy/' },
+              { name: 'Google OAuth', role: 'Optional sign-in method. If you use it, Google shares your name and email with us per their privacy policy.', url: 'https://policies.google.com/privacy' },
+            ].map(({ name, role, url }) => (
+              <div class="rounded-xl border border-(--border) bg-(--cream) px-4 py-4">
+                <p class="text-sm font-semibold text-(--forest) mb-1">
+                  <a href={url} target="_blank" rel="noopener noreferrer" class="hover:underline underline-offset-2">{name} ↗</a>
+                </p>
+                <p class="text-xs text-(--text-muted) leading-relaxed">{role}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="p6">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">6. Data Retention</h2>
+          <ul class="space-y-2 text-sm text-(--text-muted) leading-relaxed">
+            {[
+              'Account data (email, name, year of birth): retained while your account is active, plus 90 days after deletion for backup recovery',
+              'Published reviews: retained indefinitely unless removed by moderation or at your request',
+              'IP address and browser type logged at review submission: purged after 1 year unless tied to an open legal complaint or report',
+              'Session tokens: expire automatically; active sessions are revoked on account deletion',
+            ].map(item => (
+              <li class="flex items-start gap-2.5">
+                <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-(--leaf)"></span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="p7">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">7. Your Rights</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed mb-3">
+            Regardless of where you live, you can:
+          </p>
+          <ul class="space-y-2 text-sm text-(--text-muted) leading-relaxed mb-4">
+            {[
+              'Request a copy of the personal data we hold about you',
+              'Request correction of inaccurate data',
+              'Request deletion of your account and associated personal data',
+              'Opt out of any future marketing communications (we currently send none)',
+            ].map(item => (
+              <li class="flex items-start gap-2.5">
+                <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-(--leaf)"></span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            To exercise any of these rights, email <a href="mailto:privacy@cityserv.org" class="text-(--forest-light) underline underline-offset-2 hover:text-(--forest)">privacy@cityserv.org</a>. We will respond within 30 days. We honor CCPA/CPRA-style rights for California residents and similar rights for all users regardless of location.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="p8">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">8. Children</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            CityServ requires account holders to be at least 16 years old. Anyone may browse the Site without an account, regardless of age. We do not knowingly collect personal information from children under 13. If we discover we have inadvertently collected such data, we will delete it immediately. Parents who believe their child under 13 has created an account should email <a href="mailto:privacy@cityserv.org" class="text-(--forest-light) underline underline-offset-2 hover:text-(--forest)">privacy@cityserv.org</a>.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="p9">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">9. Security</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            All data is encrypted in transit using TLS. We use Cloudflare's Web Application Firewall, access controls, and encrypted secrets management to protect stored data. Passwords are hashed and never stored in plaintext. In the event of a data breach affecting your personal information, we will notify you as required by New York's SHIELD Act (NY GBL § 899-bb) as expeditiously as possible and no later than the legally required timeframe.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="p10">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">10. Changes to This Policy</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            We may update this Privacy Policy from time to time. For material changes we will post a notice on the Site and, where required, seek fresh consent. The "Last updated" date at the top of this page reflects the most recent revision. Continued use of the Site after changes take effect constitutes acceptance of the revised policy.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="p11">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">11. Contact</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            Privacy questions or requests: <a href="mailto:privacy@cityserv.org" class="text-(--forest-light) underline underline-offset-2 hover:text-(--forest)">privacy@cityserv.org</a><br/>
+            General contact: <a href="mailto:contact@cityserv.org" class="text-(--forest-light) underline underline-offset-2 hover:text-(--forest)">contact@cityserv.org</a>
+          </p>
+        </section>
+
+        <!-- Attorney note -->
+        <div class="mt-4 rounded-xl border border-(--border) bg-(--cream) px-5 py-4">
+          <p class="text-xs text-(--text-muted) leading-relaxed">
+            <strong class="text-(--forest)">Note:</strong> This Privacy Policy reflects CityServ's actual data practices as of the date above. It is not a substitute for legal advice. We recommend periodic review by a New York-licensed attorney, particularly as the Site grows or services change.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</Base>

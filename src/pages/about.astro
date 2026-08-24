@@ -1,51 +1,202 @@
 ---
 import Base from '../layouts/Base.astro';
+
+const TRUST_TIERS = [
+  { label: 'Highly Trusted', range: '80–100', color: 'bg-(--forest)', textColor: 'text-white', icon: '⭐', desc: 'Multiple independent verifications — IRS, AmeriCorps, Charity Navigator, and admin-reviewed.' },
+  { label: 'Trusted',        range: '60–79',  color: 'bg-(--forest-light)', textColor: 'text-white', icon: '✓', desc: 'IRS 501(c)(3) verified plus admin review. Solid track record.' },
+  { label: 'Verified',       range: '40–59',  color: 'bg-(--leaf-light)', textColor: 'text-(--forest)', icon: '✓', desc: 'Basic verification complete — at minimum one independent source confirmed.' },
+  { label: 'Listed',         range: '0–39',   color: 'bg-(--cream-dark)', textColor: 'text-(--forest)', icon: '○', desc: 'Organization listed but not yet independently verified. We\'re working on it.' },
+];
+
+const VERIFICATION_SOURCES = [
+  { icon: '🏛️', title: 'IRS 501(c)(3)',           desc: 'Tax-exempt status confirmed via ProPublica Nonprofit Explorer and IRS Exempt Organizations data.', badge: 'Government' },
+  { icon: '🇺🇸', title: 'AmeriCorps Grantee',      desc: 'Organization is a current or recent AmeriCorps grantee, verified via AmeriCorps Open Data.', badge: 'Government' },
+  { icon: '⭐',  title: 'Charity Navigator Rated', desc: 'Rated by Charity Navigator with a published star rating and accountability score.', badge: 'Independent' },
+  { icon: '🎓', title: 'School Verified',          desc: 'Reviewed and approved by the Friends Seminary Service Office as a partner organization.', badge: 'School' },
+  { icon: '👤', title: 'Admin Verified',           desc: 'Manually reviewed by a CityServ administrator. Not a government or regulator endorsement.', badge: 'Admin' },
+];
+
+const HOW_SCORE_WORKS = [
+  { factor: 'IRS 501(c)(3) status',              points: '+20' },
+  { factor: 'IRS status not revoked',             points: '+5' },
+  { factor: 'AmeriCorps grantee',                 points: '+15' },
+  { factor: 'Charity Navigator stars (per star)', points: '+4 each' },
+  { factor: 'Admin verified',                     points: '+10' },
+  { factor: 'Domain age (per year, max 5)',       points: '+1 each' },
+  { factor: 'Has logo',                           points: '+2' },
+  { factor: 'Has complete address',               points: '+2' },
+  { factor: 'User ratings (3+ reviews)',          points: '−10 to +10' },
+  { factor: 'Unresolved reports (2+)',            points: '−15' },
+];
 ---
 
-<Base title="About" description="About CityServ — a verified volunteer directory for NYC's East Village.">
-  <div class="mx-auto max-w-2xl px-4 py-16">
-    <h1 class="text-3xl font-bold text-white mb-6">About CityServ</h1>
+<Base title="About" description="About CityServ — a verified volunteer directory for NYC's East Village. Learn how our trust scores and verification system work.">
 
-    <div class="space-y-6 text-green-300 leading-relaxed">
-      <p>
-        CityServ is a verified volunteer-service directory built for New York City's East Village,
-        Lower East Side, and Alphabet City neighborhoods (ZIP codes 10003, 10009, and 10002).
-      </p>
-
-      <p>
-        Every organization listed on CityServ is cross-checked against IRS tax-exempt records,
-        ProPublica's Nonprofit Explorer, and AmeriCorps grantee data. Organizations are also
-        reviewed by the Friends Seminary Service Office before being featured.
-      </p>
-
-      <h2 class="text-xl font-semibold text-white mt-8 mb-3">How trust scores work</h2>
-      <p>
-        Each organization receives a trust score based on multiple verification sources:
-        IRS 501(c)(3) status, Charity Navigator ratings, AmeriCorps grantee status,
-        domain age, and admin verification. Scores range from 0–100 and are updated nightly.
-      </p>
-
-      <div class="rounded-2xl border border-green-800/50 bg-green-900/20 p-6 space-y-3">
-        <div class="flex items-center gap-3">
-          <span class="inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-xs font-semibold bg-green-400 text-green-950">⭐ Highly Trusted</span>
-          <span class="text-sm">80+ points — multiple independent verifications</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-xs font-semibold bg-green-600 text-white">✓ Trusted</span>
-          <span class="text-sm">60–79 points — IRS verified + admin reviewed</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-xs font-semibold bg-green-800 text-green-200">✓ Verified</span>
-          <span class="text-sm">40–59 points — basic verification complete</span>
-        </div>
-      </div>
-
-      <h2 class="text-xl font-semibold text-white mt-8 mb-3">Contact</h2>
-      <p>
-        Built by a student at <strong class="text-white">Friends Seminary</strong> in New York City.
-        For questions or to list your organization, email
-        <a href="mailto:contact@cityserv.org" class="text-green-400 hover:text-green-300 underline underline-offset-2">contact@cityserv.org</a>.
+  <!-- Hero Banner -->
+  <section class="bg-(--forest) py-16 px-4">
+    <div class="mx-auto max-w-3xl text-center">
+      <span class="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[12px] font-semibold tracking-wide text-white/80 mb-5">
+        <span class="h-1.5 w-1.5 rounded-full bg-(--leaf) inline-block"></span>
+        East Village · Lower East Side · Alphabet City
+      </span>
+      <h1 class="text-3xl sm:text-4xl font-bold text-white leading-tight">About CityServ</h1>
+      <p class="mt-4 text-(--leaf-light) text-base leading-relaxed max-w-lg mx-auto">
+        A verified volunteer-service directory built for New York City — starting in the East Village.
+        Every organization is cross-checked against independent, authoritative sources.
       </p>
     </div>
-  </div>
+  </section>
+
+  <!-- Mission -->
+  <section class="py-16 px-4" aria-label="Our mission">
+    <div class="mx-auto max-w-3xl">
+      <div class="rounded-2xl border border-(--border) bg-white p-8 shadow-[var(--shadow)]">
+        <div class="flex items-start gap-4">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-(--cream) text-2xl shadow-inner">
+            🌿
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-(--forest) mb-3">Our mission</h2>
+            <div class="space-y-4 text-(--text-muted) leading-relaxed">
+              <p>
+                CityServ was built by a student at <strong class="text-(--forest)">Friends Seminary</strong> in New York City.
+                The goal is simple: make it easy for anyone in the East Village, Lower East Side, and Alphabet City
+                (ZIP codes 10003, 10009, and 10002) to find trustworthy volunteer opportunities.
+              </p>
+              <p>
+                Every organization listed on CityServ is cross-checked against IRS tax-exempt records,
+                ProPublica's Nonprofit Explorer, and AmeriCorps grantee data. Organizations are also
+                reviewed by the Friends Seminary Service Office before being featured.
+              </p>
+              <p>
+                We don't host sign-ups — each "Sign up" button goes straight to the organization's own
+                registration page. No middleman, no hidden fees.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Verification Sources -->
+  <section class="bg-(--cream-dark) py-16 px-4" aria-label="Verification sources">
+    <div class="mx-auto max-w-3xl">
+      <div class="mb-10 text-center">
+        <p class="text-xs font-semibold uppercase tracking-widest text-(--text-muted) mb-1">Transparency</p>
+        <h2 class="text-2xl font-bold text-(--forest)">How we verify organizations</h2>
+        <p class="mt-3 text-sm text-(--text-muted) max-w-md mx-auto leading-relaxed">
+          Verification badges indicate that a named third-party source has the organization in its records.
+          They are not endorsements of safety or quality.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        {VERIFICATION_SOURCES.map(({ icon, title, desc, badge }) => (
+          <div class="rounded-xl border border-(--border) bg-white p-5 shadow-sm flex items-start gap-4 hover:shadow-[var(--shadow)] transition-shadow">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-(--cream) text-xl">
+              {icon}
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="font-semibold text-(--forest)">{title}</h3>
+                <span class:list={[
+                  'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+                  badge === 'Government' ? 'bg-green-100 text-green-700' :
+                  badge === 'Independent' ? 'bg-blue-100 text-blue-700' :
+                  badge === 'School' ? 'bg-amber-100 text-amber-700' :
+                  'bg-gray-100 text-gray-600'
+                ]}>{badge}</span>
+              </div>
+              <p class="text-sm text-(--text-muted) leading-relaxed">{desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+        <p class="text-sm text-amber-800 leading-relaxed">
+          <strong>Important:</strong> A missing badge does not mean the organization is illegitimate —
+          only that we couldn't confirm it from that specific source. Admin-verification is a human check,
+          not a regulator endorsement.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Score Tiers -->
+  <section class="py-16 px-4" aria-label="Trust score system">
+    <div class="mx-auto max-w-3xl">
+      <div class="mb-10 text-center">
+        <p class="text-xs font-semibold uppercase tracking-widest text-(--text-muted) mb-1">Trust Scoring</p>
+        <h2 class="text-2xl font-bold text-(--forest)">How trust scores work</h2>
+        <p class="mt-3 text-sm text-(--text-muted) max-w-md mx-auto leading-relaxed">
+          Each organization receives a score from 0–100 based on multiple verification sources and community feedback.
+          This score is a <strong class="text-(--forest)">transparency signal</strong>, not an endorsement.
+        </p>
+      </div>
+
+      <!-- Tier cards -->
+      <div class="grid gap-3 sm:grid-cols-2 mb-10">
+        {TRUST_TIERS.map(({ label, range, color, textColor, icon, desc }) => (
+          <div class="rounded-xl border border-(--border) bg-white p-5 shadow-sm">
+            <div class="flex items-center gap-3 mb-2">
+              <span class:list={['inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold', color, textColor]}>
+                {icon} {label}
+              </span>
+              <span class="text-sm font-medium text-(--text-muted)">{range} pts</span>
+            </div>
+            <p class="text-sm text-(--text-muted) leading-relaxed">{desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <!-- Score breakdown table -->
+      <div class="rounded-2xl border border-(--border) bg-white shadow-[var(--shadow)] overflow-hidden">
+        <div class="px-6 py-4 border-b border-(--border) bg-(--cream)">
+          <h3 class="font-semibold text-(--forest)">Score formula breakdown</h3>
+          <p class="text-xs text-(--text-muted) mt-1">Base score: 30 points. Maximum: 100.</p>
+        </div>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-(--border)">
+              <th class="px-6 py-3 text-left font-medium text-(--text-muted)">Factor</th>
+              <th class="px-6 py-3 text-right font-medium text-(--text-muted)">Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            {HOW_SCORE_WORKS.map(({ factor, points }, i) => (
+              <tr class:list={['border-b border-(--border)/50', i % 2 === 0 ? '' : 'bg-(--cream)/40']}>
+                <td class="px-6 py-3 text-(--forest)">{factor}</td>
+                <td class:list={[
+                  'px-6 py-3 text-right font-medium',
+                  points.startsWith('−') ? 'text-red-600' : 'text-(--forest-light)'
+                ]}>{points}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact CTA -->
+  <section class="bg-(--forest) py-16 px-4" aria-label="Get in touch">
+    <div class="mx-auto max-w-xl text-center">
+      <h2 class="text-2xl font-bold text-white mb-4">Want to list your organization?</h2>
+      <p class="text-(--leaf-light) text-sm leading-relaxed mb-8">
+        If your organization serves the East Village area and you'd like to be listed on CityServ,
+        we'd love to hear from you.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="/contact" class="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-(--forest) shadow-sm hover:bg-white/90 transition-colors">
+          Contact us
+        </a>
+        <a href="mailto:contact@cityserv.org" class="rounded-xl border border-white/20 px-6 py-3 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">
+          contact@cityserv.org
+        </a>
+      </div>
+    </div>
+  </section>
+
 </Base>

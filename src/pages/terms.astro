@@ -1,0 +1,218 @@
+---
+import Base from '../layouts/Base.astro';
+
+const LAST_UPDATED = 'August 2026';
+---
+
+<Base title="Terms & Conditions" description="Terms and Conditions for using CityServ, the verified volunteer directory for NYC.">
+  <div class="bg-(--cream) min-h-screen py-12 px-4">
+    <div class="mx-auto max-w-3xl">
+
+      <!-- Header -->
+      <div class="mb-10">
+        <nav class="text-xs text-(--text-muted) mb-6">
+          <a href="/" class="hover:text-(--forest) transition-colors">Home</a>
+          <span class="mx-1.5 opacity-40">›</span>
+          <span class="text-(--forest)">Terms & Conditions</span>
+        </nav>
+        <h1 class="text-3xl font-bold text-(--forest)">Terms &amp; Conditions</h1>
+        <p class="mt-2 text-sm text-(--text-muted)">Last updated: {LAST_UPDATED}</p>
+        <p class="mt-4 text-sm text-(--text-muted) leading-relaxed max-w-xl">
+          CityServ ("we," "us," "our") operates cityserv.org (the "Site"). By using the Site you agree to these Terms. If you do not agree, do not use the Site.
+        </p>
+      </div>
+
+      <!-- Table of Contents -->
+      <nav class="mb-8 rounded-2xl border border-(--border) bg-white p-6 shadow-[var(--shadow)]" aria-label="Table of contents">
+        <p class="text-xs font-semibold uppercase tracking-widest text-(--text-muted) mb-3">Contents</p>
+        <ol class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 text-sm">
+          <li><a href="#s1"  class="text-(--forest-light) hover:text-(--forest) transition-colors">1. Acceptance &amp; Eligibility</a></li>
+          <li><a href="#s2"  class="text-(--forest-light) hover:text-(--forest) transition-colors">2. Account Responsibilities</a></li>
+          <li><a href="#s3"  class="text-(--forest-light) hover:text-(--forest) transition-colors">3. User Content License</a></li>
+          <li><a href="#s4"  class="text-(--forest-light) hover:text-(--forest) transition-colors">4. Acceptable Use</a></li>
+          <li><a href="#s5"  class="text-(--forest-light) hover:text-(--forest) transition-colors">5. Right to Moderate</a></li>
+          <li><a href="#s6"  class="text-(--forest-light) hover:text-(--forest) transition-colors">6. DMCA Notice &amp; Takedown</a></li>
+          <li><a href="#s7"  class="text-(--forest-light) hover:text-(--forest) transition-colors">7. Disclaimers</a></li>
+          <li><a href="#s8"  class="text-(--forest-light) hover:text-(--forest) transition-colors">8. Limitation of Liability</a></li>
+          <li><a href="#s9"  class="text-(--forest-light) hover:text-(--forest) transition-colors">9. Indemnification</a></li>
+          <li><a href="#s10" class="text-(--forest-light) hover:text-(--forest) transition-colors">10. Governing Law &amp; Venue</a></li>
+          <li><a href="#s11" class="text-(--forest-light) hover:text-(--forest) transition-colors">11. Dispute Resolution</a></li>
+          <li><a href="#s12" class="text-(--forest-light) hover:text-(--forest) transition-colors">12. Section 230 Reservation</a></li>
+          <li><a href="#s13" class="text-(--forest-light) hover:text-(--forest) transition-colors">13. Anti-SLAPP Notice</a></li>
+          <li><a href="#s14" class="text-(--forest-light) hover:text-(--forest) transition-colors">14. Miscellaneous</a></li>
+          <li><a href="#s15" class="text-(--forest-light) hover:text-(--forest) transition-colors">15. Contact</a></li>
+        </ol>
+      </nav>
+
+      <!-- Legal content -->
+      <div class="rounded-2xl border border-(--border) bg-white p-8 shadow-[var(--shadow)] space-y-8">
+
+        <section id="s1">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">1. Acceptance and Eligibility</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            You must be at least 16 years old to create an account on CityServ. By creating an account you represent that you meet this requirement. If you are between 16 and 18, a parent or guardian must review and agree to these Terms on your behalf. You may browse the Site without an account regardless of age.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s2">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">2. Account Responsibilities</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            You may hold only one account. You may not share account credentials with others. You are responsible for all activity that occurs under your account. You agree to provide accurate, truthful information at registration and to keep it current. Notify us immediately at <a href="mailto:contact@cityserv.org" class="text-(--forest-light) underline underline-offset-2 hover:text-(--forest)">contact@cityserv.org</a> if you believe your account has been compromised.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s3">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">3. User Content License</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            By submitting a review or any other content ("User Content") you grant CityServ a perpetual, royalty-free, worldwide, sublicensable, irrevocable license to host, display, distribute, and otherwise use that content in connection with operating and promoting the Site. You represent that you own or have the necessary rights to submit the content and that it does not infringe any third-party rights.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s4">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">4. Acceptable Use</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed mb-3">You agree not to post or transmit content that:</p>
+          <ul class="space-y-2 text-sm text-(--text-muted) leading-relaxed">
+            {[
+              'Is false, misleading, or defamatory',
+              'Harasses, threatens, or bullies any person or organization',
+              'Is hateful on the basis of race, religion, gender, sexual orientation, disability, or national origin',
+              'Contains personal information of third parties without their consent ("doxxing")',
+              'Constitutes spam or unsolicited commercial messages',
+              'Violates any applicable local, state, federal, or international law',
+              'Impersonates any person, organization, or CityServ staff',
+            ].map(item => (
+              <li class="flex items-start gap-2.5">
+                <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-(--leaf)"></span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s5">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">5. Right to Moderate</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            We may remove, hide, or refuse any content — including reviews — at our sole discretion, for any reason or no reason, at any time without notice. We use automated AI moderation as a first pass; human administrators may review flagged content and may publish, reject, or remove it. We are not obligated to explain individual moderation decisions. Removed content is never edited — it is either retained (for legal compliance) or deleted in full.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s6">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">6. DMCA Notice and Takedown</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            CityServ respects intellectual property rights. To submit a copyright infringement notice under 17 U.S.C. § 512(c)(3), email <a href="mailto:takedown@cityserv.org" class="text-(--forest-light) underline underline-offset-2 hover:text-(--forest)">takedown@cityserv.org</a> with: (1) identification of the copyrighted work; (2) identification of the infringing material and its location on the Site; (3) your contact information; (4) a statement of good-faith belief; (5) a statement of accuracy under penalty of perjury; and (6) your physical or electronic signature.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s7">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">7. Disclaimers</h2>
+          <div class="rounded-xl border border-(--border) bg-(--cream) p-5 space-y-3">
+            <p class="text-sm text-(--text-muted) leading-relaxed">
+              THE SITE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
+            </p>
+            <p class="text-sm text-(--text-muted) leading-relaxed">
+              We do not warrant the accuracy, completeness, or timeliness of any organization listing. Verification badges indicate only that a named third-party source (IRS, ProPublica, AmeriCorps, Charity Navigator, or Friends Seminary Service Office) has the organization in its records as of the date last checked — they are <strong class="text-(--forest)">not</strong> endorsements of the organization's safety, quality, or fitness for any purpose.
+            </p>
+            <p class="text-sm text-(--text-muted) leading-relaxed">
+              CityServ is an information directory only. We do not employ, endorse, vet, supervise, or have any ongoing relationship with any listed organization. Exercise your own judgment, especially when volunteering with children, seniors, or other vulnerable populations.
+            </p>
+          </div>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s8">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">8. Limitation of Liability</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, CITYSERV AND ITS OPERATORS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO YOUR USE OF THE SITE. OUR TOTAL CUMULATIVE LIABILITY TO YOU SHALL NOT EXCEED THE GREATER OF (A) $100 USD OR (B) THE AMOUNTS YOU PAID US IN THE 12 MONTHS PRECEDING THE CLAIM. BECAUSE CITYSERV IS A FREE, NONPROFIT COMMUNITY SERVICE, THIS MEANS OUR LIABILITY IS CAPPED AT $100 IN MOST CASES.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s9">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">9. Indemnification</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            You agree to defend, indemnify, and hold harmless CityServ and its operators from and against any claims, damages, costs, and expenses (including reasonable attorneys' fees) arising from: (a) your use of the Site; (b) your User Content; (c) your violation of these Terms; or (d) your violation of any third-party right.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s10">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">10. Governing Law and Venue</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            These Terms are governed by the laws of the State of New York, without regard to conflict-of-law principles. Subject to Section 11, any dispute that proceeds to court shall be brought exclusively in the state or federal courts located in New York County, New York, and you consent to personal jurisdiction there.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s11">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">11. Dispute Resolution</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed mb-3">
+            We hope to resolve any concerns informally. Before filing any legal claim, please email <a href="mailto:contact@cityserv.org" class="text-(--forest-light) underline underline-offset-2 hover:text-(--forest)">contact@cityserv.org</a> describing your issue and giving us 30 days to respond.
+          </p>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            For claims that cannot be resolved informally, you and CityServ agree to resolve disputes through binding individual arbitration under the AAA Consumer Arbitration Rules, except that either party may bring an individual claim in small-claims court. <strong class="text-(--forest)">You and CityServ each waive any right to a jury trial or to participate in a class action.</strong> This arbitration clause does not apply to claims relating to intellectual property rights, where either party may seek injunctive relief in court.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s12">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">12. Section 230 Reservation</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            CityServ is an "interactive computer service" as defined in 47 U.S.C. § 230. We are not the publisher or speaker of User Content submitted by users. We are not liable for User Content under federal law.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s13">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">13. Anti-SLAPP Notice</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            Reviews submitted on CityServ constitute opinion and public-interest speech protected under New York Civil Rights Law §§ 70-a and 76-a (New York's anti-SLAPP statute). If you file a meritless legal claim against a reviewer or against CityServ in connection with a published review, you may be liable for the defendant's attorneys' fees and costs.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s14">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">14. Miscellaneous</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            If any provision of these Terms is found unenforceable, it shall be severed and the remaining provisions shall continue in full force. These Terms constitute the entire agreement between you and CityServ regarding use of the Site and supersede any prior agreements. We may update these Terms at any time; material changes will be communicated via the Site or email. Continued use after notice constitutes acceptance.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section id="s15">
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">15. Contact</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            Questions about these Terms? Email <a href="mailto:contact@cityserv.org" class="text-(--forest-light) underline underline-offset-2 hover:text-(--forest)">contact@cityserv.org</a>.
+          </p>
+        </section>
+
+        <!-- Attorney note -->
+        <div class="mt-8 rounded-xl border border-(--border) bg-(--cream) px-5 py-4">
+          <p class="text-xs text-(--text-muted) leading-relaxed">
+            <strong class="text-(--forest)">Note:</strong> These Terms were prepared based on standard UGC platform clauses and reflect CityServ's actual practices. They are not a substitute for advice from a licensed attorney. CityServ recommends periodic review by a New York-licensed attorney, especially before any significant change in services.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</Base>

@@ -1,185 +1,246 @@
 ---
-// Option C — Dusk / Twilight
-// Deep purple-blue sky fading to warm amber, dark silhouetted trees, dramatic city glow
+// Option C — Dusk / Night (pixel art, stars, crescent moon, amber windows)
 ---
-<svg viewBox="0 0 1440 560" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" class="w-full h-full" aria-hidden="true">
+<svg viewBox="0 0 1440 560" xmlns="http://www.w3.org/2000/svg"
+  preserveAspectRatio="xMidYMid slice"
+  style="shape-rendering:crispEdges;image-rendering:pixelated"
+  class="w-full h-full" aria-hidden="true">
   <defs>
-    <linearGradient id="skyC" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#1A1A4A"/>
-      <stop offset="35%" stop-color="#2E3A7A"/>
-      <stop offset="65%" stop-color="#7A4A8A"/>
-      <stop offset="85%" stop-color="#C8703A"/>
-      <stop offset="100%" stop-color="#E89040"/>
-    </linearGradient>
-    <radialGradient id="glowC" cx="50%" cy="75%" r="40%">
-      <stop offset="0%" stop-color="#FFB84A" stop-opacity="0.7"/>
-      <stop offset="60%" stop-color="#E87030" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#E87030" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="buildingC" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#2A2A4A"/>
-      <stop offset="100%" stop-color="#1A1A2E"/>
-    </linearGradient>
+    <style>
+      .cc1{animation:dc1 36s ease-in-out infinite alternate}
+      .cc2{animation:dc2 48s ease-in-out infinite alternate-reverse}
+      .swc1{transform-box:fill-box;transform-origin:bottom center;animation:swc 5s ease-in-out infinite alternate}
+      .swc2{transform-box:fill-box;transform-origin:bottom center;animation:swc 6.5s ease-in-out infinite alternate-reverse}
+      .swc3{transform-box:fill-box;transform-origin:bottom center;animation:swc 4.2s ease-in-out infinite alternate}
+      .swc4{transform-box:fill-box;transform-origin:bottom center;animation:swc 5.4s ease-in-out infinite alternate-reverse}
+      .swc5{transform-box:fill-box;transform-origin:bottom center;animation:swc 6.2s ease-in-out infinite alternate}
+      .swc6{transform-box:fill-box;transform-origin:bottom center;animation:swc 4.6s ease-in-out infinite alternate-reverse}
+      @keyframes dc1{from{transform:translateX(-12px)}to{transform:translateX(16px)}}
+      @keyframes dc2{from{transform:translateX(10px)}to{transform:translateX(-20px)}}
+      @keyframes swc{from{transform:rotate(-1deg)}to{transform:rotate(1deg)}}
+    </style>
   </defs>
 
-  <!-- Sky -->
-  <rect width="1440" height="560" fill="url(#skyC)"/>
-  <rect width="1440" height="560" fill="url(#glowC)"/>
+  <!-- SKY — deep night, dusk glow at horizon -->
+  <rect width="1440" height="560" fill="#06101E"/>
+  <rect y="80"  width="1440" height="120" fill="#0C1830"/>
+  <rect y="200" width="1440" height="100" fill="#1A0E28"/>
+  <rect y="300" width="1440" height="52"  fill="#4A1C06"/>
+  <rect y="352" width="1440" height="24"  fill="#7A3210"/>
 
-  <!-- Stars -->
-  <g fill="white" opacity="0.8">
-    <circle cx="150" cy="40" r="1.2"/>
-    <circle cx="280" cy="25" r="1"/>
-    <circle cx="420" cy="55" r="1.4"/>
-    <circle cx="550" cy="32" r="0.9"/>
-    <circle cx="680" cy="18" r="1.1"/>
-    <circle cx="820" cy="42" r="1.3"/>
-    <circle cx="960" cy="28" r="1"/>
-    <circle cx="1100" cy="48" r="1.2"/>
-    <circle cx="1240" cy="20" r="0.9"/>
-    <circle cx="1350" cy="38" r="1.1"/>
-    <circle cx="200" cy="70" r="0.8"/>
-    <circle cx="760" cy="65" r="1"/>
-    <circle cx="1180" cy="72" r="0.8"/>
+  <!-- STARS (tiny pixel rects) -->
+  <g fill="white" opacity=".9">
+    <rect x="108" y="12" width="4" height="4"/>
+    <rect x="252" y="28" width="2" height="2"/>
+    <rect x="388" y="8"  width="4" height="4"/>
+    <rect x="504" y="36" width="2" height="2"/>
+    <rect x="640" y="16" width="4" height="4"/>
+    <rect x="772" y="44" width="2" height="2"/>
+    <rect x="912" y="10" width="4" height="4"/>
+    <rect x="1048" y="32" width="2" height="2"/>
+    <rect x="1176" y="18" width="4" height="4"/>
+    <rect x="1316" y="40" width="2" height="2"/>
+    <rect x="176" y="60" width="2" height="2"/>
+    <rect x="332" y="52" width="4" height="4"/>
+    <rect x="468" y="72" width="2" height="2"/>
+    <rect x="600" y="58" width="4" height="4"/>
+    <rect x="836" y="68" width="2" height="2"/>
+    <rect x="1100" y="62" width="4" height="4"/>
+    <rect x="1264" y="76" width="2" height="2"/>
+  </g>
+  <!-- Dimmer stars -->
+  <g fill="white" opacity=".4">
+    <rect x="68"  y="44" width="2" height="2"/>
+    <rect x="206" y="18" width="2" height="2"/>
+    <rect x="700" y="36" width="2" height="2"/>
+    <rect x="1380" y="20" width="2" height="2"/>
+    <rect x="1020" y="56" width="2" height="2"/>
+    <rect x="440"  y="50" width="2" height="2"/>
   </g>
 
-  <!-- Moon -->
-  <circle cx="1100" cy="65" r="28" fill="#FFF8E8" opacity="0.95"/>
-  <circle cx="1112" cy="58" r="24" fill="#2E3A7A" opacity="0.4"/>
+  <!-- CRESCENT MOON (pixel art disc with cutout) -->
+  <!-- Moon disc -->
+  <rect x="220" y="32"  width="48" height="16" fill="#FFF8D8"/>
+  <rect x="204" y="48"  width="80" height="16" fill="#FFF8D8"/>
+  <rect x="196" y="64"  width="96" height="16" fill="#FFF8D8"/>
+  <rect x="196" y="80"  width="96" height="16" fill="#FFF8D8"/>
+  <rect x="196" y="96"  width="96" height="16" fill="#FFF8D8"/>
+  <rect x="204" y="112" width="80" height="16" fill="#FFF8D8"/>
+  <rect x="220" y="128" width="48" height="16" fill="#FFF8D8"/>
+  <!-- Crescent cutout (sky color overlay, offset right) -->
+  <rect x="244" y="32"  width="64" height="16" fill="#0C1830"/>
+  <rect x="236" y="48"  width="80" height="16" fill="#0C1830"/>
+  <rect x="228" y="64"  width="96" height="16" fill="#0C1830"/>
+  <rect x="228" y="80"  width="96" height="16" fill="#0C1830"/>
+  <rect x="236" y="96"  width="80" height="16" fill="#0C1830"/>
+  <rect x="252" y="112" width="64" height="16" fill="#0C1830"/>
+  <rect x="260" y="128" width="48" height="16" fill="#0C1830"/>
 
-  <!-- City — lit up at night, warm window glow -->
-  <g fill="url(#buildingC)">
-    <rect x="385" y="298" width="36" height="82"/>
-    <rect x="424" y="278" width="44" height="102"/>
-    <rect x="471" y="258" width="40" height="122"/>
-    <rect x="514" y="242" width="50" height="138"/>
-    <rect x="567" y="255" width="46" height="125"/>
-    <rect x="616" y="230" width="52" height="150"/>
-    <rect x="671" y="208" width="50" height="172"/>
-    <!-- Tallest -->
-    <rect x="714" y="165" width="64" height="215"/>
-    <rect x="721" y="148" width="50" height="19"/>
-    <rect x="730" y="132" width="32" height="18"/>
-    <polygon points="746,100 737,134 755,134" fill="#2A2A4A"/>
-    <rect x="781" y="180" width="57" height="200"/>
-    <rect x="841" y="198" width="51" height="182"/>
-    <rect x="895" y="215" width="53" height="165"/>
-    <rect x="951" y="232" width="47" height="148"/>
-    <rect x="1001" y="248" width="50" height="132"/>
-    <rect x="1054" y="261" width="43" height="119"/>
-    <rect x="1100" y="273" width="47" height="107"/>
-    <rect x="1150" y="286" width="39" height="94"/>
-    <rect x="1192" y="298" width="35" height="82"/>
+  <!-- CLOUDS (dark navy, barely visible) -->
+  <g class="cc1">
+    <rect x="560" y="96"  width="112" height="16" fill="#1A2A44" opacity=".7"/>
+    <rect x="544" y="112" width="144" height="16" fill="#1A2A44" opacity=".7"/>
+    <rect x="528" y="128" width="176" height="16" fill="#1A2A44" opacity=".7"/>
+    <rect x="544" y="144" width="144" height="16" fill="#1A2A44" opacity=".7"/>
+    <rect x="560" y="160" width="80"  height="16" fill="#1A2A44" opacity=".7"/>
+  </g>
+  <g class="cc2">
+    <rect x="1040" y="80"  width="96"  height="16" fill="#1A2A44" opacity=".5"/>
+    <rect x="1024" y="96"  width="128" height="16" fill="#1A2A44" opacity=".5"/>
+    <rect x="1024" y="112" width="128" height="16" fill="#1A2A44" opacity=".5"/>
+    <rect x="1040" y="128" width="96"  height="16" fill="#1A2A44" opacity=".5"/>
   </g>
 
-  <!-- Lit windows (warm amber glow) -->
-  <g fill="#FFB84A" opacity="0.7">
-    <rect x="722" y="172" width="7" height="9" rx="1"/>
-    <rect x="736" y="172" width="7" height="9" rx="1"/>
-    <rect x="750" y="172" width="7" height="9" rx="1"/>
-    <rect x="764" y="172" width="7" height="9" rx="1"/>
-    <rect x="722" y="190" width="7" height="9" rx="1"/>
-    <rect x="750" y="190" width="7" height="9" rx="1"/>
-    <rect x="764" y="190" width="7" height="9" rx="1"/>
-    <rect x="736" y="208" width="7" height="9" rx="1"/>
-    <rect x="750" y="208" width="7" height="9" rx="1"/>
-    <rect x="764" y="208" width="7" height="9" rx="1"/>
-    <rect x="722" y="226" width="7" height="9" rx="1"/>
-    <rect x="736" y="226" width="7" height="9" rx="1"/>
+  <!-- CITY — near-black silhouette -->
+  <g fill="#0E1A28">
+    <rect x="416" y="272" width="32" height="96"/>
+    <rect x="448" y="256" width="48" height="112"/>
+    <rect x="496" y="240" width="48" height="128"/>
+    <rect x="544" y="224" width="32" height="144"/>
+    <rect x="576" y="208" width="48" height="160"/>
+    <rect x="624" y="192" width="32" height="176"/>
+    <rect x="656" y="144" width="64" height="224"/>
+    <rect x="664" y="128" width="48" height="16"/>
+    <rect x="672" y="112" width="32" height="16"/>
+    <rect x="678" y="96"  width="20" height="16"/>
+    <rect x="682" y="80"  width="12" height="16"/>
+    <rect x="720" y="160" width="64" height="208"/>
+    <rect x="784" y="176" width="64" height="192"/>
+    <rect x="848" y="192" width="48" height="176"/>
+    <rect x="896" y="208" width="48" height="160"/>
+    <rect x="944" y="224" width="48" height="144"/>
+    <rect x="992" y="240" width="48" height="128"/>
+    <rect x="1040" y="256" width="32" height="112"/>
+    <rect x="1072" y="272" width="32" height="96"/>
+  </g>
+
+  <!-- WINDOWS — warm amber glow (some lit, some dark) -->
+  <g fill="#FFB840" opacity=".85">
+    <!-- Tall left building -->
+    <rect x="658" y="152" width="8" height="8"/>
+    <rect x="674" y="152" width="8" height="8"/>
+    <rect x="658" y="168" width="8" height="8"/>
+    <!-- Empire State tower -->
+    <rect x="722" y="168" width="8" height="8"/>
+    <rect x="738" y="168" width="8" height="8"/>
+    <rect x="754" y="168" width="8" height="8"/>
+    <rect x="722" y="184" width="8" height="8"/>
+    <rect x="754" y="184" width="8" height="8"/>
+    <rect x="738" y="200" width="8" height="8"/>
+    <rect x="722" y="216" width="8" height="8"/>
+    <rect x="738" y="216" width="8" height="8"/>
+    <rect x="754" y="216" width="8" height="8"/>
+    <!-- Right tower -->
+    <rect x="786" y="184" width="8" height="8"/>
+    <rect x="802" y="184" width="8" height="8"/>
+    <rect x="818" y="184" width="8" height="8"/>
+    <rect x="786" y="200" width="8" height="8"/>
+    <rect x="818" y="200" width="8" height="8"/>
+    <rect x="802" y="216" width="8" height="8"/>
     <!-- Other buildings -->
-    <rect x="618" y="238" width="6" height="8" rx="1"/>
-    <rect x="630" y="238" width="6" height="8" rx="1"/>
-    <rect x="618" y="254" width="6" height="8" rx="1"/>
-    <rect x="783" y="188" width="6" height="8" rx="1"/>
-    <rect x="796" y="188" width="6" height="8" rx="1"/>
-    <rect x="810" y="188" width="6" height="8" rx="1"/>
-    <rect x="783" y="204" width="6" height="8" rx="1"/>
-    <rect x="810" y="204" width="6" height="8" rx="1"/>
-    <rect x="896" y="224" width="6" height="8" rx="1"/>
-    <rect x="909" y="224" width="6" height="8" rx="1"/>
-    <rect x="896" y="240" width="6" height="8" rx="1"/>
-    <rect x="1003" y="256" width="6" height="8" rx="1"/>
-    <rect x="1016" y="256" width="6" height="8" rx="1"/>
+    <rect x="850" y="200" width="8" height="8"/>
+    <rect x="866" y="200" width="8" height="8"/>
+    <rect x="898" y="216" width="8" height="8"/>
+    <rect x="946" y="232" width="8" height="8"/>
+    <rect x="994" y="248" width="8" height="8"/>
+  </g>
+  <!-- Spire light -->
+  <rect x="685" y="78" width="4" height="4" fill="#FF4040" opacity=".9"/>
+
+  <!-- HORIZON GLOW below city -->
+  <rect x="400" y="360" width="640" height="8" fill="#6A2A08" opacity=".4"/>
+
+  <!-- GROUND — dark night grass -->
+  <rect x="0"   y="368" width="1440" height="192" fill="#0A1A06"/>
+  <rect x="0"   y="352" width="480"  height="16"  fill="#0E2208"/>
+  <rect x="480" y="336" width="480"  height="32"  fill="#0E2208"/>
+  <rect x="960" y="352" width="480"  height="16"  fill="#0E2208"/>
+  <rect x="0"   y="368" width="1440" height="24"  fill="#142C10"/>
+
+  <!-- MID TREES (dark silhouettes) -->
+  <g fill="#081408">
+    <rect x="318" y="316" width="16" height="52"/>
+    <rect x="302" y="284" width="48" height="32"/>
+    <rect x="294" y="268" width="64" height="16"/>
+    <rect x="302" y="252" width="48" height="16"/>
+    <rect x="392" y="328" width="14" height="40"/>
+    <rect x="378" y="296" width="42" height="32"/>
+    <rect x="386" y="280" width="26" height="16"/>
+    <rect x="1106" y="316" width="16" height="52"/>
+    <rect x="1090" y="284" width="48" height="32"/>
+    <rect x="1082" y="268" width="64" height="16"/>
+    <rect x="1090" y="252" width="48" height="16"/>
+    <rect x="1034" y="328" width="14" height="40"/>
+    <rect x="1020" y="296" width="42" height="32"/>
+    <rect x="1028" y="280" width="26" height="16"/>
   </g>
 
-  <!-- City glow on ground -->
-  <ellipse cx="720" cy="380" rx="420" ry="30" fill="#E87030" opacity="0.15"/>
-
-  <!-- Ground (dark, nighttime grass) -->
-  <rect x="0" y="378" width="1440" height="182" fill="#0E2A06"/>
-  <ellipse cx="720" cy="378" rx="840" ry="46" fill="#142E08"/>
-
-  <!-- Mid background trees (dark silhouettes) -->
-  <g fill="#0E2A06">
-    <rect x="298" y="305" width="11" height="76" rx="2"/>
-    <ellipse cx="304" cy="288" rx="32" ry="36"/>
-    <ellipse cx="292" cy="278" rx="26" ry="30"/>
-    <ellipse cx="318" cy="275" rx="23" ry="27"/>
-    <rect x="350" y="315" width="9" height="66" rx="2"/>
-    <ellipse cx="355" cy="300" rx="26" ry="30"/>
-    <ellipse cx="344" cy="291" rx="20" ry="25"/>
+  <!-- LEFT TREES (near-black silhouettes) -->
+  <g class="swc1">
+    <rect x="20"  y="264" width="28" height="192" fill="#0C1E0A"/>
+    <rect x="-24" y="216" width="112" height="16" fill="#0A160A"/>
+    <rect x="-40" y="200" width="144" height="16" fill="#0A180A"/>
+    <rect x="-48" y="184" width="160" height="16" fill="#0C1A0C"/>
+    <rect x="-40" y="168" width="144" height="16" fill="#0C1C0C"/>
+    <rect x="-24" y="152" width="112" height="16" fill="#0C1E0C"/>
+    <rect x="-8"  y="136" width="80"  height="16" fill="#0E200E"/>
+    <rect x="4"   y="120" width="56"  height="16" fill="#0E200E"/>
+    <rect x="4"   y="216" width="56"  height="48" fill="#0A140A"/>
+  </g>
+  <g class="swc2">
+    <rect x="160" y="296" width="22" height="160" fill="#0C1E0A"/>
+    <rect x="128" y="248" width="88" height="16" fill="#0A160A"/>
+    <rect x="112" y="232" width="120" height="16" fill="#0A180A"/>
+    <rect x="120" y="216" width="104" height="16" fill="#0C1A0C"/>
+    <rect x="136" y="200" width="72"  height="16" fill="#0C1C0C"/>
+    <rect x="148" y="184" width="48"  height="16" fill="#0E200E"/>
+    <rect x="128" y="248" width="88"  height="48" fill="#0A140A"/>
+  </g>
+  <g class="swc3">
+    <rect x="270" y="320" width="18" height="136" fill="#0C1E0A"/>
+    <rect x="246" y="280" width="70" height="16" fill="#0A160A"/>
+    <rect x="238" y="264" width="88" height="16" fill="#0A180A"/>
+    <rect x="246" y="248" width="72" height="16" fill="#0C1A0C"/>
+    <rect x="254" y="232" width="56" height="16" fill="#0C1C0C"/>
+    <rect x="262" y="216" width="40" height="16" fill="#0E200E"/>
   </g>
 
-  <g fill="#0E2A06">
-    <rect x="1130" y="305" width="11" height="76" rx="2"/>
-    <ellipse cx="1136" cy="288" rx="32" ry="36"/>
-    <ellipse cx="1124" cy="278" rx="26" ry="30"/>
-    <ellipse cx="1150" cy="275" rx="23" ry="27"/>
-    <rect x="1082" y="315" width="9" height="66" rx="2"/>
-    <ellipse cx="1087" cy="300" rx="26" ry="30"/>
-    <ellipse cx="1076" cy="291" rx="20" ry="25"/>
+  <!-- RIGHT TREES -->
+  <g class="swc4">
+    <rect x="1392" y="264" width="28" height="192" fill="#0C1E0A"/>
+    <rect x="1352" y="216" width="112" height="16" fill="#0A160A"/>
+    <rect x="1336" y="200" width="144" height="16" fill="#0A180A"/>
+    <rect x="1328" y="184" width="160" height="16" fill="#0C1A0C"/>
+    <rect x="1336" y="168" width="144" height="16" fill="#0C1C0C"/>
+    <rect x="1352" y="152" width="112" height="16" fill="#0C1E0C"/>
+    <rect x="1364" y="136" width="80"  height="16" fill="#0E200E"/>
+    <rect x="1376" y="120" width="56"  height="16" fill="#0E200E"/>
+    <rect x="1380" y="216" width="56"  height="48" fill="#0A140A"/>
+  </g>
+  <g class="swc5">
+    <rect x="1258" y="296" width="22" height="160" fill="#0C1E0A"/>
+    <rect x="1224" y="248" width="88" height="16" fill="#0A160A"/>
+    <rect x="1208" y="232" width="120" height="16" fill="#0A180A"/>
+    <rect x="1216" y="216" width="104" height="16" fill="#0C1A0C"/>
+    <rect x="1232" y="200" width="72"  height="16" fill="#0C1C0C"/>
+    <rect x="1244" y="184" width="48"  height="16" fill="#0E200E"/>
+    <rect x="1224" y="248" width="88"  height="48" fill="#0A140A"/>
+  </g>
+  <g class="swc6">
+    <rect x="1152" y="320" width="18" height="136" fill="#0C1E0A"/>
+    <rect x="1128" y="280" width="70" height="16" fill="#0A160A"/>
+    <rect x="1120" y="264" width="88" height="16" fill="#0A180A"/>
+    <rect x="1128" y="248" width="72" height="16" fill="#0C1A0C"/>
+    <rect x="1136" y="232" width="56" height="16" fill="#0C1C0C"/>
+    <rect x="1144" y="216" width="40" height="16" fill="#0E200E"/>
   </g>
 
-  <!-- LEFT FOREGROUND TREES (near-black silhouettes) -->
-  <rect x="18" y="225" width="20" height="210" fill="#081808" rx="4"/>
-  <ellipse cx="28" cy="202" rx="68" ry="72" fill="#081808"/>
-  <ellipse cx="8" cy="188" rx="55" ry="62" fill="#0C2008"/>
-  <ellipse cx="55" cy="184" rx="51" ry="57" fill="#0C2008"/>
-  <ellipse cx="28" cy="172" rx="50" ry="60" fill="#102808"/>
-  <ellipse cx="4" cy="182" rx="39" ry="50" fill="#102808"/>
-  <ellipse cx="57" cy="175" rx="36" ry="48" fill="#142E0A"/>
-
-  <rect x="148" y="248" width="17" height="182" fill="#081808" rx="3"/>
-  <ellipse cx="157" cy="225" rx="60" ry="65" fill="#081808"/>
-  <ellipse cx="138" cy="213" rx="48" ry="56" fill="#0C2008"/>
-  <ellipse cx="178" cy="209" rx="44" ry="52" fill="#0C2008"/>
-  <ellipse cx="157" cy="196" rx="42" ry="56" fill="#102808"/>
-  <ellipse cx="136" cy="210" rx="34" ry="46" fill="#142E0A"/>
-
-  <rect x="253" y="266" width="14" height="152" fill="#081808" rx="2"/>
-  <ellipse cx="260" cy="248" rx="48" ry="52" fill="#081808"/>
-  <ellipse cx="245" cy="238" rx="39" ry="46" fill="#0C2008"/>
-  <ellipse cx="276" cy="234" rx="36" ry="44" fill="#102808"/>
-  <ellipse cx="260" cy="223" rx="35" ry="46" fill="#142E0A"/>
-
-  <!-- RIGHT FOREGROUND TREES -->
-  <rect x="1402" y="225" width="20" height="210" fill="#081808" rx="4"/>
-  <ellipse cx="1412" cy="202" rx="68" ry="72" fill="#081808"/>
-  <ellipse cx="1392" cy="188" rx="55" ry="62" fill="#0C2008"/>
-  <ellipse cx="1439" cy="184" rx="51" ry="57" fill="#0C2008"/>
-  <ellipse cx="1412" cy="172" rx="50" ry="60" fill="#102808"/>
-  <ellipse cx="1388" cy="182" rx="39" ry="50" fill="#102808"/>
-  <ellipse cx="1440" cy="175" rx="36" ry="48" fill="#142E0A"/>
-
-  <rect x="1276" y="248" width="17" height="182" fill="#081808" rx="3"/>
-  <ellipse cx="1285" cy="225" rx="60" ry="65" fill="#081808"/>
-  <ellipse cx="1266" cy="213" rx="48" ry="56" fill="#0C2008"/>
-  <ellipse cx="1306" cy="209" rx="44" ry="52" fill="#0C2008"/>
-  <ellipse cx="1285" cy="196" rx="42" ry="56" fill="#102808"/>
-  <ellipse cx="1264" cy="210" rx="34" ry="46" fill="#142E0A"/>
-
-  <rect x="1173" y="266" width="14" height="152" fill="#081808" rx="2"/>
-  <ellipse cx="1180" cy="248" rx="48" ry="52" fill="#081808"/>
-  <ellipse cx="1165" cy="238" rx="39" ry="46" fill="#0C2008"/>
-  <ellipse cx="1196" cy="234" rx="36" ry="44" fill="#102808"/>
-  <ellipse cx="1180" cy="223" rx="35" ry="46" fill="#142E0A"/>
-
-  <!-- Bottom fade (to dark green page bg for this option) -->
+  <!-- BOTTOM FADE -->
   <defs>
-    <linearGradient id="fadeC" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0A1F0A" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#0A1F0A" stop-opacity="1"/>
+    <linearGradient id="fadeCpx" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F7F4EF" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#F7F4EF" stop-opacity="1"/>
     </linearGradient>
   </defs>
-  <rect x="0" y="400" width="1440" height="160" fill="url(#fadeC)"/>
+  <rect x="0" y="430" width="1440" height="130" fill="url(#fadeCpx)"/>
 </svg>

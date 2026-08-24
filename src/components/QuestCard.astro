@@ -1,0 +1,65 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  category: string;
+  progress: number; // e.g. 2
+  target: number; // e.g. 3
+  xpReward: number;
+}
+
+const { title, description, category, progress, target, xpReward } = Astro.props;
+const percentage = Math.min(100, Math.max(0, (progress / target) * 100));
+const isCompleted = progress >= target;
+---
+
+<div class:list={[
+  'group relative rounded-2xl border p-6 bg-white shadow-[var(--shadow)] transition-all duration-300 hover:shadow-[var(--shadow-lg)]',
+  isCompleted ? 'border-(--leaf)' : 'border-(--border)'
+]}>
+  <div class="flex items-start justify-between gap-4 mb-3">
+    <!-- Category & Reward -->
+    <span class="rounded-full bg-(--cream) px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-(--forest-light)">
+      {category}
+    </span>
+    <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200">
+      +{xpReward} XP
+    </span>
+  </div>
+
+  <h3 class="font-semibold text-sm text-(--forest) group-hover:text-(--forest-light) transition-colors mb-1">
+    {title}
+  </h3>
+  <p class="text-xs text-(--text-muted) leading-relaxed mb-4">{description}</p>
+
+  <!-- Progress Bar Section -->
+  <div class="space-y-1.5">
+    <div class="flex justify-between text-[11px] font-semibold">
+      <span class={isCompleted ? 'text-(--leaf)' : 'text-(--forest)'}>
+        {isCompleted ? 'Quest Completed!' : 'Active Progress'}
+      </span>
+      <span class="text-(--text-muted)">
+        {progress} / {target}
+      </span>
+    </div>
+    
+    <div class="h-2 w-full rounded-full bg-(--cream-dark) overflow-hidden">
+      <div 
+        class:list={[
+          'h-full rounded-full transition-all duration-500 ease-out',
+          isCompleted ? 'bg-(--leaf)' : 'bg-(--forest-light)'
+        ]} 
+        style={`width: ${percentage}%`}
+      ></div>
+    </div>
+  </div>
+
+  <!-- Decorative completed checkmark -->
+  {isCompleted && (
+    <div class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-(--leaf) text-white shadow-md border border-white" aria-hidden="true">
+      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+      </svg>
+    </div>
+  )}
+</div>

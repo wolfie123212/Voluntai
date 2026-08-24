@@ -1,0 +1,64 @@
+---
+interface Props {
+  icon: string;
+  name: string;
+  description: string;
+  earnedAt?: string; // If undefined, the badge is locked
+}
+
+const { icon, name, description, earnedAt } = Astro.props;
+const isLocked = !earnedAt;
+---
+
+<div class:list={[
+  'group relative rounded-2xl border p-5 transition-all duration-300',
+  isLocked 
+    ? 'border-(--border)/50 bg-white/40 opacity-70 hover:opacity-90' 
+    : 'border-(--border) bg-white shadow-[var(--shadow)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)] hover:border-(--leaf)'
+]}>
+  <div class="flex items-start gap-4">
+    <!-- Icon Container -->
+    <div class:list={[
+      'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-2xl shadow-inner transition-all duration-300',
+      isLocked 
+        ? 'bg-(--cream-dark) grayscale' 
+        : 'bg-(--cream) group-hover:scale-110'
+    ]}>
+      {icon}
+    </div>
+
+    <!-- Badge Info -->
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2">
+        <h3 class:list={[
+          'font-semibold text-sm truncate',
+          isLocked ? 'text-(--text-muted)' : 'text-(--forest)'
+        ]}>
+          {name}
+        </h3>
+        
+        {isLocked && (
+          <span class="rounded-full bg-(--cream-dark) px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-(--text-muted)">
+            Locked
+          </span>
+        )}
+      </div>
+      <p class="text-xs text-(--text-muted) leading-relaxed mt-1">{description}</p>
+      
+      {!isLocked && earnedAt && (
+        <p class="text-[10px] text-(--leaf) font-medium mt-2">
+          Earned {new Date(earnedAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+        </p>
+      )}
+    </div>
+  </div>
+
+  <!-- Locked overlays / decorations -->
+  {isLocked && (
+    <div class="absolute top-3 right-3 text-(--text-muted)/30 pointer-events-none" aria-hidden="true">
+      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v7a2 2 0 002 2h10a2 2 0 002-2v-7a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
+      </svg>
+    </div>
+  )}
+</div>

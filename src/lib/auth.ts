@@ -63,6 +63,12 @@ export function createAuth(env: Env) {
       },
     },
 
+    // Store OAuth state in an encrypted cookie instead of the verifications table.
+    // Avoids a D1 write on every Google sign-in attempt and is fully stateless.
+    account: {
+      storeStateStrategy: 'cookie' as const,
+    },
+
     socialProviders: {
       google: {
         clientId: env.GOOGLE_CLIENT_ID ?? '',

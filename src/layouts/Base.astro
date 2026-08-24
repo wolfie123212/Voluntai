@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { createAuth } from '../lib/auth';
 
 interface Props {
   title: string;
@@ -9,6 +10,18 @@ interface Props {
 
 const { title, description = 'Find verified volunteer opportunities in NYC\'s East Village.', heroNav = false } = Astro.props;
 const currentPath = new URL(Astro.request.url).pathname;
+
+// Check session for nav state — 800ms timeout so a slow DB doesn't block the page
+let navUser: { name?: string | null; displayName?: string | null } | null = null;
+try {
+  const env = Astro.locals.runtime?.env;
+  if (env) {
+    const auth = createAuth(env);
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 800));
+    const sessionCheck = auth.api.getSession({ headers: Astro.request.headers }).then(s => s?.user ?? null);
+    navUser = await Promise.race([sessionCheck, timeout]);
+  }
+} catch { /* nav degrades gracefully */ }
 ---
 
 <!doctype html>
@@ -73,17 +86,42 @@ const currentPath = new URL(Astro.request.url).pathname;
           >
             About
           </a>
-          <a
-            href="/account"
-            class:list={[
-              'ml-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all',
-              heroNav
-                ? 'bg-white text-(--forest) hover:bg-white/90'
-                : 'bg-(--forest) text-white hover:bg-(--forest-mid)'
-            ]}
-          >
-            Sign in
-          </a>
+          {navUser ? (
+            <!-- Signed-in state: avatar initial + name -->
+            <a
+              href="/account"
+              class:list={[
+                'ml-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-all',
+                heroNav
+                  ? 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
+                  : 'bg-(--cream) text-(--forest) hover:bg-(--cream-dark) border border-(--border)'
+              ]}
+              aria-label="My account"
+            >
+              <span class:list={[
+                'flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-black shrink-0',
+                heroNav ? 'bg-white text-(--forest)' : 'bg-(--forest) text-white'
+              ]}>
+                {((navUser as { displayName?: string | null }).displayName ?? navUser.name ?? 'U').charAt(0).toUpperCase()}
+              </span>
+              <span class="hidden sm:inline max-w-[80px] truncate">
+                {(navUser as { displayName?: string | null }).displayName ?? navUser.name ?? 'Account'}
+              </span>
+            </a>
+          ) : (
+            <!-- Signed-out state -->
+            <a
+              href="/signin"
+              class:list={[
+                'ml-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all',
+                heroNav
+                  ? 'bg-white text-(--forest) hover:bg-white/90'
+                  : 'bg-(--forest) text-white hover:bg-(--forest-mid)'
+              ]}
+            >
+              Sign in
+            </a>
+          )}
         </div>
       </nav>
     </header>
