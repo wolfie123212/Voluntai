@@ -111,6 +111,8 @@ export const users = sqliteTable('users', {
   role: text('role').default('user'),
   bannedReason: text('banned_reason'),
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  // Better Auth v1 writes updatedAt on every user create/update
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
 // Better Auth session/account tables
@@ -138,6 +140,10 @@ export const accounts = sqliteTable('accounts', {
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
   idToken: text('id_token'),
+  // Better Auth v1 writes these during OAuth — required for social login
+  accessTokenExpiresAt: text('access_token_expires_at'),
+  refreshTokenExpiresAt: text('refresh_token_expires_at'),
+  scope: text('scope'),
   expiresAt: text('expires_at'),
   password: text('password'),
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
