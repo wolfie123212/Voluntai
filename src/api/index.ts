@@ -12,11 +12,45 @@ const api = new Hono<{ Bindings: Env }>();
 
 api.get('/api/health', (c) => c.json({ ok: true, ts: Date.now() }));
 
+// Temporary: test if D1 user insert works at all
+api.get('/api/debug/db-write-test', async (c) => {
+  try {
+    const { getDb } = await import('../lib/db/client');
+    const { users } = await import('../lib/db/schema');
+    const db = getDb(c.env.DB);
+    const testId = 'test-' + Date.now();
+    const result = await db.insert(users).values({
+      id: testId,
+      email: `test-${Date.now()}@example.com`,
+      displayName: 'Test User',
+      updatedAt: new Date().toISOString(),
+    }).returning();
+    // Clean up
+    const { eq } = await import('drizzle-orm');
+    await db.delete(users).where(eq(users.id, testId));
+    return c.json({ ok: true, returned: result });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return c.json({ ok: false, error: msg }, 500);
+  }
+});
+
 // ─── Auth (Better Auth handles all /api/auth/* routes) ───────────────────────
 
 api.all('/api/auth/*', async (c) => {
   const auth = createAuth(c.env);
-  return auth.handler(c.req.raw);
+  try {
+    const res = await auth.handler(c.req.raw);
+    // Log any error redirects so we can see them in Cloudflare logs
+    const loc = res.headers.get('Location') ?? '';
+    if (loc.includes('error=') || loc.includes('error_description=')) {
+      console.error('[AUTH] Error redirect →', loc);
+    }
+    return res;
+  } catch (e) {
+    console.error('[AUTH] Exception in handler:', e);
+    throw e;
+  }
 });
 
 // ─── Search ──────────────────────────────────────────────────────────────────
