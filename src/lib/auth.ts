@@ -14,6 +14,10 @@ export function createAuth(env: Env) {
   return betterAuth({
     database: drizzleAdapter(db, {
       provider: 'sqlite',
+      // Enable transaction support — required for createOAuthUser (user + account in one tx)
+      // Without this, adapter.transaction is `false` and calling it throws, causing
+      // "unable_to_create_user" on every Google OAuth callback.
+      transaction: true,
       schema: {
         user: schema.users,
         session: schema.sessions,
