@@ -1,0 +1,198 @@
+---
+import Base from '../layouts/Base.astro';
+
+const SIGNALS = [
+  {
+    icon: '🏛️',
+    label: 'IRS 501(c)(3) Status',
+    source: 'IRS Exempt Organizations database + ProPublica Nonprofit Explorer',
+    points: '+20 (and +5 if status is not Revoked)',
+    description:
+      'We cross-reference every organization's EIN against IRS Publication 78 (the official list of tax-exempt public charities). A 501(c)(3) designation means the organization has filed with the IRS, is exempt from federal income tax, and allows donors to deduct contributions. We use ProPublica\'s Nonprofit Explorer to retrieve this data daily.',
+    note: 'Revoked status is tracked separately and reduces the bonus.',
+  },
+  {
+    icon: '🎓',
+    label: 'Staff Verified',
+    source: 'Friends Seminary Service Office',
+    points: '+10',
+    description:
+      'A CityServ staff member — currently the Friends Seminary Service Office — has manually reviewed the organization\'s web presence, confirmed contact details, and vetted any volunteer program claims. This badge appears only on organizations we\'ve looked at directly.',
+    note: 'This is a transparency signal, not an endorsement of the organization\'s work or impact.',
+  },
+  {
+    icon: '🇺🇸',
+    label: 'AmeriCorps Grantee',
+    source: 'Corporation for National and Community Service open data',
+    points: '+15',
+    description:
+      'AmeriCorps (a federal agency) distributes grants to nonprofits running structured volunteer or service programs. We download AmeriCorps\'s public grantee dataset and check each organization\'s EIN against it. Grantee status indicates federal oversight and periodic reporting requirements.',
+    note: 'Not all excellent nonprofits apply for AmeriCorps grants; absence here doesn\'t indicate a problem.',
+  },
+  {
+    icon: '⭐',
+    label: 'Charity Navigator Rating',
+    source: 'Charity Navigator API',
+    points: '+4 per star (max +20 for 5 stars)',
+    description:
+      'Charity Navigator is one of the US\'s most widely used nonprofit watchdog services. Their star rating (1–5) scores financial health, accountability, and transparency. We query their API with the organization\'s EIN to retrieve the current rating. A higher star count contributes proportionally to the reputability score.',
+    note: 'Many small community organizations are not large enough to be rated by Charity Navigator yet.',
+  },
+  {
+    icon: '🌐',
+    label: 'Domain Age',
+    source: 'WHOIS / first-seen date in our records',
+    points: '+1 per year online, max +5',
+    description:
+      'Organizations that have maintained a web presence for many years are less likely to be newly-created or fraudulent. We note when a domain was first seen and add up to 5 points for longevity.',
+    note: 'New but legitimate organizations will improve here naturally over time.',
+  },
+  {
+    icon: '💬',
+    label: 'Community Reviews',
+    source: 'CityServ volunteers',
+    points: '±10 based on average rating (requires 3+ reviews)',
+    description:
+      'Once an organization has at least 3 published reviews, we adjust the score based on how volunteers rated their experience. A 5-star average adds up to +10; a 1-star average subtracts up to −10. Reviews are moderated by AI (Llama Guard) before publication.',
+    note: 'We edit nothing. Reviews are published or rejected in full only.',
+  },
+  {
+    icon: '⚠️',
+    label: 'Open Reports',
+    source: 'CityServ internal reports',
+    points: '−15 if 2 or more open, unresolved reports',
+    description:
+      'Any user can submit a flag on an organization. If two or more reports are open and under review, the organization\'s score drops until the reports are resolved.',
+    note: 'A single report from a disgruntled individual does not affect the score.',
+  },
+];
+
+const TIERS = [
+  { range: '80–100', label: 'Highly Trusted', icon: '🌟', color: 'bg-(--forest) text-white', desc: 'Multiple independent verifications — IRS 501(c)(3), at least one additional source (AmeriCorps or Charity Navigator), and staff review.' },
+  { range: '60–79',  label: 'Trusted',        icon: '✅', color: 'bg-(--leaf)/20 text-(--forest)', desc: 'IRS 501(c)(3) status confirmed plus good community reputation.' },
+  { range: '40–59',  label: 'Verified',        icon: '🔍', color: 'bg-(--cream) text-(--forest)', desc: 'At least one third-party data source confirms the organization exists and is legitimate.' },
+  { range: '0–39',   label: 'Listed',          icon: '📋', color: 'bg-white text-(--text-muted)', desc: 'Basic presence on our platform. Not enough data yet for third-party verification.' },
+];
+---
+
+<Base
+  title="How Verification Works"
+  description="CityServ's reputability score is computed from public data sources. Here's exactly how."
+>
+  <!-- ── HEADER ─────────────────────────────────────────────────── -->
+  <div class="bg-white border-b border-(--border)">
+    <div class="mx-auto max-w-4xl px-4 py-12 text-center">
+      <p class="text-xs font-semibold uppercase tracking-widest text-(--forest-light) mb-3">Transparency</p>
+      <h1 class="text-3xl font-bold text-(--forest) sm:text-4xl mb-4">How verification works</h1>
+      <p class="text-(--text-muted) max-w-xl mx-auto leading-relaxed">
+        Every organization on CityServ gets a <strong class="text-(--forest) font-semibold">Reputability Score</strong> from 0–100,
+        computed entirely from public data sources. No paid badges. No advertising. Here's exactly how the math works.
+      </p>
+    </div>
+  </div>
+
+  <div class="bg-(--cream) min-h-screen">
+    <div class="mx-auto max-w-4xl px-4 py-12 space-y-12">
+
+      <!-- ── TIERS ──────────────────────────────────────────────── -->
+      <section aria-label="Trust tiers">
+        <h2 class="text-lg font-semibold text-(--forest) mb-5">Score tiers at a glance</h2>
+        <div class="grid gap-3 sm:grid-cols-2">
+          {TIERS.map(({ range, label, icon, color, desc }) => (
+            <div class={`rounded-2xl border border-(--border) p-5 ${color === 'bg-white text-(--text-muted)' ? 'bg-white' : ''}`}>
+              <div class:list={['inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold mb-3', color]}>
+                <span aria-hidden="true">{icon}</span>
+                {label} · {range}
+              </div>
+              <p class="text-sm leading-relaxed text-(--text-muted)">{desc}</p>
+            </div>
+          ))}
+        </div>
+        <p class="mt-4 text-xs text-(--text-muted) text-center">
+          Starting base score for any listed organization: <strong>30 points</strong>.
+        </p>
+      </section>
+
+      <!-- ── SIGNALS ────────────────────────────────────────────── -->
+      <section aria-label="Verification signals">
+        <h2 class="text-lg font-semibold text-(--forest) mb-5">The signals we check</h2>
+        <div class="space-y-4">
+          {SIGNALS.map(({ icon, label, source, points, description, note }) => (
+            <div class="rounded-2xl border border-(--border) bg-white p-6 shadow-[var(--shadow)]">
+              <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                <h3 class="flex items-center gap-2.5 text-base font-semibold text-(--forest)">
+                  <span class="text-xl" aria-hidden="true">{icon}</span>
+                  {label}
+                </h3>
+                <span class="shrink-0 rounded-full bg-(--cream) border border-(--border) px-3 py-0.5 text-xs font-mono font-semibold text-(--forest-light)">
+                  {points}
+                </span>
+              </div>
+              <p class="text-xs font-medium text-(--text-muted) mb-3 uppercase tracking-wide">
+                Source: {source}
+              </p>
+              <p class="text-sm text-(--text-muted) leading-relaxed">{description}</p>
+              {note && (
+                <p class="mt-3 text-xs text-(--text-muted) italic border-l-2 border-(--border) pl-3">
+                  {note}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- ── FORMULA ────────────────────────────────────────────── -->
+      <section class="rounded-2xl border border-(--border) bg-white p-6 shadow-[var(--shadow)]" aria-label="Score formula">
+        <h2 class="text-base font-semibold text-(--forest) mb-4">The formula</h2>
+        <pre class="overflow-x-auto rounded-xl bg-(--cream) p-4 text-xs text-(--forest) font-mono leading-relaxed">score = 30 (base)
+      + 20  (IRS 501c3 confirmed)
+      + 5   (IRS status ≠ REVOKED)
+      + 15  (AmeriCorps grantee)
+      + 4×⭐ (Charity Navigator stars)
+      + 10  (staff verified)
+      + min(5, years_online)
+      + 2   (logo present)
+      + 2   (address present)
+      ± 10  (review signal — requires 3+ reviews)
+      − 15  (2+ open unresolved reports)
+
+clamped to [0, 100]</pre>
+        <p class="mt-4 text-xs text-(--text-muted) leading-relaxed">
+          The score is recomputed whenever a verification refresh runs (at least nightly).
+          Code lives at <code class="font-mono bg-(--cream) px-1 rounded">src/lib/score.ts</code>.
+        </p>
+      </section>
+
+      <!-- ── DISCLAIMER ─────────────────────────────────────────── -->
+      <section class="rounded-2xl border border-amber-200 bg-amber-50 p-6" aria-label="Disclaimer">
+        <h2 class="text-base font-semibold text-amber-800 mb-3">A score is a signal, not an endorsement</h2>
+        <p class="text-sm text-amber-700 leading-relaxed">
+          CityServ's reputability score reflects what third-party data sources say about an organization's
+          legal standing, financial accountability, and community reputation — not its day-to-day impact or
+          the quality of your volunteer experience. A low score often just means an organization is small or
+          new, not that there's anything wrong. A high score doesn't guarantee a perfect volunteer experience.
+          Always read reviews and check the organization's own website before committing.
+        </p>
+        <p class="mt-3 text-xs text-amber-600">
+          We never call an organization "bad," "fraudulent," or make factual claims beyond what verification
+          sources say. Reports are investigated, not publicized.
+        </p>
+      </section>
+
+      <!-- ── CTA ────────────────────────────────────────────────── -->
+      <div class="text-center">
+        <a
+          href="/search"
+          class="inline-flex items-center gap-2 rounded-full bg-(--forest) px-6 py-3 text-sm font-semibold text-white hover:bg-(--forest-mid) transition-colors shadow-sm"
+        >
+          Browse verified organizations
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</Base>

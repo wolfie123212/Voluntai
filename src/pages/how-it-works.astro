@@ -1,0 +1,165 @@
+---
+import Base from '../layouts/Base.astro';
+
+const STEPS = [
+  {
+    num: '01',
+    icon: '🔍',
+    title: 'Search & filter',
+    body: 'Type a cause ("food"), a neighborhood ("Lower East Side"), or a keyword ("weekend"). Results are sorted by reputability so the most vetted organizations surface first. Use the quick-filter chips to browse by category.',
+  },
+  {
+    num: '02',
+    icon: '✅',
+    title: 'Read the trust score',
+    body: 'Every organization card shows a reputability score (0–100) built from IRS data, Charity Navigator ratings, AmeriCorps grantee status, staff reviews, and community ratings. Click the badge to read exactly how the score was calculated.',
+  },
+  {
+    num: '03',
+    icon: '📖',
+    title: 'Explore the org page',
+    body: 'The org detail page shows the mission, description, verification badges, contact info, all open volunteer opportunities, and reviews from past volunteers — everything you need to decide if it\'s a good fit.',
+  },
+  {
+    num: '04',
+    icon: '🚀',
+    title: 'Sign up directly',
+    body: 'Every "Sign up" button goes straight to the organization\'s own registration page — not to a middleman form. We intentionally stay out of the way so you connect with the nonprofit directly.',
+  },
+  {
+    num: '05',
+    icon: '💬',
+    title: 'Leave a review',
+    body: 'After you volunteer, come back and leave a review. Ratings and comments help future volunteers make informed decisions and contribute to the organization\'s reputability score. Sign in with Google or email.',
+  },
+];
+
+const FAQS = [
+  {
+    q: 'Is CityServ free?',
+    a: 'Yes. CityServ is free for volunteers and free for organizations. We don\'t charge listing fees, placement fees, or anything else.',
+  },
+  {
+    q: 'How do organizations get listed?',
+    a: 'We seed the directory by hand from public data — IRS records, AmeriCorps grantee lists, and ProPublica. If you represent a nonprofit and want to be listed, contact us.',
+  },
+  {
+    q: 'Can I trust the reviews?',
+    a: 'Reviews are moderated by AI (Llama Guard) before publication and can be reported by any user. We never edit review text — we either publish or reject it in full. Reviewers must be signed in, which adds a layer of accountability.',
+  },
+  {
+    q: 'Why do some organizations have a low score?',
+    a: 'A low score usually means an organization is small or new — not that there\'s anything wrong. Many excellent community groups haven\'t filed for AmeriCorps grants or aren\'t large enough to appear in Charity Navigator yet. Read reviews and visit their website.',
+  },
+  {
+    q: 'What does "Staff Verified" mean?',
+    a: 'A CityServ team member reviewed the organization\'s web presence, confirmed contact info, and checked the volunteer program details. It\'s a quality signal, not a blanket endorsement.',
+  },
+  {
+    q: 'How do I report an incorrect listing?',
+    a: 'Every org page has a "Report this listing" link at the bottom of the sidebar. Use it to flag incorrect info, a defunct organization, or any other concern. We review reports within 7 days.',
+  },
+];
+---
+
+<Base
+  title="How CityServ Works"
+  description="How CityServ connects NYC volunteers with verified nonprofits — step by step."
+>
+  <!-- ── HEADER ─────────────────────────────────────────────────── -->
+  <div class="bg-white border-b border-(--border)">
+    <div class="mx-auto max-w-3xl px-4 py-12 text-center">
+      <p class="text-xs font-semibold uppercase tracking-widest text-(--forest-light) mb-3">Getting started</p>
+      <h1 class="text-3xl font-bold text-(--forest) sm:text-4xl mb-4">How CityServ works</h1>
+      <p class="text-(--text-muted) max-w-xl mx-auto leading-relaxed">
+        CityServ connects New Yorkers with verified nonprofits in the East Village, Lower East Side, Chinatown,
+        SoHo, and beyond — no spam, no middlemen, just direct connections.
+      </p>
+    </div>
+  </div>
+
+  <div class="bg-(--cream) min-h-screen">
+    <div class="mx-auto max-w-3xl px-4 py-12 space-y-16">
+
+      <!-- ── STEPS ──────────────────────────────────────────────── -->
+      <section aria-label="How it works — steps">
+        <h2 class="sr-only">Step by step</h2>
+        <ol class="relative space-y-0">
+          {STEPS.map(({ num, icon, title, body }, i) => (
+            <li class="flex gap-6 pb-8 relative">
+              <!-- Timeline line -->
+              {i < STEPS.length - 1 && (
+                <div class="absolute left-7 top-14 bottom-0 w-px bg-(--border)" aria-hidden="true"></div>
+              )}
+              <!-- Step number bubble -->
+              <div class="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-2xl bg-(--forest) text-white shadow-sm" aria-hidden="true">
+                <span class="text-xl">{icon}</span>
+                <span class="absolute -top-1.5 -right-1.5 rounded-full bg-white border border-(--border) text-[10px] font-bold text-(--forest) h-5 w-5 flex items-center justify-center leading-none">
+                  {num}
+                </span>
+              </div>
+              <!-- Content -->
+              <div class="flex-1 pt-2">
+                <h3 class="text-base font-semibold text-(--forest) mb-1">{title}</h3>
+                <p class="text-sm text-(--text-muted) leading-relaxed">{body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <!-- ── PRINCIPLES ─────────────────────────────────────────── -->
+      <section class="grid gap-4 sm:grid-cols-3" aria-label="Our principles">
+        {[
+          { icon: '🔓', title: 'No gatekeeping', body: 'Any volunteer can browse, search, and sign up without creating an account.' },
+          { icon: '📡', title: 'Public data only', body: 'Trust scores are built from IRS, AmeriCorps, Charity Navigator, and WHOIS — sources you can check yourself.' },
+          { icon: '🔗', title: 'Direct connections', body: 'Every sign-up button goes straight to the organization. We never intercept registrations or sell leads.' },
+        ].map(({ icon, title, body }) => (
+          <div class="rounded-2xl border border-(--border) bg-white p-5 shadow-[var(--shadow)] text-center">
+            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-(--cream) text-2xl border border-(--border)">
+              {icon}
+            </div>
+            <h3 class="text-sm font-semibold text-(--forest) mb-1.5">{title}</h3>
+            <p class="text-xs text-(--text-muted) leading-relaxed">{body}</p>
+          </div>
+        ))}
+      </section>
+
+      <!-- ── FAQ ────────────────────────────────────────────────── -->
+      <section aria-label="FAQ">
+        <h2 class="text-lg font-semibold text-(--forest) mb-5">Frequently asked questions</h2>
+        <div class="space-y-3">
+          {FAQS.map(({ q, a }) => (
+            <details class="group rounded-2xl border border-(--border) bg-white shadow-[var(--shadow)] overflow-hidden">
+              <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-4 text-sm font-semibold text-(--forest) hover:text-(--forest-mid) transition-colors list-none">
+                {q}
+                <svg class="h-4 w-4 shrink-0 text-(--text-muted) transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </summary>
+              <div class="px-6 pb-5">
+                <p class="text-sm text-(--text-muted) leading-relaxed">{a}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <!-- ── CTA ────────────────────────────────────────────────── -->
+      <div class="rounded-2xl border-2 border-(--forest) bg-white p-8 text-center shadow-[var(--shadow)]">
+        <h2 class="text-xl font-bold text-(--forest) mb-2">Ready to start volunteering?</h2>
+        <p class="text-(--text-muted) text-sm mb-6">Browse verified opportunities in NYC's East Village and surrounding neighborhoods.</p>
+        <a
+          href="/search"
+          class="inline-flex items-center gap-2 rounded-full bg-(--forest) px-6 py-3 text-sm font-semibold text-white hover:bg-(--forest-mid) transition-colors shadow-sm"
+        >
+          Find opportunities
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</Base>
