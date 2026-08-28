@@ -8,7 +8,7 @@ const SIGNALS = [
     source: 'IRS Exempt Organizations database + ProPublica Nonprofit Explorer',
     points: '+20 (and +5 if status is not Revoked)',
     description:
-      'We cross-reference every organization's EIN against IRS Publication 78 (the official list of tax-exempt public charities). A 501(c)(3) designation means the organization has filed with the IRS, is exempt from federal income tax, and allows donors to deduct contributions. We use ProPublica\'s Nonprofit Explorer to retrieve this data daily.',
+      `We cross-reference every organization's EIN against IRS Publication 78 (the official list of tax-exempt public charities). A 501(c)(3) designation means the organization has filed with the IRS, is exempt from federal income tax, and allows donors to deduct contributions. We use ProPublica's Nonprofit Explorer to retrieve this data daily.`,
     note: 'Revoked status is tracked separately and reduces the bonus.',
   },
   {
@@ -17,8 +17,8 @@ const SIGNALS = [
     source: 'Friends Seminary Service Office',
     points: '+10',
     description:
-      'A CityServ staff member — currently the Friends Seminary Service Office — has manually reviewed the organization\'s web presence, confirmed contact details, and vetted any volunteer program claims. This badge appears only on organizations we\'ve looked at directly.',
-    note: 'This is a transparency signal, not an endorsement of the organization\'s work or impact.',
+      `A CityServ staff member — currently the Friends Seminary Service Office — has manually reviewed the organization's web presence, confirmed contact details, and vetted any volunteer program claims. This badge appears only on organizations we've looked at directly.`,
+    note: `This is a transparency signal, not an endorsement of the organization's work or impact.`,
   },
   {
     icon: '🇺🇸',
@@ -26,8 +26,8 @@ const SIGNALS = [
     source: 'Corporation for National and Community Service open data',
     points: '+15',
     description:
-      'AmeriCorps (a federal agency) distributes grants to nonprofits running structured volunteer or service programs. We download AmeriCorps\'s public grantee dataset and check each organization\'s EIN against it. Grantee status indicates federal oversight and periodic reporting requirements.',
-    note: 'Not all excellent nonprofits apply for AmeriCorps grants; absence here doesn\'t indicate a problem.',
+      `AmeriCorps (a federal agency) distributes grants to nonprofits running structured volunteer or service programs. We download AmeriCorps's public grantee dataset and check each organization's EIN against it. Grantee status indicates federal oversight and periodic reporting requirements.`,
+    note: `Not all excellent nonprofits apply for AmeriCorps grants; absence here doesn't indicate a problem.`,
   },
   {
     icon: '⭐',
@@ -35,7 +35,7 @@ const SIGNALS = [
     source: 'Charity Navigator API',
     points: '+4 per star (max +20 for 5 stars)',
     description:
-      'Charity Navigator is one of the US\'s most widely used nonprofit watchdog services. Their star rating (1–5) scores financial health, accountability, and transparency. We query their API with the organization\'s EIN to retrieve the current rating. A higher star count contributes proportionally to the reputability score.',
+      `Charity Navigator is one of the US's most widely used nonprofit watchdog services. Their star rating (1–5) scores financial health, accountability, and transparency. We query their API with the organization's EIN to retrieve the current rating. A higher star count contributes proportionally to the reputability score.`,
     note: 'Many small community organizations are not large enough to be rated by Charity Navigator yet.',
   },
   {
@@ -62,7 +62,7 @@ const SIGNALS = [
     source: 'CityServ internal reports',
     points: '−15 if 2 or more open, unresolved reports',
     description:
-      'Any user can submit a flag on an organization. If two or more reports are open and under review, the organization\'s score drops until the reports are resolved.',
+      `Any user can submit a flag on an organization. If two or more reports are open and under review, the organization's score drops until the reports are resolved.`,
     note: 'A single report from a disgruntled individual does not affect the score.',
   },
 ];
