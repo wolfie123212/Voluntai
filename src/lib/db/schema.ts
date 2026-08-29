@@ -103,7 +103,9 @@ export const opportunities = sqliteTable(
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
-  emailVerified: integer('email_verified').default(0),
+  // mode:'boolean' tells Drizzle's D1 driver to coerce true→1/false→0 at the wire level.
+  // Better Auth sends emailVerified as a JS boolean; without this D1 rejects it (expects INTEGER).
+  emailVerified: integer('email_verified', { mode: 'boolean' }).default(false),
   displayName: text('display_name'),
   avatarR2Key: text('avatar_r2_key'),
   ageDeclared: integer('age_declared'),

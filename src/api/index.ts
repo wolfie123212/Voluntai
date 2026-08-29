@@ -28,7 +28,7 @@ api.get('/api/debug/oauth-user-test', async (c) => {
     const createdUsers = await db.insert(users).values({
       id: userId,
       email: `test-oauth-${ts}@gmail.com`,
-      emailVerified: 1,
+      emailVerified: true,  // Better Auth sends boolean; Drizzle mode:'boolean' coerces to 1
       displayName: 'Test OAuth User',
       avatarR2Key: 'https://lh3.googleusercontent.com/test',
       role: 'user',
