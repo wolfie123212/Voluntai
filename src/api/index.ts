@@ -12,8 +12,7 @@ const api = new Hono<{ Bindings: Env }>();
 
 api.get('/api/health', (c) => c.json({ ok: true, ts: Date.now() }));
 
-// Temporary: simulate exactly what Better Auth's createOAuthUser does
-// (user insert → use returned ID → account insert) to isolate DB issues from auth issues
+// Simulate EXACTLY what Better Auth inserts during OAuth (with all fields BA actually sends)
 api.get('/api/debug/oauth-user-test', async (c) => {
   try {
     const { getDb } = await import('../lib/db/client');
@@ -22,20 +21,24 @@ api.get('/api/debug/oauth-user-test', async (c) => {
     const db = getDb(c.env.DB);
 
     const ts = Date.now();
+    const now = new Date().toISOString();
     const userId = `test-oauth-${ts}`;
 
-    // Step 1: insert user (mimics createOAuthUser's first insert)
+    // Step 1: insert user with EXACT fields Better Auth sends (including role, avatarR2Key, createdAt)
     const createdUsers = await db.insert(users).values({
       id: userId,
       email: `test-oauth-${ts}@gmail.com`,
       emailVerified: 1,
       displayName: 'Test OAuth User',
-      updatedAt: new Date().toISOString(),
+      avatarR2Key: 'https://lh3.googleusercontent.com/test',
+      role: 'user',
+      createdAt: now,
+      updatedAt: now,
     }).returning();
 
     if (!createdUsers[0]) return c.json({ ok: false, step: 'user-insert', error: 'RETURNING returned 0 rows' });
 
-    // Step 2: insert account using user ID (mimics the dependent second insert)
+    // Step 2: insert account with EXACT fields Better Auth sends
     const createdAccounts = await db.insert(accounts).values({
       id: `acc-${ts}`,
       userId: createdUsers[0].id,
@@ -43,7 +46,8 @@ api.get('/api/debug/oauth-user-test', async (c) => {
       providerId: 'google',
       accessToken: 'test-token',
       scope: 'email profile',
-      updatedAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
     }).returning();
 
     // Clean up
@@ -55,6 +59,59 @@ api.get('/api/debug/oauth-user-test', async (c) => {
     const msg = e instanceof Error ? e.message : String(e);
     const stack = e instanceof Error ? e.stack?.slice(0, 300) : undefined;
     return c.json({ ok: false, error: msg, stack }, 500);
+  }
+});
+
+// Debug: call Better Auth's createOAuthUser directly and capture any error
+api.get('/api/debug/ba-create-user', async (c) => {
+  const errors: string[] = [];
+  const origErr = console.error;
+  console.error = (...args: unknown[]) => {
+    errors.push(args.map((a) => (a instanceof Error ? `${a.message}\n${a.stack?.slice(0, 400)}` : JSON.stringify(a))).join(' '));
+    origErr(...args);
+  };
+  try {
+    const auth = createAuth(c.env);
+    // Access Better Auth's internal context
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctx = await (auth as any).$context;
+    if (!ctx?.internalAdapter) {
+      console.error = origErr;
+      return c.json({ ok: false, error: 'No internalAdapter in Better Auth context', contextKeys: Object.keys(ctx ?? {}) });
+    }
+    const ts = Date.now();
+    const result = await ctx.internalAdapter.createOAuthUser(
+      {
+        name: `Test-${ts}`,
+        email: `test-${ts}@test-cityserv-debug.com`,
+        image: 'https://test.example.com/avatar.jpg',
+        emailVerified: true,
+      },
+      {
+        accountId: `google-debug-${ts}`,
+        providerId: 'google',
+        accessToken: 'debug-token',
+        scope: 'email profile',
+      }
+    );
+    console.error = origErr;
+    // Clean up test user
+    try {
+      const { getDb } = await import('../lib/db/client');
+      const { users, accounts } = await import('../lib/db/schema');
+      const { eq } = await import('drizzle-orm');
+      const db = getDb(c.env.DB);
+      if (result?.user?.id) {
+        await db.delete(accounts).where(eq(accounts.userId, result.user.id));
+        await db.delete(users).where(eq(users.id, result.user.id));
+      }
+    } catch { /* cleanup is best-effort */ }
+    return c.json({ ok: true, user: result?.user, capturedErrors: errors });
+  } catch (e: unknown) {
+    console.error = origErr;
+    const msg = e instanceof Error ? e.message : String(e);
+    const stack = e instanceof Error ? e.stack?.slice(0, 500) : undefined;
+    return c.json({ ok: false, error: msg, stack, capturedErrors: errors }, 500);
   }
 });
 
