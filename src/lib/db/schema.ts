@@ -4,8 +4,31 @@ import {
   text,
   real,
   index,
+  customType,
 } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
+
+// ─── Custom column type: textTimestamp ───────────────────────────────────────
+// Better Auth's adapter factory converts all ISO strings with type="date" to
+// Date objects in transformInput (unconditionally). Those Date objects then pass
+// through to Drizzle and reach D1's .bind(), which only accepts primitives and
+// rejects Date objects.
+//
+// textTimestamp keeps the column as SQL TEXT but calls toDriver() to convert
+// Date objects → ISO-8601 strings before .bind(). It also handles the case
+// where BA's transformInput sends a string directly (e.g. from databaseHooks).
+const textTimestamp = customType<{ data: Date | string; driverData: string }>({
+  dataType() {
+    return 'TEXT';
+  },
+  toDriver(value: Date | string): string {
+    if (value instanceof Date) return value.toISOString();
+    return value; // already a string (ISO-8601 or similar)
+  },
+  fromDriver(value: string): string {
+    return value; // raw ISO string; BA's customTransformOutput converts to Date as needed
+  },
+});
 
 // ─── organizations ───────────────────────────────────────────────────────────
 
@@ -112,9 +135,9 @@ export const users = sqliteTable('users', {
   ageDeclaredAt: text('age_declared_at'),
   role: text('role').default('user'),
   bannedReason: text('banned_reason'),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  // Better Auth v1 writes updatedAt on every user create/update
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  // textTimestamp converts Date objects → ISO strings before D1.bind() (D1 rejects raw Dates).
+  createdAt: textTimestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: textTimestamp('updated_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
 // Better Auth session/account tables
@@ -125,11 +148,11 @@ export const sessions = sqliteTable('sessions', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   token: text('token').notNull().unique(),
-  expiresAt: text('expires_at').notNull(),
+  expiresAt: textTimestamp('expires_at').notNull(),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: textTimestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: textTimestamp('updated_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const accounts = sqliteTable('accounts', {
@@ -142,23 +165,23 @@ export const accounts = sqliteTable('accounts', {
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
   idToken: text('id_token'),
-  // Better Auth v1 writes these during OAuth — required for social login
-  accessTokenExpiresAt: text('access_token_expires_at'),
-  refreshTokenExpiresAt: text('refresh_token_expires_at'),
+  // Better Auth v1 writes these during OAuth — Date objects handled by textTimestamp
+  accessTokenExpiresAt: textTimestamp('access_token_expires_at'),
+  refreshTokenExpiresAt: textTimestamp('refresh_token_expires_at'),
   scope: text('scope'),
-  expiresAt: text('expires_at'),
+  expiresAt: textTimestamp('expires_at'),
   password: text('password'),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: textTimestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: textTimestamp('updated_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const verifications = sqliteTable('verifications', {
   id: text('id').primaryKey(),
   identifier: text('identifier').notNull(),
   value: text('value').notNull(),
-  expiresAt: text('expires_at').notNull(),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  expiresAt: textTimestamp('expires_at').notNull(),
+  createdAt: textTimestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: textTimestamp('updated_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ─── reviews ─────────────────────────────────────────────────────────────────
