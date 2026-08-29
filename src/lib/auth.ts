@@ -113,48 +113,7 @@ export function createAuth(env: Env) {
       },
     },
 
-    // D1's .bind() only accepts primitives (null, number, string, boolean, ArrayBuffer).
-    // Better Auth passes createdAt/updatedAt as raw Date objects; drizzle-adapter forwards
-    // them through transformInput unchanged (supportsDates defaults to true), so they land
-    // in D1's prepared-statement bind as Date objects and are rejected.
-    // These hooks run before the adapter sees the data and convert every Date to ISO-8601.
-    databaseHooks: {
-      user: {
-        create: {
-          before: async (data) => ({ data: datesAsIso(data) }),
-        },
-        update: {
-          before: async (data) => ({ data: datesAsIso(data) }),
-        },
-      },
-      account: {
-        create: {
-          before: async (data) => ({ data: datesAsIso(data) }),
-        },
-        update: {
-          before: async (data) => ({ data: datesAsIso(data) }),
-        },
-      },
-      session: {
-        create: {
-          before: async (data) => ({ data: datesAsIso(data) }),
-        },
-        update: {
-          before: async (data) => ({ data: datesAsIso(data) }),
-        },
-      },
-    },
   });
-}
-
-/** Convert every Date value in a plain object to an ISO-8601 string.
- *  D1's prepared-statement `.bind()` rejects Date objects (only primitives allowed). */
-function datesAsIso<T extends Record<string, unknown>>(data: T): T {
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(data)) {
-    out[k] = v instanceof Date ? v.toISOString() : v;
-  }
-  return out as T;
 }
 
 async function sendEmail(
