@@ -111,7 +111,11 @@ api.get('/api/debug/ba-create-user', async (c) => {
     console.error = origErr;
     const msg = e instanceof Error ? e.message : String(e);
     const stack = e instanceof Error ? e.stack?.slice(0, 500) : undefined;
-    return c.json({ ok: false, error: msg, stack, capturedErrors: errors }, 500);
+    // DrizzleQueryError wraps the real D1 error in .cause — capture it
+    const cause = (e as { cause?: unknown })?.cause;
+    const causeMsg = cause instanceof Error ? cause.message : cause ? String(cause) : undefined;
+    const causeStack = cause instanceof Error ? cause.stack?.slice(0, 400) : undefined;
+    return c.json({ ok: false, error: msg, stack, cause: causeMsg, causeStack, capturedErrors: errors }, 500);
   }
 });
 
