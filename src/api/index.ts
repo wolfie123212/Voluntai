@@ -12,26 +12,49 @@ const api = new Hono<{ Bindings: Env }>();
 
 api.get('/api/health', (c) => c.json({ ok: true, ts: Date.now() }));
 
-// Temporary: test if D1 user insert works at all
-api.get('/api/debug/db-write-test', async (c) => {
+// Temporary: simulate exactly what Better Auth's createOAuthUser does
+// (user insert → use returned ID → account insert) to isolate DB issues from auth issues
+api.get('/api/debug/oauth-user-test', async (c) => {
   try {
     const { getDb } = await import('../lib/db/client');
-    const { users } = await import('../lib/db/schema');
+    const { users, accounts } = await import('../lib/db/schema');
+    const { eq } = await import('drizzle-orm');
     const db = getDb(c.env.DB);
-    const testId = 'test-' + Date.now();
-    const result = await db.insert(users).values({
-      id: testId,
-      email: `test-${Date.now()}@example.com`,
-      displayName: 'Test User',
+
+    const ts = Date.now();
+    const userId = `test-oauth-${ts}`;
+
+    // Step 1: insert user (mimics createOAuthUser's first insert)
+    const createdUsers = await db.insert(users).values({
+      id: userId,
+      email: `test-oauth-${ts}@gmail.com`,
+      emailVerified: 1,
+      displayName: 'Test OAuth User',
       updatedAt: new Date().toISOString(),
     }).returning();
+
+    if (!createdUsers[0]) return c.json({ ok: false, step: 'user-insert', error: 'RETURNING returned 0 rows' });
+
+    // Step 2: insert account using user ID (mimics the dependent second insert)
+    const createdAccounts = await db.insert(accounts).values({
+      id: `acc-${ts}`,
+      userId: createdUsers[0].id,
+      accountId: `google-${ts}`,
+      providerId: 'google',
+      accessToken: 'test-token',
+      scope: 'email profile',
+      updatedAt: new Date().toISOString(),
+    }).returning();
+
     // Clean up
-    const { eq } = await import('drizzle-orm');
-    await db.delete(users).where(eq(users.id, testId));
-    return c.json({ ok: true, returned: result });
+    await db.delete(accounts).where(eq(accounts.id, `acc-${ts}`));
+    await db.delete(users).where(eq(users.id, userId));
+
+    return c.json({ ok: true, user: createdUsers[0], account: createdAccounts[0] });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
-    return c.json({ ok: false, error: msg }, 500);
+    const stack = e instanceof Error ? e.stack?.slice(0, 300) : undefined;
+    return c.json({ ok: false, error: msg, stack }, 500);
   }
 });
 
