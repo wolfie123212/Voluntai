@@ -115,7 +115,13 @@ api.get('/api/debug/ba-create-user', async (c) => {
     const cause = (e as { cause?: unknown })?.cause;
     const causeMsg = cause instanceof Error ? cause.message : cause ? String(cause) : undefined;
     const causeStack = cause instanceof Error ? cause.stack?.slice(0, 400) : undefined;
-    return c.json({ ok: false, error: msg, stack, cause: causeMsg, causeStack, capturedErrors: errors }, 500);
+    // Also capture all enumerable properties and prototype chain info
+    const errKeys = e instanceof Error ? Object.getOwnPropertyNames(e) : [];
+    const errProps: Record<string, unknown> = {};
+    for (const k of errKeys) {
+      try { errProps[k] = String((e as Record<string, unknown>)[k]).slice(0, 300); } catch { errProps[k] = '(unserializable)'; }
+    }
+    return c.json({ ok: false, error: msg, stack, cause: causeMsg, causeStack, errProps, capturedErrors: errors }, 500);
   }
 });
 
