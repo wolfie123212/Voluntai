@@ -11,20 +11,34 @@ import type { Env } from '../worker';
 export function createAuth(env: Env) {
   const db = getDb(env.DB);
 
+  // Build the drizzle adapter with transaction:false (the default).
+  // With transaction:false, adapter.transaction is literally `false` — calling it
+  // throws a TypeError which Better Auth catches as "unable_to_create_user".
+  //
+  // With transaction:true, drizzleAdapter uses db.transaction((tx) => ...) which
+  // calls Drizzle's D1 batch API. D1's batch API cannot handle the createOAuthUser
+  // pattern (insert user → use returned ID → insert account), so it also throws.
+  //
+  // Fix: leave transaction:false, then patch adapter.transaction with a no-op that
+  // simply runs the callback on the current adapter. D1 statements are individually
+  // durable so we accept the (extremely unlikely) partial-write risk on low traffic.
+  const dbAdapter = drizzleAdapter(db, {
+    provider: 'sqlite',
+    transaction: false,
+    schema: {
+      user: schema.users,
+      session: schema.sessions,
+      account: schema.accounts,
+      verification: schema.verifications,
+    },
+  });
+
+  // Patch: give Better Auth a working .transaction() that bypasses D1's limitations.
+  (dbAdapter as unknown as Record<string, unknown>).transaction =
+    (fn: (adapter: typeof dbAdapter) => Promise<unknown>) => fn(dbAdapter);
+
   return betterAuth({
-    database: drizzleAdapter(db, {
-      provider: 'sqlite',
-      // Enable transaction support — required for createOAuthUser (user + account in one tx)
-      // Without this, adapter.transaction is `false` and calling it throws, causing
-      // "unable_to_create_user" on every Google OAuth callback.
-      transaction: true,
-      schema: {
-        user: schema.users,
-        session: schema.sessions,
-        account: schema.accounts,
-        verification: schema.verifications,
-      },
-    }),
+    database: dbAdapter,
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.APP_BASE_URL ?? 'https://cityserv.pages.dev',
     trustedOrigins: [
