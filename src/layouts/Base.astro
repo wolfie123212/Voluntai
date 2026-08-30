@@ -51,7 +51,14 @@ try {
       <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3" aria-label="Main navigation">
         <!-- Logo -->
         <a href="/" class="flex items-center gap-2 font-bold transition-opacity hover:opacity-80" aria-label="CityServ home">
-          <LogoMark heroNav={heroNav} size={34} />
+          <img
+            src="/logo-mark.png"
+            alt="CityServ"
+            width="40"
+            height="40"
+            class:list={['object-contain', heroNav ? 'brightness-0 invert' : '']}
+            style="height:40px;width:auto;"
+          />
           <span class:list={[
             'text-[15px] font-bold tracking-tight',
             heroNav ? 'text-white' : 'text-(--forest)'
