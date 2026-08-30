@@ -19,6 +19,8 @@
     "db:migrate:local": "wrangler d1 migrations apply service-finder-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply service-finder-db --remote",
     "seed": "npx tsx scripts/seed-east-village.ts",
+    "seed:lower-manhattan": "npx tsx scripts/seed-lower-manhattan.ts",
+    "seed:animals": "npx tsx scripts/seed-animals.ts",
     "fix:opps": "npx tsx scripts/fix-opportunities.ts",
     "refresh": "npx tsx scripts/refresh-verifications.ts",
     "import:bmf": "npx tsx scripts/import-irs-bmf.ts"
