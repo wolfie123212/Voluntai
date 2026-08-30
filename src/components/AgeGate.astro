@@ -1,0 +1,163 @@
+---
+// AgeGate — shown on first visit to any page for users who haven't confirmed their age.
+// Blocks the page with a modal overlay until the user confirms they are 13+.
+// Stores 'confirmed' in localStorage under 'cityserv_age_gate'.
+// Skipped for signed-in users (they completed account creation + ToS at signup).
+interface Props {
+  isSignedIn?: boolean;
+}
+const { isSignedIn = false } = Astro.props;
+---
+
+{!isSignedIn && (
+  <>
+    <!-- Backdrop — blocks scroll and interaction until age is confirmed -->
+    <div
+      id="age-gate-backdrop"
+      aria-hidden="true"
+      class="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm hidden"
+    ></div>
+
+    <!-- Modal -->
+    <div
+      id="age-gate"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="age-gate-title"
+      aria-describedby="age-gate-desc"
+      class="fixed inset-0 z-[301] flex items-center justify-center px-4 hidden"
+    >
+      <div class="w-full max-w-sm rounded-2xl border border-(--border) bg-white shadow-2xl p-8">
+
+        <!-- Logo mark -->
+        <div class="flex items-center gap-2 mb-6">
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-(--forest) text-white text-sm font-black">CS</div>
+          <span class="font-bold text-(--forest) text-[15px]">CityServ</span>
+        </div>
+
+        <!-- Default state -->
+        <div id="age-gate-form-state">
+          <h2 id="age-gate-title" class="text-lg font-bold text-(--forest) mb-1">Before you continue</h2>
+          <p id="age-gate-desc" class="text-sm text-(--text-muted) mb-6 leading-relaxed">
+            CityServ is for users aged 13 and older. Please enter your birth year to continue.
+          </p>
+
+          <label for="age-gate-year" class="block text-sm font-medium text-(--forest) mb-2">Birth year</label>
+          <select
+            id="age-gate-year"
+            class="w-full rounded-xl border border-(--border) bg-(--cream) px-4 py-2.5 text-sm text-(--forest) focus:border-(--leaf) focus:outline-none mb-4"
+            aria-required="true"
+          >
+            <option value="">Select your birth year…</option>
+          </select>
+
+          <p id="age-gate-error" class="hidden mb-3 text-sm text-red-600" role="alert">Please select your birth year.</p>
+
+          <button
+            id="age-gate-submit"
+            class="w-full rounded-xl bg-(--forest) py-3 text-sm font-semibold text-white hover:bg-(--forest-mid) transition-colors"
+          >
+            Continue
+          </button>
+
+          <p class="mt-4 text-xs text-(--text-muted) text-center leading-relaxed">
+            By continuing you agree to our
+            <a href="/terms" class="underline hover:text-(--forest)">Terms</a> and
+            <a href="/privacy" class="underline hover:text-(--forest)">Privacy Policy</a>.
+          </p>
+        </div>
+
+        <!-- Blocked state (under 13) -->
+        <div id="age-gate-blocked-state" class="hidden text-center">
+          <div class="text-4xl mb-4" aria-hidden="true">🔒</div>
+          <h2 class="text-lg font-bold text-(--forest) mb-2">CityServ is for ages 13+</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed mb-4">
+            We're unable to create an account or store personal information for users under 13, in compliance with COPPA.
+          </p>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            If you're a parent or guardian, please read our
+            <a href="/privacy" class="underline text-(--forest) hover:text-(--forest-mid)">Privacy Policy</a>
+            to learn how we handle data.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </>
+)}
+
+<script>
+  const STORAGE_KEY = 'cityserv_age_gate';
+  const backdrop = document.getElementById('age-gate-backdrop');
+  const modal    = document.getElementById('age-gate');
+  const formState    = document.getElementById('age-gate-form-state');
+  const blockedState = document.getElementById('age-gate-blocked-state');
+  const yearSelect   = document.getElementById('age-gate-year') as HTMLSelectElement | null;
+  const submitBtn    = document.getElementById('age-gate-submit');
+  const errorMsg     = document.getElementById('age-gate-error');
+
+  if (!modal) {
+    // Component not rendered (signed-in user) — nothing to do
+  } else {
+    // Populate birth year options: current year down to 120 years ago
+    const currentYear = new Date().getFullYear();
+    if (yearSelect) {
+      for (let y = currentYear; y >= currentYear - 120; y--) {
+        const opt = document.createElement('option');
+        opt.value = String(y);
+        opt.textContent = String(y);
+        yearSelect.appendChild(opt);
+      }
+    }
+
+    function show() {
+      backdrop?.classList.remove('hidden');
+      modal?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      yearSelect?.focus();
+    }
+
+    function dismiss() {
+      backdrop?.classList.add('hidden');
+      modal?.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function confirm() {
+      try { localStorage.setItem(STORAGE_KEY, 'confirmed'); } catch { /* private mode */ }
+      dismiss();
+    }
+
+    function maybeShow() {
+      let stored: string | null = null;
+      try { stored = localStorage.getItem(STORAGE_KEY); } catch { /* private mode */ }
+      if (!stored) show();
+    }
+
+    submitBtn?.addEventListener('click', () => {
+      const year = parseInt(yearSelect?.value ?? '');
+      if (!year) {
+        errorMsg?.classList.remove('hidden');
+        yearSelect?.focus();
+        return;
+      }
+      errorMsg?.classList.add('hidden');
+
+      const age = new Date().getFullYear() - year;
+      if (age < 13) {
+        formState?.classList.add('hidden');
+        blockedState?.classList.remove('hidden');
+        // Do NOT store anything — under-13 user should see this gate every time
+      } else {
+        confirm();
+      }
+    });
+
+    // Enter key on select triggers submit
+    yearSelect?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitBtn?.click();
+    });
+
+    maybeShow();
+  }
+</script>

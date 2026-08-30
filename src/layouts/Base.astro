@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { createAuth } from '../lib/auth';
 import CookieBanner from '../components/CookieBanner.astro';
+import AgeGate from '../components/AgeGate.astro';
 
 interface Props {
   title: string;
@@ -181,6 +182,7 @@ try {
         </div>
       </div>
     </footer>
+    <AgeGate isSignedIn={!!navUser} />
     <CookieBanner />
   </body>
 </html>
