@@ -61,19 +61,25 @@ api.post('/api/reviews', async (c) => {
     return c.json({ error: 'Invalid request body.' }, 400);
   }
 
-  const { orgId, rating, reviewBody, volunteeredInYear, turnstileToken, opportunityId } = body as {
+  const { orgId, rating, reviewBody, volunteeredInYear, turnstileToken, opportunityId, attest } = body as {
     orgId: number;
     rating: number;
     reviewBody: string;
     volunteeredInYear: number;
     turnstileToken: string;
     opportunityId?: number;
+    attest?: boolean;
   };
 
   // Validate Turnstile
   const turnstileOk = await verifyTurnstile(String(turnstileToken ?? ''), c.env.TURNSTILE_SECRET_KEY);
   if (!turnstileOk) {
     return c.json({ error: 'CAPTCHA verification failed. Please try again.' }, 400);
+  }
+
+  // Require attestation — reviewer must confirm they personally volunteered
+  if (!attest) {
+    return c.json({ error: 'You must confirm that you personally volunteered at this organization.' }, 400);
   }
 
   // Validate inputs

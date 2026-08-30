@@ -45,6 +45,7 @@ if (Astro.request.method === 'POST') {
     reviewBody: String(form.get('body') ?? '').slice(0, 2000),
     volunteeredInYear: parseInt(String(form.get('volunteered_in_year') ?? '0')),
     opportunityId: form.get('opportunity_id') ? parseInt(String(form.get('opportunity_id'))) : null,
+    attest: form.get('attest') === 'true',
     turnstileToken: String(form.get('cf-turnstile-response') ?? ''),
   };
 
@@ -155,6 +156,22 @@ const currentYear = new Date().getFullYear();
               <p class="mt-2 text-xs text-green-600">
                 Share your honest experience. Stick to what you saw and did. Avoid accusations you can't back up — defamatory or harassing reviews will be removed. Your post is governed by our <a href="/terms" class="underline hover:text-green-400">Terms</a>.
               </p>
+            </div>
+
+            <!-- Attestation -->
+            <div class="rounded-xl border border-green-800/60 bg-green-950/40 px-4 py-4">
+              <label class="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  name="attest"
+                  value="true"
+                  required
+                  class="mt-0.5 h-4 w-4 shrink-0 accent-green-400 cursor-pointer"
+                />
+                <span class="text-sm text-green-300 leading-snug group-hover:text-green-200 transition-colors">
+                  <strong class="text-white">I confirm</strong> that I personally volunteered at {org.name} during the year selected above. I understand that submitting a false review violates CityServ's <a href="/terms" class="underline hover:text-green-400">Terms of Service</a>.
+                </span>
+              </label>
             </div>
 
             <!-- Turnstile -->
