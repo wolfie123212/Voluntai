@@ -1,0 +1,102 @@
+---
+// CityServ logo mark — East Village brownstones, street lamp, leaf base.
+// Based on Logo 1 concept: two-color scheme (dark forest + bright leaf green).
+// heroNav: renders buildings/lamp in white (for use on dark illustrated hero).
+interface Props {
+  heroNav?: boolean;
+  size?: number; // height in px, width auto-scales
+}
+const { heroNav = false, size = 36 } = Astro.props;
+
+const forest  = heroNav ? '#ffffff' : '#1b4332';
+const mid     = heroNav ? 'rgba(255,255,255,0.6)' : '#2d6a4f';
+const leaf    = '#52b788';
+const leafDim = heroNav ? 'rgba(82,183,136,0.9)' : leaf;
+const win     = heroNav ? 'rgba(27,67,50,0.35)' : 'rgba(255,255,255,0.28)';
+const signBg  = forest;
+const signTxt = heroNav ? '#1b4332' : '#ffffff';
+---
+
+<svg
+  width={size}
+  height={Math.round(size * 44 / 38)}
+  viewBox="0 0 38 44"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+  role="img"
+>
+  <!-- ── Leaf / ground sweep ─────────────────────────────────── -->
+  <path
+    d="M1 34 C6 26 17 30 21 32 C26 34 32 27 37 25 C36 39 27 43 19 43 C10 43 2 40 1 34Z"
+    fill={leafDim}
+  />
+
+  <!-- ── Tree (left side) ────────────────────────────────────── -->
+  <!-- trunk -->
+  <rect x="4" y="28" width="1.8" height="7" rx="0.5" fill={forest} />
+  <!-- crown -->
+  <ellipse cx="4.9" cy="22" rx="5" ry="6.5" fill={leaf} />
+
+  <!-- ── Lamp post ───────────────────────────────────────────── -->
+  <!-- pole -->
+  <rect x="10.5" y="6" width="1.4" height="29" rx="0.5" fill={forest} />
+  <!-- curved arm -->
+  <path d="M11.2 9 Q11.2 4.5 17 4.5" stroke={forest} stroke-width="1.3" stroke-linecap="round" fill="none"/>
+  <!-- lamp head -->
+  <path d="M14.5 4.5 Q17 2.5 19.5 4.5 Q18 7 17 7 Q16 7 14.5 4.5Z" fill={forest}/>
+  <!-- glow -->
+  <ellipse cx="17" cy="5" rx="1.2" ry="0.9" fill={heroNav ? 'rgba(255,255,150,0.5)' : 'rgba(255,240,100,0.55)'}/>
+
+  <!-- Street sign on pole -->
+  <rect x="11.2" y="15.5" width="9.5" height="3.5" rx="0.5" fill={signBg}/>
+  <text
+    x="11.8"
+    y="18.4"
+    font-size="2.7"
+    fill={signTxt}
+    font-family="system-ui, -apple-system, sans-serif"
+    font-weight="700"
+    letter-spacing="0.15"
+  >E 7 ST</text>
+
+  <!-- ── Building 1 — left (medium) ─────────────────────────── -->
+  <rect x="13" y="22" width="7" height="14" fill={forest}/>
+  <!-- cornice -->
+  <rect x="12.5" y="20.5" width="8" height="1.8" rx="0.3" fill={mid}/>
+  <!-- windows -->
+  <rect x="14.3" y="24"   width="2" height="2.5" rx="0.3" fill={win}/>
+  <rect x="17"   y="24"   width="2" height="2.5" rx="0.3" fill={win}/>
+  <rect x="14.3" y="28.5" width="2" height="2.5" rx="0.3" fill={win}/>
+  <rect x="17"   y="28.5" width="2" height="2.5" rx="0.3" fill={win}/>
+  <!-- door + stoop -->
+  <rect x="15.5" y="32.5" width="2.5" height="3.5" rx="0.8" fill={win}/>
+
+  <!-- ── Building 2 — center (tallest) ──────────────────────── -->
+  <rect x="20" y="12" width="9" height="24" fill={forest}/>
+  <!-- cornice -->
+  <rect x="19.5" y="10.5" width="10" height="1.8" rx="0.3" fill={mid}/>
+  <!-- windows row 1 -->
+  <rect x="21.3" y="14"   width="2.5" height="3"   rx="0.3" fill={win}/>
+  <rect x="24.8" y="14"   width="2.5" height="3"   rx="0.3" fill={win}/>
+  <!-- windows row 2 -->
+  <rect x="21.3" y="19"   width="2.5" height="3"   rx="0.3" fill={win}/>
+  <rect x="24.8" y="19"   width="2.5" height="3"   rx="0.3" fill={win}/>
+  <!-- windows row 3 -->
+  <rect x="21.3" y="24"   width="2.5" height="3"   rx="0.3" fill={win}/>
+  <rect x="24.8" y="24"   width="2.5" height="3"   rx="0.3" fill={win}/>
+  <!-- door -->
+  <rect x="23"   y="30"   width="3"   height="6"   rx="1"   fill={win}/>
+
+  <!-- ── Building 3 — right (shorter) ───────────────────────── -->
+  <rect x="29" y="18" width="8" height="18" fill={forest}/>
+  <!-- cornice -->
+  <rect x="28.5" y="16.5" width="9" height="1.8" rx="0.3" fill={mid}/>
+  <!-- windows -->
+  <rect x="30.3" y="20"   width="2" height="2.5" rx="0.3" fill={win}/>
+  <rect x="33.5" y="20"   width="2" height="2.5" rx="0.3" fill={win}/>
+  <rect x="30.3" y="24.5" width="2" height="2.5" rx="0.3" fill={win}/>
+  <rect x="33.5" y="24.5" width="2" height="2.5" rx="0.3" fill={win}/>
+  <rect x="30.3" y="29"   width="2" height="2.5" rx="0.3" fill={win}/>
+  <rect x="33.5" y="29"   width="2" height="2.5" rx="0.3" fill={win}/>
+</svg>

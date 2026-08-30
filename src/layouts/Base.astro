@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { createAuth } from '../lib/auth';
 import CookieBanner from '../components/CookieBanner.astro';
 import AgeGate from '../components/AgeGate.astro';
+import LogoMark from '../components/LogoMark.astro';
 
 interface Props {
   title: string;
@@ -49,15 +50,10 @@ try {
     ]}>
       <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3" aria-label="Main navigation">
         <!-- Logo -->
-        <a href="/" class="flex items-center gap-2.5 font-bold transition-opacity hover:opacity-80" aria-label="CityServ home">
-          <div class:list={[
-            'flex h-8 w-8 items-center justify-center rounded-lg text-sm font-black',
-            heroNav ? 'bg-white text-(--forest)' : 'bg-(--forest) text-white'
-          ]}>
-            CS
-          </div>
+        <a href="/" class="flex items-center gap-2 font-bold transition-opacity hover:opacity-80" aria-label="CityServ home">
+          <LogoMark heroNav={heroNav} size={34} />
           <span class:list={[
-            'text-[15px] font-700 tracking-tight',
+            'text-[15px] font-bold tracking-tight',
             heroNav ? 'text-white' : 'text-(--forest)'
           ]}>
             CityServ
