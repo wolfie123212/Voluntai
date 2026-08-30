@@ -26,12 +26,14 @@ const resultSummary = q
   : `${orgs.length} verified organization${orgs.length !== 1 ? 's' : ''} in the East Village`;
 
 const QUICK_FILTERS = [
-  { label: 'Food & Hunger', q: 'food' },
-  { label: 'Seniors',       q: 'seniors' },
-  { label: 'Youth',         q: 'youth' },
-  { label: 'Housing',       q: 'housing' },
-  { label: 'Animals',       q: 'animals' },
-  { label: 'Health',        q: 'health' },
+  { label: 'Food & Hunger',  q: 'food',        icon: '🍽️' },
+  { label: 'Seniors',        q: 'seniors',      icon: '🤝' },
+  { label: 'Youth',          q: 'youth',        icon: '🎓' },
+  { label: 'Housing',        q: 'housing',      icon: '🏠' },
+  { label: 'Animals',        q: 'animals',      icon: '🐾' },
+  { label: 'Health',         q: 'health',       icon: '💚' },
+  { label: 'Environment',    q: 'environment',  icon: '🌱' },
+  { label: 'Arts & Culture', q: 'arts',         icon: '🎨' },
 ];
 ---
 
@@ -50,23 +52,32 @@ const QUICK_FILTERS = [
 
       <!-- Quick filter chips -->
       <div class="mt-4 flex flex-wrap gap-2" aria-label="Quick filters">
-        {QUICK_FILTERS.map(({ label, q: fq }) => (
+        {QUICK_FILTERS.map(({ label, q: fq, icon }) => (
           <a
             href={`/search?q=${fq}`}
             class:list={[
-              'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+              'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all hover:-translate-y-px',
               q === fq
-                ? 'border-(--forest) bg-(--forest) text-white'
-                : 'border-(--border) bg-(--cream) text-(--forest-light) hover:border-(--leaf) hover:text-(--forest)'
+                ? 'border-(--forest) bg-(--forest) text-white shadow-sm'
+                : 'border-(--border) bg-(--cream) text-(--forest-light) hover:border-(--leaf) hover:text-(--forest) hover:bg-white'
             ]}
           >
+            <span aria-hidden="true">{icon}</span>
             {label}
           </a>
         ))}
         {q && !QUICK_FILTERS.some(f => f.q === q) && (
-          <span class="rounded-full border border-(--amber) bg-(--amber)/10 px-3 py-1 text-xs font-medium text-(--forest)">
-            "{q}"
+          <span class="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
+            🔎 "{q}"
           </span>
+        )}
+        {q && (
+          <a
+            href="/search"
+            class="inline-flex items-center gap-1 rounded-full border border-(--border) px-3 py-1.5 text-xs font-medium text-(--text-muted) hover:text-(--forest) hover:border-(--leaf) transition-colors"
+          >
+            ✕ Clear
+          </a>
         )}
       </div>
     </div>
@@ -77,21 +88,12 @@ const QUICK_FILTERS = [
     <div class="mx-auto max-w-6xl">
 
       <!-- Result count -->
-      <div class="mb-6 flex items-center justify-between gap-4">
+      <div class="mb-6">
         <p class="text-sm text-(--text-muted)">
           {error
             ? '⚠️ Search unavailable right now — try again shortly.'
             : resultSummary}
         </p>
-        {q && (
-          <a
-            href="/search"
-            class="shrink-0 inline-flex items-center gap-1 rounded-full border border-(--border) bg-white px-3 py-1 text-xs text-(--text-muted) hover:text-(--forest) hover:border-(--leaf) transition-colors"
-          >
-            <svg class="h-3 w-3" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 4.586L10.293.293a1 1 0 111.414 1.414L7.414 6l4.293 4.293a1 1 0 01-1.414 1.414L6 7.414l-4.293 4.293a1 1 0 01-1.414-1.414L4.586 6 .293 1.707A1 1 0 011.707.293L6 4.586z"/></svg>
-            Clear
-          </a>
-        )}
       </div>
 
       {orgs.length > 0 ? (
