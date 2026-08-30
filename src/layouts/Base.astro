@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { createAuth } from '../lib/auth';
+import CookieBanner from '../components/CookieBanner.astro';
 
 interface Props {
   title: string;
@@ -180,5 +181,6 @@ try {
         </div>
       </div>
     </footer>
+    <CookieBanner />
   </body>
 </html>

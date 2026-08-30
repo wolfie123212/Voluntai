@@ -1,0 +1,71 @@
+---
+// CookieBanner — shown once on first visit until the user makes a choice.
+// Stores 'all' | 'essential' in localStorage under 'cityserv_cookie_consent'.
+// No server involvement — purely client-side so it never blocks SSR.
+---
+
+<div
+  id="cookie-banner"
+  role="dialog"
+  aria-label="Cookie consent"
+  aria-live="polite"
+  class="fixed bottom-0 left-0 right-0 z-[200] translate-y-full transition-transform duration-300 ease-out"
+>
+  <div class="mx-auto max-w-6xl px-4 pb-4">
+    <div class="rounded-xl border border-(--border) bg-white shadow-lg px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4">
+      <!-- Text -->
+      <div class="flex-1 min-w-0">
+        <p class="text-sm text-(--text) leading-relaxed">
+          <span class="font-semibold text-(--forest)">🍪 We use cookies</span>
+          &nbsp;to keep you signed in and understand how volunteers use CityServ. No ads, no tracking networks.
+          <a href="/privacy" class="underline text-(--forest) hover:text-(--forest-mid) ml-1 whitespace-nowrap">
+            Privacy policy →
+          </a>
+        </p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button
+          id="cookie-essential"
+          class="rounded-lg border border-(--border) px-4 py-2 text-sm font-medium text-(--text-muted) hover:border-(--forest) hover:text-(--forest) transition-colors"
+        >
+          Essential only
+        </button>
+        <button
+          id="cookie-accept"
+          class="rounded-lg bg-(--forest) px-4 py-2 text-sm font-semibold text-white hover:bg-(--forest-mid) transition-colors"
+        >
+          Accept all
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'cityserv_cookie_consent';
+  const banner = document.getElementById('cookie-banner');
+
+  function dismiss(choice: string) {
+    try { localStorage.setItem(STORAGE_KEY, choice); } catch { /* private mode */ }
+    banner?.classList.add('translate-y-full');
+    banner?.setAttribute('aria-hidden', 'true');
+  }
+
+  function maybeShow() {
+    let stored: string | null = null;
+    try { stored = localStorage.getItem(STORAGE_KEY); } catch { /* private mode */ }
+    if (!stored && banner) {
+      // Small delay so it slides in after page paint
+      requestAnimationFrame(() => {
+        setTimeout(() => banner.classList.remove('translate-y-full'), 80);
+      });
+    }
+  }
+
+  document.getElementById('cookie-accept')?.addEventListener('click', () => dismiss('all'));
+  document.getElementById('cookie-essential')?.addEventListener('click', () => dismiss('essential'));
+
+  maybeShow();
+</script>
