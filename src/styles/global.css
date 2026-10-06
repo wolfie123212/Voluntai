@@ -21,10 +21,12 @@ html {
   font-family: 'Inter', system-ui, sans-serif;
   background-color: var(--cream);
   color: var(--forest);
+  overflow-x: hidden;
 }
 
 body {
   background-color: var(--cream);
+  overflow-x: hidden;
 }
 
 /* Skip-to-content for accessibility (WCAG 2.4.1) */
