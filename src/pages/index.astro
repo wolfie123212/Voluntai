@@ -1,8 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import HeroA from '../components/HeroA.astro';
-import HeroB from '../components/HeroB.astro';
-import HeroC from '../components/HeroC.astro';
+import CityHero, { type TimeOfDay } from '../components/CityHero.astro';
 import OrgCard from '../components/OrgCard.astro';
 import type { OrgSearchRow } from '../lib/search';
 
@@ -14,11 +12,13 @@ const nyHour = parseInt(
     hour12: false,
   })
 );
-// Morning 6–11: HeroB (bright blue sky)
-// Day 11–19: HeroA (golden hour glow)
-// Night 19–6: HeroC (dusk / stars)
-const heroVariant: 'A' | 'B' | 'C' =
-  nyHour >= 6 && nyHour < 11 ? 'B' : nyHour >= 11 && nyHour < 19 ? 'A' : 'C';
+const TIMES: TimeOfDay[] = ['dawn', 'day', 'golden', 'night'];
+const byClock: TimeOfDay =
+  nyHour >= 5 && nyHour < 8 ? 'dawn' : nyHour >= 8 && nyHour < 17 ? 'day' : nyHour >= 17 && nyHour < 20 ? 'golden' : 'night';
+const requested = Astro.url.searchParams.get('t') as TimeOfDay | null;
+const timeOfDay: TimeOfDay = requested && TIMES.includes(requested) ? requested : byClock;
+// Top sky band per palette — Base paints html/body with it so no seam shows above the hero.
+const SKY_TOP: Record<TimeOfDay, string> = { dawn: '#26224F', day: '#1B64BE', golden: '#2E2358', night: '#040B16' };
 
 let featuredOrgs: OrgSearchRow[] = [];
 let totalOrgs = 69;
@@ -79,16 +79,14 @@ const STEPS = [
 ];
 ---
 
-<Base title="Home" heroNav={true}>
+<Base title="Home" heroNav={true} heroBg={SKY_TOP[timeOfDay]}>
 
   <!-- ── HERO ─────────────────────────────────────────────────────── -->
   <section class="relative min-h-screen flex flex-col justify-center overflow-hidden -mt-[62px]" aria-label="Hero">
 
     <!-- Illustrated background (time-based) -->
     <div class="absolute inset-0 w-full h-full" aria-hidden="true">
-      {heroVariant === 'A' && <HeroA />}
-      {heroVariant === 'B' && <HeroB />}
-      {heroVariant === 'C' && <HeroC />}
+      <CityHero time={timeOfDay} />
     </div>
 
     <!-- Gradient overlays -->

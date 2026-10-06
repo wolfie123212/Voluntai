@@ -9,9 +9,11 @@ interface Props {
   title: string;
   description?: string;
   heroNav?: boolean; // transparent nav for pages with illustrated hero
+  heroBg?: string;   // page background behind the hero so no seam shows above it
 }
 
-const { title, description = 'Find verified volunteer opportunities in NYC\'s East Village.', heroNav = false } = Astro.props;
+const { title, description = 'Find verified volunteer opportunities in NYC\'s East Village.', heroNav = false, heroBg = '#06101E' } = Astro.props;
+const pageBg = heroNav ? `background-color:${heroBg}` : undefined;
 const currentPath = new URL(Astro.request.url).pathname;
 
 // Check session for nav state — 800ms timeout so a slow DB doesn't block the page
@@ -28,7 +30,7 @@ try {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" style={pageBg}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -38,9 +40,8 @@ try {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
-    {heroNav && <style>html, body { background-color: #06101E !important; }</style>}
   </head>
-  <body>
+  <body style={pageBg}>
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <header class:list={[

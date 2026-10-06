@@ -1,0 +1,803 @@
+---
+// Pixel-art Manhattan hero. One scene; `time` swaps the palette tokens.
+// 8px grid on a 1440×560 canvas. Window grids use an SVG pattern; only lit
+// windows are individual rects (seeded so the scene is identical on every load).
+export type TimeOfDay = 'dawn' | 'day' | 'golden' | 'night';
+
+interface Props {
+  time?: TimeOfDay;
+}
+const { time = 'night' } = Astro.props;
+
+function mulberry32(a: number) {
+  return function () {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const snap = (v: number, g: number) => Math.round(v / g) * g;
+
+// ── Stars ────────────────────────────────────────────────────────────────────
+const rs = mulberry32(7);
+const stars = Array.from({ length: 150 }, (_, i) => ({
+  x: snap(8 + rs() * 1424, 4),
+  y: snap(-332 + rs() * 568, 4),
+  s: rs() < 0.45 ? 4 : 2,
+  tw: i % 4 === 0,
+  d: (rs() * 6).toFixed(1),
+}));
+
+// ── Clouds ───────────────────────────────────────────────────────────────────
+type Row = [dx: number, w: number];
+const CLOUD_A: Row[] = [[16, 48], [8, 72], [0, 88], [8, 72], [24, 32]];
+const CLOUD_B: Row[] = [[24, 40], [8, 80], [0, 96], [8, 80], [16, 56]];
+const clouds = [
+  { x: 80,   y: -260, rows: CLOUD_B, cls: 'cl2', op: 0.85 },
+  { x: 640,  y: -210, rows: CLOUD_A, cls: 'cl3', op: 0.9 },
+  { x: 1120, y: -150, rows: CLOUD_B, cls: 'cl1', op: 0.8 },
+  { x: 200,  y: 88,  rows: CLOUD_A, cls: 'cl1', op: 1 },
+  { x: 560,  y: 56,  rows: CLOUD_B, cls: 'cl2', op: 0.9 },
+  { x: 980,  y: 104, rows: CLOUD_A, cls: 'cl3', op: 0.8 },
+  { x: 1250, y: 64,  rows: CLOUD_B, cls: 'cl1', op: 0.7 },
+];
+
+// ── Far skyline (hazy, behind the river) ─────────────────────────────────────
+const rf = mulberry32(11);
+const far: { x: number; w: number; h: number }[] = [];
+{
+  let x = -8;
+  while (x < 1448) {
+    const w = 16 + snap(rf() * 40, 8);
+    const acrossRiver = x > 1000;
+    const h = acrossRiver ? 24 + snap(rf() * 40, 8) : 40 + snap(rf() * 88, 8);
+    far.push({ x, w, h });
+    x += w;
+  }
+}
+const FAR_BASE = 368;
+
+// Lit-window reflections on the river (only where the river is visible, right of the towers)
+const rr = mulberry32(13);
+const refl = Array.from({ length: 44 }, () => ({
+  x: snap(1000 + rr() * 436, 4),
+  y: snap(372 + rr() * 22, 2),
+  h: rr() < 0.5 ? 4 : 6,
+}));
+
+// ── Windows ──────────────────────────────────────────────────────────────────
+// Pattern cells are 8×12 in user space; a window is a 4×6 rect at (2,2) in the cell.
+function winRect(bx: number, by: number, w: number, h: number) {
+  const x1 = Math.ceil((bx + 4) / 8) * 8;
+  const x2 = Math.floor((bx + w - 4) / 8) * 8;
+  const y1 = Math.ceil((by + 8) / 12) * 12;
+  const y2 = Math.floor((by + h - 8) / 12) * 12;
+  return { x: x1, y: y1, w: Math.max(0, x2 - x1), h: Math.max(0, y2 - y1) };
+}
+function lit(bx: number, by: number, w: number, h: number, density: number, seed: number) {
+  const r = mulberry32(seed);
+  const g = winRect(bx, by, w, h);
+  const out: { x: number; y: number }[] = [];
+  for (let cx = g.x; cx + 8 <= g.x + g.w; cx += 8)
+    for (let cy = g.y; cy + 12 <= g.y + g.h; cy += 12)
+      if (r() < density) out.push({ x: cx + 2, y: cy + 2 });
+  return out;
+}
+
+// ── Mid skyline ──────────────────────────────────────────────────────────────
+const MID_BASE = 400;
+type Roof = 'flat' | 'water' | 'antenna' | 'setback';
+interface Tower { x: number; w: number; h: number; roof: Roof; seed: number }
+const towers: Tower[] = [
+  { x: 456,  w: 40, h: 136, roof: 'water',   seed: 21 },
+  { x: 504,  w: 32, h: 112, roof: 'flat',    seed: 22 },
+  { x: 696,  w: 40, h: 200, roof: 'water',   seed: 23 },
+  { x: 880,  w: 48, h: 232, roof: 'antenna', seed: 24 },
+  { x: 936,  w: 40, h: 184, roof: 'setback', seed: 25 },
+  { x: 984,  w: 32, h: 152, roof: 'water',   seed: 26 },
+  { x: 1024, w: 24, h: 104, roof: 'flat',    seed: 27 },
+];
+
+// Empire State Building tiers (x, y, w, h) — base at MID_BASE
+const empire = [
+  { x: 556, y: 304, w: 64, h: 96 },
+  { x: 560, y: 176, w: 56, h: 128 },
+  { x: 568, y: 112, w: 40, h: 64 },
+  { x: 576, y: 88,  w: 24, h: 24 },
+];
+// Chrysler crown layers (from body top upward)
+const chryslerBody = { x: 640, y: 200, w: 40, h: 200 };
+const chryslerCrown = Array.from({ length: 6 }, (_, i) => ({
+  x: 640 + i * 3,
+  y: 200 - (i + 1) * 10,
+  w: 40 - i * 6,
+  h: 10,
+}));
+// One World Trade Center — tapering steps
+const wtc = [
+  { x: 800, y: 320, w: 64, h: 80 },
+  { x: 802, y: 240, w: 60, h: 80 },
+  { x: 804, y: 160, w: 56, h: 80 },
+  { x: 806, y: 96,  w: 52, h: 64 },
+];
+// Woolworth-style gothic tower
+const wool = { x: 744, y: 168, w: 44, h: 232 };
+const woolCap = [
+  { x: 748, y: 152, w: 36, h: 16 },
+  { x: 754, y: 140, w: 24, h: 12 },
+  { x: 760, y: 130, w: 12, h: 10 },
+  { x: 764, y: 118, w: 4,  h: 12 },
+];
+
+// ── Low rooftops strip (between skyline and the walk) ────────────────────────
+const LOW_BASE = 440;
+const rl = mulberry32(5);
+const low: { x: number; w: number; h: number; tank: boolean; seed: number }[] = [];
+{
+  let x = 0; let i = 0;
+  while (x < 1440) {
+    const w = 24 + snap(rl() * 32, 8);
+    const h = 24 + snap(rl() * 24, 8);
+    low.push({ x, w, h, tank: rl() < 0.22, seed: 100 + i++ });
+    x += w;
+  }
+}
+
+// ── Brooklyn Bridge ──────────────────────────────────────────────────────────
+const DECK_Y = 352;
+const towerTops = { y: 224 };
+const bt1 = { x: 1064, w: 48 };
+const bt2 = { x: 1296, w: 48 };
+function cable(x1: number, y1: number, x2: number, y2: number, steps: number) {
+  const pts: { x: number; y: number }[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    pts.push({ x: snap(x1 + (x2 - x1) * t, 4), y: snap(y1 + (y2 - y1) * (1 - (1 - t) ** 2), 4) });
+  }
+  return pts;
+}
+const cables = [
+  cable(1088, towerTops.y, 1000, DECK_Y - 8, 11),
+  cable(1088, towerTops.y, 1192, DECK_Y - 8, 26),
+  cable(1320, towerTops.y, 1192, DECK_Y - 8, 32),
+  cable(1320, towerTops.y, 1440, DECK_Y - 8, 15),
+];
+
+// ── Street scene (East Village block, x 320–680) ─────────────────────────────
+const WALK_Y = 440;
+interface Tenement { x: number; w: number; h: number; bodega?: boolean; seed: number }
+const tenements: Tenement[] = [
+  { x: 320, w: 72, h: 128, seed: 31 },
+  { x: 392, w: 64, h: 144, bodega: true, seed: 32 },
+  { x: 456, w: 80, h: 120, seed: 33 },
+  { x: 536, w: 64, h: 136, seed: 34 },
+];
+function floors(t: Tenement) {
+  const out: number[] = [];
+  for (let y = WALK_Y - t.h + 20; y < WALK_Y - 28; y += 24) out.push(y);
+  return out;
+}
+
+const lamps = [604, 760, 920, 1080, 1240];
+const streetTrees = [
+  { x: 712,  cls: 'sw1' }, { x: 840, cls: 'sw2' }, { x: 1000, cls: 'sw3' },
+  { x: 1160, cls: 'sw1' }, { x: 1320, cls: 'sw2' },
+];
+const railPosts = Array.from({ length: 32 }, (_, i) => 688 + i * 24);
+const benches = [780, 960, 1140];
+const laneDashes = Array.from({ length: 30 }, (_, i) => i * 48 + 16);
+const crosswalk = Array.from({ length: 5 }, (_, i) => 624 + i * 16);
+---
+
+<svg
+  viewBox="0 -340 1440 900"
+  xmlns="http://www.w3.org/2000/svg"
+  preserveAspectRatio="xMidYMax slice"
+  class="w-full h-full"
+  data-time={time}
+  aria-hidden="true"
+>
+  <style>
+    svg { shape-rendering: crispEdges; image-rendering: pixelated; }
+
+    /* ── Palette tokens ─────────────────────────────────────────── */
+    svg[data-time="night"] {
+      --sky0:#040B16; --sky1:#06101E; --sky2:#0C1830; --sky3:#1A0E28; --sky4:#3A1810;
+      --glow:#7A3210; --glow-op:.7;
+      --sun:#FFD040; --sun-op:0; --moon-op:1; --star-op:.9; --plane-op:.9;
+      --cloud:#1A2A44; --cloud-op:.7;
+      --far:#0A1420; --river1:#0A1A2E; --river2:#10263C; --statue:#0C1A24;
+      --mid:#0E1A28; --mid-hi:#16263A; --glass:#122034; --chrome:#1C2A3C;
+      --win-lit:#FFB840; --win-op:.95;
+      --low:#0B1521; --bridge:#0C1420; --cable:#05080E; --neck-op:.9;
+      --near:#1A1420; --near-hi:#2A2230; --iron:#07070C; --shop-op:.95;
+      --walk:#1D2430; --road:#0D1117; --line-op:.5; --lamp-op:.9; --beacon-op:1; --taxi-light:1;
+      --tr1:#0A160A; --tr2:#0C1C0C; --tr3:#0E200E; --trunk:#0C1E0A; --grass:#0E2208;
+    }
+    svg[data-time="day"] {
+      --sky0:#1B64BE; --sky1:#2070C8; --sky2:#4A9EE0; --sky3:#7BBCE8; --sky4:#B8DCF4;
+      --glow:#E6F2FA; --glow-op:.6;
+      --sun:#FFD040; --sun-op:1; --moon-op:0; --star-op:0; --plane-op:.5;
+      --cloud:#FFFFFF; --cloud-op:1;
+      --far:#9CC3DE; --river1:#4A8FCB; --river2:#6FB0E0; --statue:#6FB39A;
+      --mid:#5A7C9E; --mid-hi:#8FAFCB; --glass:#BFE0F4; --chrome:#D8E2EA;
+      --win-lit:#FFF2B0; --win-op:0;
+      --low:#4A6680; --bridge:#7A6652; --cable:#2E2E2E; --neck-op:0;
+      --near:#9A5A48; --near-hi:#D9C7A8; --iron:#2E2E2E; --shop-op:.4;
+      --walk:#C4BDB0; --road:#4A4D53; --line-op:1; --lamp-op:0; --beacon-op:.4; --taxi-light:0;
+      --tr1:#2E6A2E; --tr2:#3A7F3A; --tr3:#4C9A4C; --trunk:#4A3626; --grass:#5BA34A;
+    }
+    svg[data-time="dawn"] {
+      --sky0:#26224F; --sky1:#2E2A5E; --sky2:#6D4C8E; --sky3:#D9806C; --sky4:#F5B98A;
+      --glow:#FFD2A0; --glow-op:.8;
+      --sun:#FFF4B0; --sun-op:1; --moon-op:0; --star-op:.25; --plane-op:.8;
+      --cloud:#F8D6C6; --cloud-op:.95;
+      --far:#8A6E9C; --river1:#D98C86; --river2:#F0B09A; --statue:#7FA596;
+      --mid:#5A4576; --mid-hi:#8A6F9E; --glass:#C99AB0; --chrome:#E0C2CC;
+      --win-lit:#FFC870; --win-op:.35;
+      --low:#4C3C68; --bridge:#5C4A5A; --cable:#2A2430; --neck-op:.3;
+      --near:#7A4A48; --near-hi:#C9A58E; --iron:#2A2430; --shop-op:.7;
+      --walk:#B8A5AE; --road:#3E3A48; --line-op:.9; --lamp-op:.4; --beacon-op:.6; --taxi-light:.5;
+      --tr1:#243A2A; --tr2:#2E4A34; --tr3:#3A5C40; --trunk:#2E2422; --grass:#3E6A3C;
+    }
+    svg[data-time="golden"] {
+      --sky0:#2E2358; --sky1:#3A2A6A; --sky2:#8A3A5A; --sky3:#E0633A; --sky4:#F7B04A;
+      --glow:#FFC070; --glow-op:.9;
+      --sun:#FFF0A0; --sun-op:1; --moon-op:0; --star-op:.15; --plane-op:.9;
+      --cloud:#FFCF9A; --cloud-op:.95;
+      --far:#6B3F66; --river1:#E07A3A; --river2:#F5A95A; --statue:#5F7A72;
+      --mid:#3B2D58; --mid-hi:#7A4A6A; --glass:#8A4E62; --chrome:#F0B080;
+      --win-lit:#FFC060; --win-op:.65;
+      --low:#33264C; --bridge:#3E2A3E; --cable:#1E1820; --neck-op:.6;
+      --near:#5E3238; --near-hi:#C98A5A; --iron:#1E1820; --shop-op:.85;
+      --walk:#9C7A72; --road:#332C38; --line-op:.8; --lamp-op:.6; --beacon-op:.8; --taxi-light:.8;
+      --tr1:#1E2A1C; --tr2:#263824; --tr3:#30482C; --trunk:#221A18; --grass:#3A5A2E;
+    }
+
+    /* ── Celestial positions ────────────────────────────────────── */
+    .sun-g  { transform: translate(1000px, -200px); }
+    svg[data-time="dawn"]   .sun-g { transform: translate(110px, 286px); }
+    svg[data-time="golden"] .sun-g { transform: translate(1130px, 236px); }
+    .moon-g { transform: translate(960px, -170px); }
+
+    /* ── Color classes ──────────────────────────────────────────── */
+    .sky0{fill:var(--sky0)} .sky1{fill:var(--sky1)} .sky2{fill:var(--sky2)} .sky3{fill:var(--sky3)} .sky4{fill:var(--sky4)}
+    .glow{fill:var(--glow);opacity:var(--glow-op)}
+    .sun{fill:var(--sun);opacity:var(--sun-op)} .sun-haze{fill:var(--sun);opacity:calc(var(--sun-op) * .12)}
+    .moon{fill:#FFF8D8;opacity:var(--moon-op)} .moon-cut{fill:var(--sky1);opacity:var(--moon-op)}
+    .star{fill:#fff;opacity:var(--star-op)}
+    .plane{fill:#9AA4B2;opacity:var(--plane-op)} .plane-light{fill:#FF5A5A;opacity:var(--plane-op)}
+    .cloud{fill:var(--cloud);opacity:var(--cloud-op)}
+    .far{fill:var(--far)}
+    .river1{fill:var(--river1)} .river2{fill:var(--river2)}
+    .statue{fill:var(--statue)} .flame{fill:#FFD27A;opacity:var(--lamp-op)}
+    .mid{fill:var(--mid)} .mid-hi{fill:var(--mid-hi)} .chrome{fill:var(--chrome)}
+    .win-dark{fill:var(--glass)} .win-lit{fill:var(--win-lit);opacity:var(--win-op)}
+    .tank{fill:var(--mid-hi)} .beacon{fill:#FF4040;opacity:var(--beacon-op)}
+    .low{fill:var(--low)}
+    .bridge{fill:var(--bridge)} .cable{fill:var(--cable)} .neck{fill:#FFE6A0;opacity:var(--neck-op)}
+    .near{fill:var(--near)} .near-hi{fill:var(--near-hi)} .iron{fill:var(--iron)}
+    .door{fill:var(--iron)} .shop{fill:#FFD27A;opacity:var(--shop-op)}
+    .awn-a{fill:#C8392B} .awn-b{fill:#F4EFE6}
+    .sign{fill:#1E7A4A} .globe{fill:#3DBB6A} .globe-glow{fill:#7DF0A0;opacity:var(--lamp-op)}
+    .walk{fill:var(--walk)} .curb{fill:var(--iron);opacity:.35}
+    .road{fill:var(--road)} .yline{fill:#E8C23A;opacity:var(--line-op)} .wline{fill:#F4F4F4;opacity:calc(var(--line-op) * .8)}
+    .pole{fill:var(--iron)} .lamp{fill:#FFE08A;opacity:calc(.35 + var(--lamp-op) * .65)} .lamp-glow{fill:#FFE08A;opacity:calc(var(--lamp-op) * .22)}
+    .bench{fill:var(--near-hi)} .rail{fill:var(--iron)}
+    .tr1{fill:var(--tr1)} .tr2{fill:var(--tr2)} .tr3{fill:var(--tr3)} .trunk{fill:var(--trunk)} .grass{fill:var(--grass)}
+    .taxi{fill:#F2C230} .taxi-dk{fill:#1B1B1B} .taxi-win{fill:#2A3A4A} .headlight{fill:#FFF6C8;opacity:var(--taxi-light)} .taillight{fill:#FF4040;opacity:calc(.4 + var(--taxi-light) * .6)}
+    .bus-body{fill:#E9EEF3} .bus-stripe{fill:#1D4F9E}
+    .ferry-hull{fill:#F28C28} .ferry-cab{fill:#F4EFE6} .ferry-stack{fill:#1D4F9E}
+    .refl{fill:var(--win-lit);opacity:calc(var(--win-op) * .3)}
+    .hydrant{fill:#C8392B} .pigeon{fill:#8A8F99} .bird{fill:var(--iron);opacity:.55}
+
+    /* ── Motion ─────────────────────────────────────────────────── */
+    .cl1{animation:drift1 36s ease-in-out infinite alternate}
+    .cl2{animation:drift2 48s ease-in-out infinite alternate-reverse}
+    .cl3{animation:drift1 54s ease-in-out infinite alternate-reverse}
+    .sway1,.sway2,.sway3,.sway4,.sw1,.sw2,.sw3{transform-box:fill-box;transform-origin:bottom center}
+    .sway1{animation:sway 5s ease-in-out infinite alternate}
+    .sway2{animation:sway 6.5s ease-in-out infinite alternate-reverse}
+    .sway3{animation:sway 4.2s ease-in-out infinite alternate}
+    .sway4{animation:sway 5.4s ease-in-out infinite alternate-reverse}
+    .sw1{animation:sway 3.8s ease-in-out infinite alternate}
+    .sw2{animation:sway 4.6s ease-in-out infinite alternate-reverse}
+    .sw3{animation:sway 5.2s ease-in-out infinite alternate}
+    .tw{animation:twinkle 3.2s ease-in-out infinite alternate}
+    .beacon{animation:blink 1.6s steps(1) infinite}
+    .cab{animation:drive 28s linear infinite}
+    .plane-g{animation:fly 110s linear infinite}
+    .plane-light{animation:blink 1.1s steps(1) infinite}
+    .shimmer{animation:shimmer 4s ease-in-out infinite alternate}
+    .shimmer.b{animation-delay:-2s}
+    .ferry{animation:sail 70s linear infinite}
+    .bus{animation:driveR 44s linear infinite}
+    .birds{animation:glide 75s linear infinite}
+
+    @keyframes drift1{from{transform:translateX(-14px)}to{transform:translateX(18px)}}
+    @keyframes drift2{from{transform:translateX(12px)}to{transform:translateX(-22px)}}
+    @keyframes sway{from{transform:rotate(-1deg)}to{transform:rotate(1deg)}}
+    @keyframes twinkle{from{opacity:calc(var(--star-op) * .25)}to{opacity:var(--star-op)}}
+    @keyframes blink{0%,55%{opacity:var(--beacon-op)}56%,100%{opacity:0}}
+    @keyframes drive{from{transform:translateX(1500px)}to{transform:translateX(-140px)}}
+    @keyframes fly{from{transform:translate(-120px,0)}to{transform:translate(1560px,-28px)}}
+    @keyframes shimmer{from{opacity:.25}to{opacity:.7}}
+    @keyframes sail{from{transform:translateX(1480px)}to{transform:translateX(940px)}}
+    @keyframes driveR{from{transform:translateX(-160px)}to{transform:translateX(1500px)}}
+    @keyframes glide{from{transform:translate(-80px,0)}to{transform:translate(1540px,-40px)}}
+
+    @media (prefers-reduced-motion: reduce) {
+      svg * { animation: none !important; }
+    }
+  </style>
+
+  <defs>
+    <pattern id="winp" width="8" height="12" patternUnits="userSpaceOnUse">
+      <rect class="win-dark" x="2" y="2" width="4" height="6"/>
+    </pattern>
+    <linearGradient id="fadeCream" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#F7F4EF" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#F7F4EF" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ── SKY ─────────────────────────────────────────────────────── -->
+  <rect class="sky0" y="-340" width="1440" height="160"/>
+  <rect class="sky1" y="-180" width="1440" height="284"/>
+  <rect class="sky2" y="104" width="1440" height="104"/>
+  <rect class="sky3" y="208" width="1440" height="96"/>
+  <rect class="sky4" y="304" width="1440" height="64"/>
+  <rect class="glow" y="336" width="1440" height="32"/>
+
+  <!-- ── STARS ───────────────────────────────────────────────────── -->
+  <g>
+    {stars.map((s) => (
+      <rect
+        class:list={['star', s.tw && 'tw']}
+        x={s.x} y={s.y} width={s.s} height={s.s}
+        style={s.tw ? `animation-delay:-${s.d}s` : undefined}
+      />
+    ))}
+  </g>
+
+  <!-- ── SUN ─────────────────────────────────────────────────────── -->
+  <g class="sun-g">
+    <rect class="sun-haze" x="-56" y="-40" width="192" height="160"/>
+    <rect class="sun-haze" x="-32" y="-16" width="144" height="112"/>
+    <rect class="sun-haze" x="-12" y="4"   width="104" height="72"/>
+    <rect class="sun" x="24" y="0"  width="32" height="8"/>
+    <rect class="sun" x="8"  y="8"  width="64" height="8"/>
+    <rect class="sun" x="0"  y="16" width="80" height="48"/>
+    <rect class="sun" x="8"  y="64" width="64" height="8"/>
+    <rect class="sun" x="24" y="72" width="32" height="8"/>
+    <g class="sun" style="opacity:calc(var(--sun-op) * .55)">
+      <rect x="36" y="-24" width="8" height="16"/>
+      <rect x="36" y="88"  width="8" height="16"/>
+      <rect x="-24" y="36" width="16" height="8"/>
+      <rect x="88"  y="36" width="16" height="8"/>
+    </g>
+  </g>
+
+  <!-- ── MOON ────────────────────────────────────────────────────── -->
+  <g class="moon-g">
+    <rect class="moon" x="24" y="0"  width="48" height="16"/>
+    <rect class="moon" x="8"  y="16" width="80" height="16"/>
+    <rect class="moon" x="0"  y="32" width="96" height="48"/>
+    <rect class="moon" x="8"  y="80" width="80" height="16"/>
+    <rect class="moon" x="24" y="96" width="48" height="16"/>
+    <rect class="moon-cut" x="48" y="0"  width="64" height="16"/>
+    <rect class="moon-cut" x="40" y="16" width="80" height="16"/>
+    <rect class="moon-cut" x="32" y="32" width="96" height="48"/>
+    <rect class="moon-cut" x="40" y="80" width="80" height="16"/>
+    <rect class="moon-cut" x="56" y="96" width="64" height="16"/>
+  </g>
+
+  <!-- ── PLANE ───────────────────────────────────────────────────── -->
+  <g class="plane-g">
+    <rect class="plane" x="0"  y="-128" width="20" height="4"/>
+    <rect class="plane" x="14" y="-134" width="4"  height="6"/>
+    <rect class="plane" x="6"  y="-124" width="8"  height="2"/>
+    <rect class="plane-light" x="0" y="-129" width="2" height="2"/>
+  </g>
+
+  <!-- ── BIRDS ───────────────────────────────────────────────────── -->
+  <g class="birds">
+    <rect class="bird" x="0"  y="-60" width="4" height="2"/>
+    <rect class="bird" x="4"  y="-62" width="4" height="2"/>
+    <rect class="bird" x="8"  y="-60" width="4" height="2"/>
+    <rect class="bird" x="26" y="-50" width="4" height="2"/>
+    <rect class="bird" x="30" y="-52" width="4" height="2"/>
+    <rect class="bird" x="34" y="-50" width="4" height="2"/>
+    <rect class="bird" x="14" y="-40" width="4" height="2"/>
+    <rect class="bird" x="18" y="-42" width="4" height="2"/>
+    <rect class="bird" x="22" y="-40" width="4" height="2"/>
+  </g>
+
+  <!-- ── CLOUDS ──────────────────────────────────────────────────── -->
+  {clouds.map((c) => (
+    <g class={c.cls} style={`opacity:${c.op}`}>
+      {c.rows.map(([dx, w], i) => (
+        <rect class="cloud" x={c.x + dx} y={c.y + i * 8} width={w} height="8"/>
+      ))}
+    </g>
+  ))}
+
+  <!-- ── FAR SKYLINE ─────────────────────────────────────────────── -->
+  <g>
+    {far.map((b) => (
+      <rect class="far" x={b.x} y={FAR_BASE - b.h} width={b.w} height={b.h}/>
+    ))}
+  </g>
+
+  <!-- ── RIVER ───────────────────────────────────────────────────── -->
+  <rect class="river1" y="368" width="1440" height="32"/>
+  <g>
+    <rect class="river2 shimmer"   x="1016" y="376" width="56" height="2"/>
+    <rect class="river2 shimmer b" x="1120" y="384" width="88" height="2"/>
+    <rect class="river2 shimmer"   x="1232" y="372" width="48" height="2"/>
+    <rect class="river2 shimmer b" x="1352" y="388" width="64" height="2"/>
+    <rect class="river2 shimmer"   x="1280" y="392" width="40" height="2"/>
+    <rect class="river2 shimmer b" x="1040" y="392" width="40" height="2"/>
+  </g>
+  <g>
+    {refl.map((r) => <rect class="refl" x={r.x} y={r.y} width="2" height={r.h}/>)}
+  </g>
+
+  <!-- Staten Island Ferry (sails right → left, passes behind the towers) -->
+  <g class="ferry">
+    <rect class="ferry-hull"  x="0"  y="380" width="44" height="8"/>
+    <rect class="ferry-cab"   x="6"  y="372" width="32" height="8"/>
+    <rect class="taxi-win"    x="10" y="374" width="4"  height="3"/>
+    <rect class="taxi-win"    x="17" y="374" width="4"  height="3"/>
+    <rect class="taxi-win"    x="24" y="374" width="4"  height="3"/>
+    <rect class="taxi-win"    x="31" y="374" width="4"  height="3"/>
+    <rect class="ferry-stack" x="20" y="366" width="4"  height="6"/>
+    <rect class="lamp"        x="2"  y="376" width="2"  height="2"/>
+  </g>
+
+  <!-- ── STATUE OF LIBERTY ───────────────────────────────────────── -->
+  <g>
+    <rect class="statue" x="1212" y="352" width="16" height="16"/>
+    <rect class="statue" x="1216" y="332" width="8"  height="20"/>
+    <rect class="statue" x="1218" y="326" width="4"  height="6"/>
+    <rect class="statue" x="1216" y="322" width="8"  height="2"/>
+    <rect class="statue" x="1224" y="320" width="2"  height="12"/>
+    <rect class="flame"  x="1223" y="316" width="4"  height="4"/>
+  </g>
+
+  <!-- ── MID SKYLINE ─────────────────────────────────────────────── -->
+  <g>
+    <!-- Generic towers -->
+    {towers.map((t) => {
+      const y = MID_BASE - t.h;
+      const g = winRect(t.x, y, t.w, t.h);
+      return (
+        <>
+          <rect class="mid" x={t.x} y={y} width={t.w} height={t.h}/>
+          <rect class="mid-hi" x={t.x - 2} y={y} width={t.w + 4} height="4"/>
+          <rect x={g.x} y={g.y} width={g.w} height={g.h} fill="url(#winp)"/>
+          {lit(t.x, y, t.w, t.h, 0.3, t.seed).map((p) => (
+            <rect class="win-lit" x={p.x} y={p.y} width="4" height="6"/>
+          ))}
+          {t.roof === 'water' && (
+            <>
+              <rect class="iron" x={t.x + 8}  y={y - 10} width="2" height="10"/>
+              <rect class="iron" x={t.x + 18} y={y - 10} width="2" height="10"/>
+              <rect class="tank" x={t.x + 6}  y={y - 22} width="16" height="12"/>
+              <rect class="tank" x={t.x + 10} y={y - 26} width="8"  height="4"/>
+            </>
+          )}
+          {t.roof === 'antenna' && <rect class="iron" x={t.x + t.w / 2 - 1} y={y - 28} width="2" height="28"/>}
+          {t.roof === 'setback' && (
+            <>
+              <rect class="mid" x={t.x + t.w * 0.2} y={y - 24} width={t.w * 0.6} height="24"/>
+              <rect class="mid-hi" x={t.x + t.w * 0.2 - 2} y={y - 24} width={t.w * 0.6 + 4} height="4"/>
+            </>
+          )}
+        </>
+      );
+    })}
+
+    <!-- Empire State Building -->
+    {empire.map((tier, i) => {
+      const g = winRect(tier.x, tier.y, tier.w, tier.h);
+      return (
+        <>
+          <rect class="mid" x={tier.x} y={tier.y} width={tier.w} height={tier.h}/>
+          <rect class="mid-hi" x={tier.x - 2} y={tier.y} width={tier.w + 4} height="4"/>
+          <rect x={g.x} y={g.y} width={g.w} height={g.h} fill="url(#winp)"/>
+          {lit(tier.x, tier.y, tier.w, tier.h, i >= 2 ? 0.6 : 0.3, 40 + i).map((p) => (
+            <rect class="win-lit" x={p.x} y={p.y} width="4" height="6"/>
+          ))}
+        </>
+      );
+    })}
+    <rect class="mid-hi" x="584" y="56" width="8" height="32"/>
+    <rect class="chrome" x="586" y="32" width="4" height="24"/>
+    <rect class="beacon" x="586" y="26" width="4" height="4"/>
+
+    <!-- Chrysler Building -->
+    <rect class="mid" x={chryslerBody.x} y={chryslerBody.y} width={chryslerBody.w} height={chryslerBody.h}/>
+    {(() => { const g = winRect(chryslerBody.x, chryslerBody.y, chryslerBody.w, chryslerBody.h);
+      return <rect x={g.x} y={g.y} width={g.w} height={g.h} fill="url(#winp)"/>; })()}
+    {lit(chryslerBody.x, chryslerBody.y, chryslerBody.w, chryslerBody.h, 0.32, 51).map((p) => (
+      <rect class="win-lit" x={p.x} y={p.y} width="4" height="6"/>
+    ))}
+    {chryslerCrown.map((c, i) => (
+      <>
+        <rect class="chrome" x={c.x} y={c.y} width={c.w} height={c.h}/>
+        <rect class="mid" x={c.x + 3} y={c.y + 3} width="2" height="4"/>
+        <rect class="mid" x={c.x + c.w / 2 - 1} y={c.y + 3} width="2" height="4"/>
+        <rect class="mid" x={c.x + c.w - 5} y={c.y + 3} width="2" height="4"/>
+        {i === 5 && <rect class="chrome" x={c.x + c.w / 2 - 1} y={c.y - 28} width="2" height="28"/>}
+      </>
+    ))}
+
+    <!-- Woolworth-style gothic tower -->
+    <rect class="mid" x={wool.x} y={wool.y} width={wool.w} height={wool.h}/>
+    {(() => { const g = winRect(wool.x, wool.y, wool.w, wool.h);
+      return <rect x={g.x} y={g.y} width={g.w} height={g.h} fill="url(#winp)"/>; })()}
+    {lit(wool.x, wool.y, wool.w, wool.h, 0.28, 61).map((p) => (
+      <rect class="win-lit" x={p.x} y={p.y} width="4" height="6"/>
+    ))}
+    {woolCap.map((c) => <rect class="statue" x={c.x} y={c.y} width={c.w} height={c.h}/>)}
+
+    <!-- One World Trade Center -->
+    {wtc.map((s, i) => {
+      const g = winRect(s.x, s.y, s.w, s.h);
+      return (
+        <>
+          <rect class="mid-hi" x={s.x} y={s.y} width={s.w} height={s.h}/>
+          <rect x={g.x} y={g.y} width={g.w} height={g.h} fill="url(#winp)"/>
+          {lit(s.x, s.y, s.w, s.h, 0.22, 70 + i).map((p) => (
+            <rect class="win-lit" x={p.x} y={p.y} width="4" height="6"/>
+          ))}
+        </>
+      );
+    })}
+    <rect class="chrome" x="826" y="80" width="12" height="16"/>
+    <rect class="chrome" x="830" y="16" width="4"  height="64"/>
+    <rect class="beacon" x="830" y="10" width="4"  height="4" style="animation-delay:-.8s"/>
+  </g>
+
+  <!-- ── BROOKLYN BRIDGE ─────────────────────────────────────────── -->
+  <g>
+    {cables.map((pts) => (
+      <>
+        {pts.map((p, i) => (
+          <>
+            <rect class="cable" x={p.x} y={p.y} width="4" height="4"/>
+            {i % 3 === 0 && <rect class="neck" x={p.x + 1} y={p.y - 1} width="2" height="2"/>}
+            {i % 2 === 0 && p.y < DECK_Y - 12 && <rect class="cable" x={p.x + 1} y={p.y + 4} width="2" height={DECK_Y - p.y - 4}/>}
+          </>
+        ))}
+      </>
+    ))}
+    {[bt1, bt2].map((bt) => (
+      <>
+        <rect class="bridge" x={bt.x} y={towerTops.y} width={bt.w} height={400 - towerTops.y}/>
+        <rect class="sky3"   x={bt.x + 8}  y="268" width="12" height="76"/>
+        <rect class="sky3"   x={bt.x + 28} y="268" width="12" height="76"/>
+        <rect class="bridge" x={bt.x + 8}  y="268" width="4"  height="4"/>
+        <rect class="bridge" x={bt.x + 16} y="268" width="4"  height="4"/>
+        <rect class="bridge" x={bt.x + 28} y="268" width="4"  height="4"/>
+        <rect class="bridge" x={bt.x + 36} y="268" width="4"  height="4"/>
+        <rect class="bridge" x={bt.x + 10} y="272" width="2"  height="4"/>
+        <rect class="bridge" x={bt.x + 16} y="272" width="2"  height="4"/>
+        <rect class="bridge" x={bt.x + 30} y="272" width="2"  height="4"/>
+        <rect class="bridge" x={bt.x + 36} y="272" width="2"  height="4"/>
+        <rect class="mid-hi" x={bt.x - 2} y={towerTops.y} width={bt.w + 4} height="4"/>
+      </>
+    ))}
+    <rect class="bridge" x="1000" y={DECK_Y} width="440" height="8"/>
+    <rect class="iron"   x="1000" y={DECK_Y - 4} width="440" height="2" style="opacity:.6"/>
+  </g>
+
+  <!-- ── LOW ROOFTOPS ────────────────────────────────────────────── -->
+  <g>
+    {low.map((b) => (
+      <>
+        <rect class="low" x={b.x} y={LOW_BASE - b.h} width={b.w} height={b.h}/>
+        <rect class="mid-hi" x={b.x} y={LOW_BASE - b.h} width={b.w} height="2" style="opacity:.5"/>
+        {lit(b.x, LOW_BASE - b.h, b.w, b.h, 0.25, b.seed).map((p) => (
+          <rect class="win-lit" x={p.x} y={p.y} width="4" height="6"/>
+        ))}
+        {b.tank && b.w >= 32 && (
+          <>
+            <rect class="iron" x={b.x + 8}  y={LOW_BASE - b.h - 8}  width="2" height="8"/>
+            <rect class="iron" x={b.x + 18} y={LOW_BASE - b.h - 8}  width="2" height="8"/>
+            <rect class="tank" x={b.x + 6}  y={LOW_BASE - b.h - 18} width="16" height="10"/>
+            <rect class="tank" x={b.x + 10} y={LOW_BASE - b.h - 22} width="8"  height="4"/>
+          </>
+        )}
+      </>
+    ))}
+  </g>
+
+  <!-- ── EAST VILLAGE BLOCK ──────────────────────────────────────── -->
+  <g>
+    {tenements.map((t) => {
+      const top = WALK_Y - t.h;
+      const g = winRect(t.x, top, t.w, t.h - 28);
+      return (
+        <>
+          <rect class="near" x={t.x} y={top} width={t.w} height={t.h}/>
+          <rect class="near-hi" x={t.x - 4} y={top} width={t.w + 8} height="6"/>
+          <rect x={g.x} y={g.y} width={g.w} height={g.h} fill="url(#winp)"/>
+          {lit(t.x, top, t.w, t.h - 28, 0.4, t.seed).map((p) => (
+            <rect class="win-lit" x={p.x} y={p.y} width="4" height="6"/>
+          ))}
+          <!-- fire escape -->
+          {floors(t).map((fy) => (
+            <>
+              <rect class="iron" x={t.x + 6} y={fy} width={t.w - 12} height="2"/>
+              <rect class="iron" x={t.x + 6} y={fy - 8} width="2" height="8"/>
+              <rect class="iron" x={t.x + t.w - 8} y={fy - 8} width="2" height="8"/>
+              <rect class="iron" x={t.x + 10} y={fy + 2}  width="2" height="6"/>
+              <rect class="iron" x={t.x + 14} y={fy + 8}  width="2" height="6"/>
+              <rect class="iron" x={t.x + 18} y={fy + 14} width="2" height="6"/>
+            </>
+          ))}
+          {t.bodega ? (
+            <>
+              <rect class="shop" x={t.x + 6} y={WALK_Y - 22} width={t.w - 12} height="16"/>
+              {Array.from({ length: Math.floor((t.w + 8) / 8) }, (_, i) => (
+                <rect class={i % 2 ? 'awn-b' : 'awn-a'} x={t.x - 4 + i * 8} y={WALK_Y - 30} width="8" height="6"/>
+              ))}
+              <rect class="iron" x={t.x - 4} y={WALK_Y - 24} width={t.w + 8} height="2"/>
+            </>
+          ) : (
+            <>
+              <rect class="door" x={t.x + t.w / 2 - 5} y={WALK_Y - 18} width="10" height="18"/>
+              <rect class="near-hi" x={t.x + t.w / 2 - 9} y={WALK_Y - 6} width="18" height="2"/>
+              <rect class="near-hi" x={t.x + t.w / 2 - 7} y={WALK_Y - 10} width="14" height="2"/>
+            </>
+          )}
+        </>
+      );
+    })}
+
+    <!-- E 7 ST lamp post -->
+    <rect class="pole" x="604" y="396" width="2" height="44"/>
+    <rect class="pole" x="605" y="392" width="8" height="2"/>
+    <rect class="lamp" x="610" y="390" width="6" height="4"/>
+    <rect class="lamp-glow" x="600" y="384" width="26" height="18"/>
+    <rect class="sign" x="596" y="408" width="24" height="8"/>
+    <rect class="awn-b" x="599" y="411" width="2" height="2"/>
+    <rect class="awn-b" x="603" y="411" width="4" height="2"/>
+    <rect class="awn-b" x="609" y="411" width="2" height="2"/>
+    <rect class="awn-b" x="613" y="411" width="4" height="2"/>
+
+    <!-- Hydrant + pigeons -->
+    <rect class="hydrant" x="582" y="430" width="6"  height="10"/>
+    <rect class="hydrant" x="580" y="432" width="10" height="2"/>
+    <rect class="hydrant" x="583" y="428" width="4"  height="2"/>
+    <rect class="pigeon"  x="686" y="437" width="3" height="3"/>
+    <rect class="pigeon"  x="694" y="438" width="3" height="2"/>
+    <rect class="pigeon"  x="702" y="437" width="3" height="3"/>
+
+    <!-- Subway entrance -->
+    <rect class="rail" x="624" y="426" width="2"  height="14"/>
+    <rect class="rail" x="670" y="426" width="2"  height="14"/>
+    <rect class="rail" x="624" y="426" width="48" height="2"/>
+    <rect class="iron" x="628" y="432" width="40" height="8"/>
+    <rect class="pole" x="626" y="412" width="2" height="14"/>
+    <rect class="pole" x="668" y="412" width="2" height="14"/>
+    <rect class="globe" x="623" y="406" width="8" height="8"/>
+    <rect class="globe" x="665" y="406" width="8" height="8"/>
+    <rect class="globe-glow" x="620" y="403" width="14" height="14"/>
+    <rect class="globe-glow" x="662" y="403" width="14" height="14"/>
+  </g>
+
+  <!-- ── WALK + ESPLANADE ────────────────────────────────────────── -->
+  <rect class="grass" x="0" y="432" width="320" height="8"/>
+  <rect class="walk" y="440" width="1440" height="16"/>
+  <rect class="curb" y="454" width="1440" height="2"/>
+  <g>
+    <rect class="rail" x="688" y="430" width="752" height="2"/>
+    {railPosts.map((x) => <rect class="rail" x={x} y="430" width="2" height="10"/>)}
+    {benches.map((x) => (
+      <>
+        <rect class="bench" x={x} y="434" width="24" height="3"/>
+        <rect class="iron"  x={x + 2}  y="437" width="2" height="3"/>
+        <rect class="iron"  x={x + 20} y="437" width="2" height="3"/>
+      </>
+    ))}
+    {lamps.slice(1).map((x) => (
+      <>
+        <rect class="pole" x={x} y="404" width="2" height="36"/>
+        <rect class="lamp" x={x - 3} y="400" width="8" height="4"/>
+        <rect class="lamp-glow" x={x - 10} y="394" width="22" height="16"/>
+      </>
+    ))}
+    {streetTrees.map((t) => (
+      <g class={t.cls}>
+        <rect class="trunk" x={t.x + 6} y="428" width="4" height="12"/>
+        <rect class="tr2" x={t.x}     y="412" width="16" height="16"/>
+        <rect class="tr3" x={t.x + 4} y="404" width="8"  height="8"/>
+        <rect class="tr1" x={t.x - 4} y="416" width="4"  height="8"/>
+        <rect class="tr1" x={t.x + 16} y="416" width="4" height="8"/>
+      </g>
+    ))}
+  </g>
+
+  <!-- ── STREET ──────────────────────────────────────────────────── -->
+  <rect class="road" y="456" width="1440" height="40"/>
+  <rect class="yline" y="474" width="1440" height="2"/>
+  <rect class="yline" y="478" width="1440" height="2"/>
+  {laneDashes.map((x) => <rect class="wline" x={x} y="490" width="20" height="2"/>)}
+  {crosswalk.map((x) => <rect class="wline" x={x} y="458" width="8" height="36"/>)}
+
+  <!-- MTA bus (drives left → right, far lane) -->
+  <g class="bus">
+    <rect class="bus-body"   x="0"  y="454" width="60" height="18"/>
+    <rect class="bus-stripe" x="0"  y="465" width="60" height="3"/>
+    <rect class="taxi-win"   x="4"  y="457" width="8" height="6"/>
+    <rect class="taxi-win"   x="15" y="457" width="8" height="6"/>
+    <rect class="taxi-win"   x="26" y="457" width="8" height="6"/>
+    <rect class="taxi-win"   x="37" y="457" width="8" height="6"/>
+    <rect class="taxi-win"   x="50" y="457" width="8" height="8"/>
+    <rect class="taxi-dk"    x="8"  y="470" width="8" height="6"/>
+    <rect class="taxi-dk"    x="44" y="470" width="8" height="6"/>
+    <rect class="headlight"  x="58" y="466" width="4" height="3"/>
+    <rect class="taillight"  x="-2" y="466" width="4" height="3"/>
+  </g>
+
+  <!-- Yellow cab (drives right → left) -->
+  <g class="cab">
+    <rect class="taxi"     x="0"  y="472" width="44" height="14"/>
+    <rect class="taxi"     x="10" y="464" width="24" height="8"/>
+    <rect class="taxi-win" x="12" y="465" width="9"  height="6"/>
+    <rect class="taxi-win" x="23" y="465" width="9"  height="6"/>
+    <rect class="taxi-dk"  x="18" y="460" width="8"  height="4"/>
+    <rect class="taxi-dk"  x="6"  y="484" width="8"  height="8"/>
+    <rect class="taxi-dk"  x="30" y="484" width="8"  height="8"/>
+    <rect class="headlight" x="-2" y="476" width="4" height="4"/>
+    <rect class="taillight" x="42" y="476" width="4" height="4"/>
+  </g>
+
+  <!-- ── FOREGROUND TREES ────────────────────────────────────────── -->
+  <g class="sway1">
+    <rect class="trunk" x="20"  y="264" width="28"  height="236"/>
+    <rect class="tr1" x="-24" y="216" width="112" height="16"/>
+    <rect class="tr1" x="-40" y="200" width="144" height="16"/>
+    <rect class="tr2" x="-48" y="184" width="160" height="16"/>
+    <rect class="tr2" x="-40" y="168" width="144" height="16"/>
+    <rect class="tr3" x="-24" y="152" width="112" height="16"/>
+    <rect class="tr3" x="-8"  y="136" width="80"  height="16"/>
+    <rect class="tr3" x="4"   y="120" width="56"  height="16"/>
+    <rect class="tr1" x="4"   y="216" width="56"  height="48"/>
+  </g>
+  <g class="sway2">
+    <rect class="trunk" x="160" y="296" width="22" height="204"/>
+    <rect class="tr1" x="128" y="248" width="88"  height="16"/>
+    <rect class="tr1" x="112" y="232" width="120" height="16"/>
+    <rect class="tr2" x="120" y="216" width="104" height="16"/>
+    <rect class="tr2" x="136" y="200" width="72"  height="16"/>
+    <rect class="tr3" x="148" y="184" width="48"  height="16"/>
+    <rect class="tr1" x="128" y="248" width="88"  height="48"/>
+  </g>
+  <g class="sway3">
+    <rect class="trunk" x="270" y="320" width="18" height="180"/>
+    <rect class="tr1" x="246" y="280" width="70" height="16"/>
+    <rect class="tr1" x="238" y="264" width="88" height="16"/>
+    <rect class="tr2" x="246" y="248" width="72" height="16"/>
+    <rect class="tr2" x="254" y="232" width="56" height="16"/>
+    <rect class="tr3" x="262" y="216" width="40" height="16"/>
+  </g>
+  <g class="sway4">
+    <rect class="trunk" x="1432" y="264" width="28"  height="236"/>
+    <rect class="tr1" x="1392" y="216" width="112" height="16"/>
+    <rect class="tr1" x="1376" y="200" width="144" height="16"/>
+    <rect class="tr2" x="1368" y="184" width="160" height="16"/>
+    <rect class="tr2" x="1376" y="168" width="144" height="16"/>
+    <rect class="tr3" x="1392" y="152" width="112" height="16"/>
+    <rect class="tr3" x="1404" y="136" width="80"  height="16"/>
+    <rect class="tr3" x="1416" y="120" width="56"  height="16"/>
+    <rect class="tr1" x="1420" y="216" width="56"  height="48"/>
+  </g>
+
+  <!-- ── BOTTOM FADE ─────────────────────────────────────────────── -->
+  <rect x="0" y="484" width="1440" height="76" fill="url(#fadeCream)"/>
+</svg>
