@@ -59,7 +59,9 @@ const categories = parseCategories(opp.categories);
         href={opp.signup_url}
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center gap-1.5 rounded-full bg-(--forest) px-4 py-2 text-sm font-medium text-white hover:bg-(--forest-mid) transition-colors"
+        data-track-opp={opp.id}
+        data-track-org={opp.org_id}
+        class="signup-btn inline-flex items-center gap-1.5 rounded-full bg-(--forest) px-4 py-2 text-sm font-medium text-white hover:bg-(--forest-mid) transition-colors"
       >
         Sign up directly
         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -75,3 +77,19 @@ const categories = parseCategories(opp.categories);
     </a>
   </div>
 </div>
+
+<script>
+  document.querySelectorAll<HTMLAnchorElement>('a.signup-btn[data-track-opp]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const opportunityId = Number(btn.dataset.trackOpp);
+      const orgId = Number(btn.dataset.trackOrg);
+      // Fire-and-forget — don't block navigation
+      fetch('/api/volunteer/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ opportunityId, orgId }),
+        keepalive: true,
+      }).catch(() => {/* ignore — unauthenticated users or network errors */});
+    });
+  });
+</script>

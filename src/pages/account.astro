@@ -77,6 +77,34 @@ if (urlUpdated === 'true') {
   updateMsg = 'Display name updated successfully.';
 }
 
+// Fetch volunteer activity
+interface VolunteerRow {
+  opportunity_id: number;
+  org_id: number;
+  opp_title: string;
+  org_name: string;
+  org_slug: string;
+  signup_url: string | null;
+  clicked_at: string | null;
+  completed_at: string | null;
+}
+let volunteerActivity: VolunteerRow[] = [];
+try {
+  const result = await env.DB
+    .prepare(`SELECT va.opportunity_id, va.org_id, va.clicked_at, va.completed_at,
+                     op.title as opp_title, op.signup_url,
+                     o.name as org_name, o.slug as org_slug
+              FROM volunteer_actions va
+              JOIN opportunities op ON op.id = va.opportunity_id
+              JOIN organizations o ON o.id = va.org_id
+              WHERE va.user_id = ?
+              ORDER BY COALESCE(va.completed_at, va.clicked_at) DESC
+              LIMIT 50`)
+    .bind(user.id)
+    .all<VolunteerRow>();
+  volunteerActivity = result.results;
+} catch { /* DB unavailable */ }
+
 function stars(n: number) { return '★'.repeat(n) + '☆'.repeat(5 - n); }
 
 // MVP Gamification static data (custom tailored to their reviews count and local NYC theme)
@@ -221,6 +249,68 @@ const QUESTS = [
       </div>
     </section>
 
+    <!-- Volunteer Activity -->
+    <section class="mb-10">
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-(--text-muted) mb-1">Activity</p>
+          <h2 class="text-xl font-bold text-(--forest)">My Volunteering</h2>
+        </div>
+        <a href="/leaderboard" class="text-sm font-medium text-(--forest) underline underline-offset-2 hover:text-(--forest-mid) whitespace-nowrap">
+          View leaderboard →
+        </a>
+      </div>
+
+      {volunteerActivity.length === 0 ? (
+        <div class="rounded-2xl border border-(--border) bg-white px-6 py-10 text-center shadow-[var(--shadow)]">
+          <div class="mx-auto mb-3 text-3xl" aria-hidden="true">🌿</div>
+          <p class="text-(--text-muted) text-sm leading-relaxed max-w-sm mx-auto">
+            When you click "Sign up directly" on an opportunity, it'll appear here so you can mark it done.
+          </p>
+          <a href="/search" class="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-(--forest) px-5 py-2.5 text-sm font-semibold text-white hover:bg-(--forest-mid) transition-colors">
+            Find opportunities
+          </a>
+        </div>
+      ) : (
+        <div class="space-y-3">
+          {volunteerActivity.map((va) => (
+            <div class="flex items-center gap-4 rounded-xl border border-(--border) bg-white px-4 py-3 shadow-[var(--shadow)]">
+              <!-- Status icon -->
+              <div class:list={[
+                'flex h-9 w-9 items-center justify-center rounded-full shrink-0 text-lg',
+                va.completed_at ? 'bg-green-50 text-green-600' : 'bg-(--cream) text-(--text-muted)'
+              ]}>
+                {va.completed_at ? '✅' : '🔗'}
+              </div>
+
+              <!-- Info -->
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-(--forest) truncate">{va.opp_title}</p>
+                <p class="text-xs text-(--text-muted) truncate">
+                  <a href={`/orgs/${va.org_slug}`} class="hover:text-(--forest) transition-colors">{va.org_name}</a>
+                  {va.completed_at
+                    ? <span class="ml-1.5 text-green-600 font-medium">· Completed {new Date(va.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                    : <span class="ml-1.5">· Clicked {new Date(va.clicked_at!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                  }
+                </p>
+              </div>
+
+              <!-- Mark done button -->
+              {!va.completed_at && (
+                <button
+                  class="mark-done-btn shrink-0 rounded-full border border-(--border) bg-white px-3 py-1.5 text-xs font-semibold text-(--forest-light) hover:border-(--leaf) hover:text-(--forest) transition-colors"
+                  data-opp-id={va.opportunity_id}
+                  data-org-id={va.org_id}
+                >
+                  Mark done
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+
     <!-- Reviews -->
     <section>
       <div class="mb-6">
@@ -269,3 +359,42 @@ const QUESTS = [
     </section>
   </div>
 </Base>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.mark-done-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const oppId = Number(btn.dataset.oppId);
+      const orgId = Number(btn.dataset.orgId);
+      btn.disabled = true;
+      btn.textContent = '…';
+      try {
+        const res = await fetch('/api/volunteer/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ opportunityId: oppId, orgId }),
+        });
+        if (res.ok) {
+          // Replace button with done badge and update icon
+          const row = btn.closest('div.flex');
+          if (row) {
+            const icon = row.querySelector('.rounded-full.shrink-0');
+            if (icon) { icon.textContent = '✅'; (icon as HTMLElement).className = 'flex h-9 w-9 items-center justify-center rounded-full shrink-0 text-lg bg-green-50 text-green-600'; }
+            const meta = row.querySelector('p.text-xs');
+            if (meta) {
+              const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              const span = meta.querySelector('span:last-child');
+              if (span) { span.textContent = `· Completed ${today}`; (span as HTMLElement).className = 'ml-1.5 text-green-600 font-medium'; }
+            }
+          }
+          btn.remove();
+        } else {
+          btn.textContent = 'Try again';
+          btn.disabled = false;
+        }
+      } catch {
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+      }
+    });
+  });
+</script>

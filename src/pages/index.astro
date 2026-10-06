@@ -22,6 +22,7 @@ const heroVariant: 'A' | 'B' | 'C' =
 
 let featuredOrgs: OrgSearchRow[] = [];
 let totalOrgs = 69;
+let volunteersThisMonth = 47;
 try {
   const db = Astro.locals.runtime?.env?.DB;
   if (db) {
@@ -33,6 +34,13 @@ try {
       .prepare(`SELECT COUNT(*) as n FROM organizations WHERE status = 'published'`)
       .first<{ n: number }>();
     totalOrgs = countRow?.n ?? 69;
+
+    const cutoff = new Date(Date.now() - 30 * 86400000).toISOString();
+    const volRow = await db
+      .prepare(`SELECT COUNT(DISTINCT user_id) as n FROM volunteer_actions WHERE clicked_at >= ? OR completed_at >= ?`)
+      .bind(cutoff, cutoff)
+      .first<{ n: number }>();
+    if ((volRow?.n ?? 0) > 0) volunteersThisMonth = volRow!.n;
   }
 } catch {
   // DB unavailable in local dev without wrangler
@@ -74,7 +82,7 @@ const STEPS = [
 <Base title="Home" heroNav={true}>
 
   <!-- ── HERO ─────────────────────────────────────────────────────── -->
-  <section class="relative min-h-[78vh] w-screen flex flex-col justify-center overflow-hidden -mt-[62px]" aria-label="Hero">
+  <section class="relative min-h-screen flex flex-col justify-center overflow-hidden -mt-[62px]" aria-label="Hero">
 
     <!-- Illustrated background (time-based) -->
     <div class="absolute inset-0 w-full h-full" aria-hidden="true">
@@ -139,7 +147,7 @@ const STEPS = [
               <span class="flex h-7 w-7 items-center justify-center rounded-full bg-green-600/90 text-[11px] font-bold text-white ring-1 ring-white/20">J</span>
             </div>
             <p class="text-[12px] font-medium text-white/90">
-              <span class="font-bold text-white">47 volunteers</span> signed up this month
+              <span class="font-bold text-white">{volunteersThisMonth} volunteers</span> active this month
             </p>
           </div>
           <div class="inline-flex items-center gap-1.5 rounded-2xl border border-white/20 bg-black/20 backdrop-blur-sm px-4 py-2.5">

@@ -258,6 +258,34 @@ export const enrichmentRuns = sqliteTable('enrichment_runs', {
   ranAt: text('ran_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
+// ─── volunteer_actions ────────────────────────────────────────────────────────
+// One row per (user, opportunity). clicked_at set when user hits "Sign up directly".
+// completed_at set when user marks the opportunity as done on their account page.
+
+export const volunteerActions = sqliteTable(
+  'volunteer_actions',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    opportunityId: integer('opportunity_id')
+      .notNull()
+      .references(() => opportunities.id, { onDelete: 'cascade' }),
+    orgId: integer('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    clickedAt: text('clicked_at'),
+    completedAt: text('completed_at'),
+    createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  },
+  (t) => [
+    index('idx_va_user').on(t.userId),
+    index('idx_va_completed').on(t.completedAt),
+    index('idx_va_org').on(t.orgId),
+  ]
+);
+
 // ─── Type exports ─────────────────────────────────────────────────────────────
 
 export type Organization = typeof organizations.$inferSelect;
@@ -272,3 +300,5 @@ export type Report = typeof reports.$inferSelect;
 export type NewReport = typeof reports.$inferInsert;
 export type AuditLogEntry = typeof auditLog.$inferSelect;
 export type EnrichmentRun = typeof enrichmentRuns.$inferSelect;
+export type VolunteerAction = typeof volunteerActions.$inferSelect;
+export type NewVolunteerAction = typeof volunteerActions.$inferInsert;

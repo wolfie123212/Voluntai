@@ -1,0 +1,218 @@
+---
+import Base from '../layouts/Base.astro';
+import { createAuth } from '../lib/auth';
+
+const env = Astro.locals.runtime?.env;
+const auth = env ? createAuth(env) : null;
+const session = auth ? await auth.api.getSession({ headers: Astro.request.headers }) : null;
+const currentUserId = session?.user?.id ?? null;
+
+const period = (Astro.url.searchParams.get('period') ?? 'month') as 'week' | 'month';
+const cutoff = period === 'week'
+  ? new Date(Date.now() - 7 * 86400000).toISOString()
+  : new Date(Date.now() - 30 * 86400000).toISOString();
+
+interface LeaderRow {
+  user_id: string;
+  display_name: string | null;
+  completions_period: number;
+  completions_all: number;
+  clicks_period: number;
+}
+
+let leaders: LeaderRow[] = [];
+let totalActive = 0;
+let myStats: { completions_period: number; clicks_period: number } | null = null;
+
+try {
+  if (env?.DB) {
+    const result = await env.DB
+      .prepare(`SELECT
+          va.user_id,
+          u.display_name,
+          COUNT(CASE WHEN va.completed_at >= ? THEN 1 END) as completions_period,
+          COUNT(va.completed_at) as completions_all,
+          COUNT(CASE WHEN va.clicked_at >= ? THEN 1 END) as clicks_period
+        FROM volunteer_actions va
+        JOIN users u ON u.id = va.user_id
+        GROUP BY va.user_id
+        HAVING completions_period > 0 OR clicks_period > 0
+        ORDER BY completions_period DESC, clicks_period DESC
+        LIMIT 20`)
+      .bind(cutoff, cutoff)
+      .all<LeaderRow>();
+    leaders = result.results;
+
+    const totalRow = await env.DB
+      .prepare(`SELECT COUNT(DISTINCT user_id) as n FROM volunteer_actions WHERE clicked_at >= ? OR completed_at >= ?`)
+      .bind(cutoff, cutoff)
+      .first<{ n: number }>();
+    totalActive = totalRow?.n ?? 0;
+
+    if (currentUserId) {
+      const myRow = await env.DB
+        .prepare(`SELECT
+            COUNT(CASE WHEN completed_at >= ? THEN 1 END) as completions_period,
+            COUNT(CASE WHEN clicked_at >= ? THEN 1 END) as clicks_period
+          FROM volunteer_actions WHERE user_id = ?`)
+        .bind(cutoff, cutoff, currentUserId)
+        .first<{ completions_period: number; clicks_period: number }>();
+      if (myRow) myStats = myRow;
+    }
+  }
+} catch { /* DB unavailable */ }
+
+function displayName(row: LeaderRow): string {
+  const name = row.display_name ?? 'Volunteer';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length > 1) return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+  return parts[0];
+}
+
+const periodLabel = period === 'week' ? 'This Week' : 'This Month';
+---
+
+<Base title="Leaderboard">
+  <div class="mx-auto max-w-3xl px-4 py-12">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="text-3xl" aria-hidden="true">🏆</span>
+        <h1 class="text-2xl font-bold text-(--forest)">Volunteer Leaderboard</h1>
+      </div>
+      <p class="text-(--text-muted) text-sm">
+        Top volunteers ranked by opportunities completed. Mark an opportunity as done on your
+        <a href="/account" class="text-(--forest) underline underline-offset-2 hover:text-(--forest-mid)">account page</a>.
+      </p>
+    </div>
+
+    <!-- Period toggle + stats strip -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+      <div class="flex rounded-lg border border-(--border) overflow-hidden text-sm font-medium">
+        <a
+          href="/leaderboard?period=week"
+          class:list={[
+            'px-4 py-2 transition-colors',
+            period === 'week'
+              ? 'bg-(--forest) text-white'
+              : 'bg-white text-(--forest-light) hover:bg-(--cream)'
+          ]}
+        >This Week</a>
+        <a
+          href="/leaderboard?period=month"
+          class:list={[
+            'px-4 py-2 transition-colors border-l border-(--border)',
+            period === 'month'
+              ? 'bg-(--forest) text-white'
+              : 'bg-white text-(--forest-light) hover:bg-(--cream)'
+          ]}
+        >This Month</a>
+      </div>
+
+      <div class="text-sm text-(--text-muted)">
+        <span class="font-semibold text-(--forest)">{totalActive}</span> active volunteers {periodLabel.toLowerCase()}
+      </div>
+    </div>
+
+    <!-- My stats (logged in) -->
+    {myStats && (
+      <div class="mb-6 rounded-xl border border-(--leaf)/40 bg-(--leaf)/8 p-4 flex items-center gap-4">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-(--forest) text-white text-sm font-bold shrink-0">
+          {(session?.user?.name ?? session?.user?.email ?? 'U').charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-(--forest)">Your stats {periodLabel.toLowerCase()}</p>
+          <p class="text-xs text-(--text-muted) mt-0.5">
+            <span class="font-semibold text-(--forest)">{myStats.completions_period}</span> completed ·
+            <span class="font-semibold text-(--forest)">{myStats.clicks_period}</span> signed up for
+          </p>
+        </div>
+        <a href="/account" class="ml-auto text-xs font-medium text-(--forest) underline underline-offset-2 hover:text-(--forest-mid) whitespace-nowrap">
+          Log activity →
+        </a>
+      </div>
+    )}
+
+    <!-- Leaderboard table -->
+    {leaders.length === 0 ? (
+      <div class="rounded-2xl border border-(--border) bg-white p-12 text-center">
+        <div class="text-4xl mb-3" aria-hidden="true">🌱</div>
+        <p class="font-semibold text-(--forest) mb-1">No completions yet {periodLabel.toLowerCase()}</p>
+        <p class="text-sm text-(--text-muted)">
+          Be the first! Find an opportunity and mark it done on your account page.
+        </p>
+        <a href="/search" class="mt-4 inline-block rounded-full bg-(--forest) px-5 py-2.5 text-sm font-semibold text-white hover:bg-(--forest-mid) transition-colors">
+          Find opportunities →
+        </a>
+      </div>
+    ) : (
+      <div class="rounded-2xl border border-(--border) bg-white overflow-hidden">
+        {leaders.map((row, i) => {
+          const rank = i + 1;
+          const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
+          const isMe = row.user_id === currentUserId;
+          return (
+            <div class:list={[
+              'flex items-center gap-4 px-5 py-4 border-b border-(--border) last:border-0',
+              isMe ? 'bg-(--leaf)/6' : 'hover:bg-(--cream)/50'
+            ]}>
+              <!-- Rank -->
+              <div class="w-8 text-center shrink-0">
+                {medal
+                  ? <span class="text-xl" aria-label={`Rank ${rank}`}>{medal}</span>
+                  : <span class="text-sm font-bold text-(--text-muted)">{rank}</span>
+                }
+              </div>
+
+              <!-- Avatar -->
+              <div class:list={[
+                'flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold shrink-0',
+                isMe ? 'bg-(--forest) text-white' : 'bg-(--cream) text-(--forest)'
+              ]}>
+                {displayName(row).charAt(0).toUpperCase()}
+              </div>
+
+              <!-- Name -->
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-(--forest) text-sm truncate">
+                  {displayName(row)}
+                  {isMe && <span class="ml-1.5 text-[11px] font-normal text-(--leaf) bg-(--leaf)/15 px-1.5 py-0.5 rounded-full">you</span>}
+                </p>
+                <p class="text-xs text-(--text-muted) mt-0.5">
+                  {row.completions_all} total completed all-time
+                </p>
+              </div>
+
+              <!-- Score -->
+              <div class="text-right shrink-0">
+                <p class="text-lg font-bold text-(--forest) leading-none">{row.completions_period}</p>
+                <p class="text-[11px] text-(--text-muted) mt-0.5">completed</p>
+              </div>
+
+              <!-- Mini bar -->
+              <div class="w-20 hidden sm:block">
+                <div class="h-1.5 rounded-full bg-(--border) overflow-hidden">
+                  <div
+                    class="h-full rounded-full bg-(--leaf) transition-all"
+                    style={`width:${Math.min(100, (row.completions_period / (leaders[0]?.completions_period || 1)) * 100)}%`}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+
+    <!-- Footer note -->
+    <p class="mt-6 text-xs text-(--text-muted) text-center leading-relaxed">
+      Rankings update in real time. Completions are self-reported — mark your volunteer sessions done on your
+      <a href="/account" class="underline underline-offset-2 hover:text-(--forest)">account page</a>.
+      {!currentUserId && (
+        <> <a href="/signin" class="text-(--forest) font-medium underline underline-offset-2">Sign in</a> to appear on the board.</>
+      )}
+    </p>
+
+  </div>
+</Base>

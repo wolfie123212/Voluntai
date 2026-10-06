@@ -291,4 +291,102 @@ api.post('/api/admin/reports/:id/resolve', async (c) => {
   return c.json({ ok: true });
 });
 
+// ─── Volunteer tracking ───────────────────────────────────────────────────────
+
+// POST /api/volunteer/track  { opportunityId, orgId }
+// Records that a signed-in user clicked "Sign up directly" on an opportunity.
+api.post('/api/volunteer/track', async (c) => {
+  const auth = createAuth(c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  if (!session?.user) return c.json({ ok: false, error: 'unauthenticated' }, 401);
+
+  const { opportunityId, orgId } = await c.req.json() as { opportunityId: number; orgId: number };
+  if (!opportunityId || !orgId) return c.json({ ok: false, error: 'missing fields' }, 400);
+
+  await c.env.DB
+    .prepare(`INSERT INTO volunteer_actions (user_id, opportunity_id, org_id, clicked_at, created_at)
+              VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+              ON CONFLICT(user_id, opportunity_id) DO UPDATE SET clicked_at = CURRENT_TIMESTAMP`)
+    .bind(session.user.id, opportunityId, orgId)
+    .run();
+
+  return c.json({ ok: true });
+});
+
+// POST /api/volunteer/complete  { opportunityId, orgId }
+// Marks an opportunity as completed (user self-reports after volunteering).
+api.post('/api/volunteer/complete', async (c) => {
+  const auth = createAuth(c.env);
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  if (!session?.user) return c.json({ ok: false, error: 'unauthenticated' }, 401);
+
+  const { opportunityId, orgId } = await c.req.json() as { opportunityId: number; orgId: number };
+  if (!opportunityId || !orgId) return c.json({ ok: false, error: 'missing fields' }, 400);
+
+  await c.env.DB
+    .prepare(`INSERT INTO volunteer_actions (user_id, opportunity_id, org_id, completed_at, created_at)
+              VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+              ON CONFLICT(user_id, opportunity_id) DO UPDATE SET completed_at = CURRENT_TIMESTAMP`)
+    .bind(session.user.id, opportunityId, orgId)
+    .run();
+
+  return c.json({ ok: true });
+});
+
+// GET /api/leaderboard?period=month  — top 20 volunteers by completions
+api.get('/api/leaderboard', async (c) => {
+  const period = c.req.query('period') ?? 'month';
+  const cutoff = period === 'week'
+    ? new Date(Date.now() - 7 * 86400000).toISOString()
+    : new Date(Date.now() - 30 * 86400000).toISOString();
+
+  const rows = await c.env.DB
+    .prepare(`SELECT
+        va.user_id,
+        u.display_name,
+        COUNT(CASE WHEN va.completed_at >= ? THEN 1 END) as completions_period,
+        COUNT(va.completed_at) as completions_all,
+        COUNT(va.clicked_at) as clicks_all,
+        MAX(va.completed_at) as last_completed_at
+      FROM volunteer_actions va
+      JOIN users u ON u.id = va.user_id
+      WHERE va.completed_at IS NOT NULL
+      GROUP BY va.user_id
+      ORDER BY completions_period DESC, completions_all DESC
+      LIMIT 20`)
+    .bind(cutoff)
+    .all<{
+      user_id: string;
+      display_name: string | null;
+      completions_period: number;
+      completions_all: number;
+      clicks_all: number;
+      last_completed_at: string;
+    }>();
+
+  // Privacy: show first name + last initial only
+  const leaderboard = rows.results.map((r, i) => {
+    const name = r.display_name ?? 'Volunteer';
+    const parts = name.trim().split(/\s+/);
+    const display = parts.length > 1
+      ? `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`
+      : parts[0];
+    return {
+      rank: i + 1,
+      display,
+      completions_period: r.completions_period,
+      completions_all: r.completions_all,
+      last_completed_at: r.last_completed_at,
+    };
+  });
+
+  // Also return total unique volunteers this month
+  const totalRow = await c.env.DB
+    .prepare(`SELECT COUNT(DISTINCT user_id) as n FROM volunteer_actions WHERE completed_at >= ?`)
+    .bind(cutoff)
+    .first<{ n: number }>();
+
+  return c.json({ leaderboard, total: totalRow?.n ?? 0, period });
+});
+
 export default api;
