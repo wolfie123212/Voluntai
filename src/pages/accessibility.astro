@@ -1,0 +1,66 @@
+---
+import Base from '../layouts/Base.astro';
+
+const LAST_UPDATED = 'October 2026';
+const link = 'text-(--forest-light) underline underline-offset-2 hover:text-(--forest)';
+---
+
+<Base title="Accessibility" description="CityServ's commitment to accessibility and how to report a barrier.">
+  <div class="bg-(--cream) min-h-screen py-12 px-4">
+    <div class="mx-auto max-w-3xl">
+      <div class="mb-10">
+        <nav class="text-xs text-(--text-muted) mb-6" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-(--forest) transition-colors">Home</a>
+          <span class="mx-1.5 opacity-40" aria-hidden="true">›</span>
+          <span class="text-(--forest)">Accessibility</span>
+        </nav>
+        <h1 class="text-3xl font-bold text-(--forest)">Accessibility Statement</h1>
+        <p class="mt-2 text-sm text-(--text-muted)">Last updated: {LAST_UPDATED}</p>
+        <p class="mt-4 text-sm text-(--text-muted) leading-relaxed max-w-xl">
+          Everyone should be able to find a way to serve their city. We want CityServ to work for people who use screen readers, keyboards, magnification, captions, or any other assistive technology.
+        </p>
+      </div>
+
+      <div class="rounded-2xl border border-(--border) bg-white p-8 shadow-[var(--shadow)] space-y-8">
+        <section>
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">Our goal</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.1 at Level AA across cityserv.org.
+          </p>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section>
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">What we do</h2>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-(--text-muted) leading-relaxed">
+            <li>Run automated accessibility checks (axe-core) on public pages before releases.</li>
+            <li>Support full keyboard navigation, including a "Skip to main content" link.</li>
+            <li>Label form fields and give errors in text, not color alone.</li>
+            <li>Hide decorative illustrations from screen readers and stop animations when your device asks for reduced motion.</li>
+            <li>Keep text contrast at or above WCAG AA ratios.</li>
+          </ul>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section>
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">Known limitations</h2>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-(--text-muted) leading-relaxed">
+            <li>Organizations' own sign-up pages are run by those organizations, and we can't guarantee their accessibility. Tell us if one blocks you and we'll pass it on.</li>
+            <li>The CAPTCHA on our forms is provided by Cloudflare Turnstile, which is designed to work without visual puzzles. If it stops you, email us and we'll handle your request directly.</li>
+          </ul>
+        </section>
+
+        <hr class="border-(--border)" />
+
+        <section>
+          <h2 class="text-lg font-semibold text-(--forest) mb-3">Report a barrier</h2>
+          <p class="text-sm text-(--text-muted) leading-relaxed">
+            If something on CityServ doesn't work for you, email <a href="mailto:contact@cityserv.org" class={link}>contact@cityserv.org</a> or use the <a href="/contact" class={link}>contact form</a>. Tell us the page and what happened. We aim to reply within 5 business days.
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</Base>

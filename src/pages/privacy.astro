@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 
-const LAST_UPDATED = 'August 2026';
+const LAST_UPDATED = 'October 2026';
 ---
 
 <Base title="Privacy Policy" description="Privacy Policy for CityServ — how we collect, use, and protect your data.">
@@ -73,6 +73,7 @@ const LAST_UPDATED = 'August 2026';
                 { label: 'Review content', when: 'Text and rating you submit for a volunteer organization' },
                 { label: 'IP address and browser type', when: 'Recorded only at the moment of review submission for legal compliance and abuse prevention — never shown publicly, never used for tracking' },
                 { label: 'Site usage data', when: 'Via Cloudflare Web Analytics — privacy-preserving, no cookies, no cross-site tracking, no fingerprinting' },
+                { label: 'Approximate city of visits', when: 'Our host, Cloudflare, estimates the city, region and country of each page view and sign-in from your network connection. We keep only daily totals per city (for example, "Brooklyn, NY: 40 views"). We do not store your IP address for this, and these totals are never linked to you or your account' },
               ].map(({ label, when }) => (
                 <li class="flex items-start gap-2.5">
                   <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-(--leaf)"></span>
@@ -82,7 +83,7 @@ const LAST_UPDATED = 'August 2026';
             </ul>
           </div>
           <p class="mt-3 text-sm text-(--text-muted) leading-relaxed">
-            We do <strong class="text-(--forest)">not</strong> collect payment information, location data beyond what you voluntarily share in a review, or any health or financial information.
+            We do <strong class="text-(--forest)">not</strong> collect payment information, precise location data (only the city-level totals described above), or any health or financial information.
           </p>
         </section>
 

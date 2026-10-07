@@ -1,11 +1,26 @@
 ---
 import Base from '../layouts/Base.astro';
 import { verifyTurnstile } from '../lib/turnstile';
+import { sendEmail, emailHtml } from '../lib/auth';
+
+const ADMIN_EMAIL = 'wolfbusterwhite@gmail.com';
+const esc = (s: string) =>
+  s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
 const env = Astro.locals.runtime?.env;
 const siteKey = env?.TURNSTILE_SITE_KEY ?? '';
 const type = new URL(Astro.request.url).searchParams.get('type') ?? 'general';
 const isTakedown = type === 'takedown';
+
+const REASONS = [
+  { value: 'defamation', label: 'Defamation / false statement of fact' },
+  { value: 'dmca', label: 'Copyright infringement (DMCA)' },
+  { value: 'harassment', label: 'Harassment or threats' },
+  { value: 'pii', label: 'Personal information exposed' },
+  { value: 'spam', label: 'Spam or fake review' },
+  { value: 'inaccurate', label: 'Inaccurate organization info' },
+  { value: 'other', label: 'Other' },
+];
 
 let error = '';
 let success = false;
@@ -33,19 +48,33 @@ if (Astro.request.method === 'POST' && env) {
         .bind(reviewId ?? null, orgId ?? null, reporterEmail || null, reporterName || null, reason, details || null)
         .run();
       success = true;
+
+      if (env.RESEND_API_KEY) {
+        const label = REASONS.find((r) => r.value === reason)?.label ?? reason;
+        const rows = [
+          ['Reason', label],
+          ['From', `${reporterName || '(no name)'} <${reporterEmail || 'no email'}>`],
+          ['Review ID', reviewId ? String(reviewId) : '—'],
+          ['Org ID', orgId ? String(orgId) : '—'],
+        ]
+          .map(([k, v]) => `<p style="margin:4px 0;color:#bbf7d0"><strong style="color:white">${k}:</strong> ${esc(v)}</p>`)
+          .join('');
+        Astro.locals.runtime.ctx.waitUntil(
+          sendEmail(env, {
+            to: ADMIN_EMAIL,
+            subject: `[CityServ] ${isTakedown ? 'Takedown request' : 'Contact form'}: ${label}`,
+            html: emailHtml(
+              isTakedown ? 'New takedown request' : 'New contact message',
+              `${rows}<p style="margin:16px 0 0;white-space:pre-wrap;color:#dcfce7">${esc(details || '(no details)')}</p>
+               <p style="margin:24px 0 0"><a href="https://cityserv.org/admin/moderation" style="color:#4ade80">Open moderation queue →</a></p>`
+            ),
+          }).catch((e) => console.error('[contact] email failed', e))
+        );
+      }
     }
   }
 }
 
-const REASONS = [
-  { value: 'defamation', label: 'Defamation / false statement of fact' },
-  { value: 'dmca', label: 'Copyright infringement (DMCA)' },
-  { value: 'harassment', label: 'Harassment or threats' },
-  { value: 'pii', label: 'Personal information exposed' },
-  { value: 'spam', label: 'Spam or fake review' },
-  { value: 'inaccurate', label: 'Inaccurate organization info' },
-  { value: 'other', label: 'Other' },
-];
 ---
 
 <Base title={isTakedown ? 'Takedown Request' : 'Contact'}>

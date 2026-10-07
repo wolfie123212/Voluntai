@@ -116,7 +116,7 @@ export function createAuth(env: Env) {
   });
 }
 
-async function sendEmail(
+export async function sendEmail(
   env: Env,
   opts: { to: string; subject: string; html: string }
 ) {
@@ -129,7 +129,7 @@ async function sendEmail(
   });
 }
 
-function emailHtml(title: string, body: string): string {
+export function emailHtml(title: string, body: string): string {
   return `<!DOCTYPE html><html><body style="margin:0;padding:40px 20px;font-family:Inter,system-ui,sans-serif;background:#052e16">
     <div style="max-width:480px;margin:0 auto;background:#14532d;border-radius:16px;padding:32px">
       <p style="margin:0 0 24px;font-size:22px;font-weight:700;color:#4ade80">🌿 CityServ</p>
