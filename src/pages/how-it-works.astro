@@ -4,31 +4,26 @@ import Base from '../layouts/Base.astro';
 const STEPS = [
   {
     num: '01',
-    icon: '🔍',
     title: 'Search & filter',
     body: 'Type a cause ("food"), a neighborhood ("Lower East Side"), or a keyword ("weekend"). Results are sorted by reputability so the most vetted organizations surface first. Use the quick-filter chips to browse by category.',
   },
   {
     num: '02',
-    icon: '✅',
     title: 'Read the trust score',
     body: 'Every organization card shows a reputability score (0–100) built from IRS data, Charity Navigator ratings, AmeriCorps grantee status, staff reviews, and community ratings. Click the badge to read exactly how the score was calculated.',
   },
   {
     num: '03',
-    icon: '📖',
     title: 'Explore the org page',
     body: 'The org detail page shows the mission, description, verification badges, contact info, all open volunteer opportunities, and reviews from past volunteers — everything you need to decide if it\'s a good fit.',
   },
   {
     num: '04',
-    icon: '🚀',
     title: 'Sign up directly',
     body: 'Every "Sign up" button goes straight to the organization\'s own registration page — not to a middleman form. We intentionally stay out of the way so you connect with the nonprofit directly.',
   },
   {
     num: '05',
-    icon: '💬',
     title: 'Leave a review',
     body: 'After you volunteer, come back and leave a review. Ratings and comments help future volunteers make informed decisions and contribute to the organization\'s reputability score. Sign in with Google or email.',
   },
@@ -85,7 +80,7 @@ const FAQS = [
       <section aria-label="How it works — steps">
         <h2 class="sr-only">Step by step</h2>
         <ol class="relative space-y-0">
-          {STEPS.map(({ num, icon, title, body }, i) => (
+          {STEPS.map(({ num, title, body }, i) => (
             <li class="flex gap-6 pb-8 relative">
               <!-- Timeline line -->
               {i < STEPS.length - 1 && (
@@ -93,10 +88,7 @@ const FAQS = [
               )}
               <!-- Step number bubble -->
               <div class="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-2xl bg-(--forest) text-white shadow-sm" aria-hidden="true">
-                <span class="text-xl">{icon}</span>
-                <span class="absolute -top-1.5 -right-1.5 rounded-full bg-white border border-(--border) text-[10px] font-bold text-(--forest) h-5 w-5 flex items-center justify-center leading-none">
-                  {num}
-                </span>
+                <span class="text-lg font-black tabular-nums">{num}</span>
               </div>
               <!-- Content -->
               <div class="flex-1 pt-2">
@@ -111,14 +103,11 @@ const FAQS = [
       <!-- ── PRINCIPLES ─────────────────────────────────────────── -->
       <section class="grid gap-4 sm:grid-cols-3" aria-label="Our principles">
         {[
-          { icon: '🔓', title: 'No gatekeeping', body: 'Any volunteer can browse, search, and sign up without creating an account.' },
-          { icon: '📡', title: 'Public data only', body: 'Trust scores are built from IRS, AmeriCorps, Charity Navigator, and WHOIS — sources you can check yourself.' },
-          { icon: '🔗', title: 'Direct connections', body: 'Every sign-up button goes straight to the organization. We never intercept registrations or sell leads.' },
-        ].map(({ icon, title, body }) => (
+          { title: 'No gatekeeping', body: 'Any volunteer can browse, search, and sign up without creating an account.' },
+          { title: 'Public data only', body: 'Trust scores are built from IRS, AmeriCorps, Charity Navigator, and WHOIS — sources you can check yourself.' },
+          { title: 'Direct connections', body: 'Every sign-up button goes straight to the organization. We never intercept registrations or sell leads.' },
+        ].map(({ title, body }) => (
           <div class="rounded-2xl border border-(--border) bg-white p-5 shadow-[var(--shadow)] text-center">
-            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-(--cream) text-2xl border border-(--border)">
-              {icon}
-            </div>
             <h3 class="text-sm font-semibold text-(--forest) mb-1.5">{title}</h3>
             <p class="text-xs text-(--text-muted) leading-relaxed">{body}</p>
           </div>

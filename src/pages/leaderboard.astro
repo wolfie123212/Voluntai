@@ -77,10 +77,7 @@ const periodLabel = period === 'week' ? 'This Week' : 'This Month';
 
     <!-- Header -->
     <div class="mb-8">
-      <div class="flex items-center gap-3 mb-2">
-        <span class="text-3xl" aria-hidden="true">🏆</span>
-        <h1 class="text-2xl font-bold text-(--forest)">Volunteer Leaderboard</h1>
-      </div>
+      <h1 class="text-2xl font-bold text-(--forest) mb-2">Volunteer Leaderboard</h1>
       <p class="text-(--text-muted) text-sm">
         Top volunteers ranked by opportunities completed. Mark an opportunity as done on your
         <a href="/account" class="text-(--forest) underline underline-offset-2 hover:text-(--forest-mid)">account page</a>.
@@ -137,7 +134,6 @@ const periodLabel = period === 'week' ? 'This Week' : 'This Month';
     <!-- Leaderboard table -->
     {leaders.length === 0 ? (
       <div class="rounded-2xl border border-(--border) bg-white p-12 text-center">
-        <div class="text-4xl mb-3" aria-hidden="true">🌱</div>
         <p class="font-semibold text-(--forest) mb-1">No completions yet {periodLabel.toLowerCase()}</p>
         <p class="text-sm text-(--text-muted)">
           Be the first! Find an opportunity and mark it done on your account page.
@@ -150,7 +146,7 @@ const periodLabel = period === 'week' ? 'This Week' : 'This Month';
       <div class="rounded-2xl border border-(--border) bg-white overflow-hidden">
         {leaders.map((row, i) => {
           const rank = i + 1;
-          const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
+          const medal = rank === 1 ? 'bg-amber-400 text-amber-950' : rank === 2 ? 'bg-slate-300 text-slate-800' : rank === 3 ? 'bg-orange-300 text-orange-950' : null;
           const isMe = row.user_id === currentUserId;
           return (
             <div class:list={[
@@ -160,7 +156,7 @@ const periodLabel = period === 'week' ? 'This Week' : 'This Month';
               <!-- Rank -->
               <div class="w-8 text-center shrink-0">
                 {medal
-                  ? <span class="text-xl" aria-label={`Rank ${rank}`}>{medal}</span>
+                  ? <span class:list={['mx-auto flex h-7 w-7 items-center justify-center rounded-full text-sm font-black', medal]} aria-label={`Rank ${rank}`}>{rank}</span>
                   : <span class="text-sm font-bold text-(--text-muted)">{rank}</span>
                 }
               </div>

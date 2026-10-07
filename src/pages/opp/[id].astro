@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import PixelIcon from '../../components/PixelIcon.astro';
 import { parseCategories } from '../../lib/search';
 import type { OpportunityRow, OrgSearchRow } from '../../lib/search';
 
@@ -75,7 +76,7 @@ const isExpired = opp.expires_at ? new Date(opp.expires_at) < new Date() : false
           <div class="rounded-2xl border border-(--border) bg-white p-6 shadow-[var(--shadow)]">
             {isExpired && (
               <p class="mb-3 inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-medium text-amber-700">
-                ⚠️ This opportunity may have expired
+                This opportunity may have expired
               </p>
             )}
 
@@ -91,16 +92,16 @@ const isExpired = opp.expires_at ? new Date(opp.expires_at) < new Date() : false
             <div class="mt-4 flex flex-wrap gap-2">
               {opp.is_remote ? (
                 <span class="rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-medium text-blue-700">
-                  🌐 Remote
+                  Remote
                 </span>
               ) : (
                 <span class="rounded-full bg-(--cream) border border-(--border) px-3 py-1 text-xs font-medium text-(--forest-light)">
-                  📍 In-person
+                  In-person
                 </span>
               )}
               {opp.commitment && (
                 <span class="rounded-full bg-(--cream) border border-(--border) px-3 py-1 text-xs font-medium text-(--forest-light)">
-                  🕐 {opp.commitment}
+                  {opp.commitment}
                 </span>
               )}
               {opp.hours_per_week && (
@@ -237,22 +238,22 @@ const isExpired = opp.expires_at ? new Date(opp.expires_at) < new Date() : false
               <ul class="space-y-2.5">
                 {org.is_irs_501c3 === 1 && (
                   <li class="flex items-center gap-2 text-xs text-(--forest)">
-                    <span aria-hidden="true">🏛️</span> IRS 501(c)(3) nonprofit
+                    <PixelIcon name="bank" size={16} /> IRS 501(c)(3) nonprofit
                   </li>
                 )}
                 {org.admin_verified_by && (
                   <li class="flex items-center gap-2 text-xs text-(--forest)">
-                    <span aria-hidden="true">🎓</span> Staff-verified
+                    <PixelIcon name="cap" size={16} /> Staff-verified
                   </li>
                 )}
                 {org.is_americorps_grantee === 1 && (
                   <li class="flex items-center gap-2 text-xs text-(--forest)">
-                    <span aria-hidden="true">🇺🇸</span> AmeriCorps grantee
+                    <PixelIcon name="globe" size={16} /> AmeriCorps grantee
                   </li>
                 )}
                 {org.charity_nav_stars && (
                   <li class="flex items-center gap-2 text-xs text-(--forest)">
-                    <span aria-hidden="true">⭐</span> {org.charity_nav_stars}-star Charity Navigator
+                    <PixelIcon name="star" size={16} /> {org.charity_nav_stars}-star Charity Navigator
                   </li>
                 )}
               </ul>

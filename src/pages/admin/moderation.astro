@@ -87,7 +87,7 @@ function flagLabel(flags: string | null): string {
       </h2>
 
       {pendingReviews.length === 0 ? (
-        <p class="text-sm text-green-500">No pending reviews. 🎉</p>
+        <p class="text-sm text-green-500">No pending reviews.</p>
       ) : (
         <div class="space-y-4">
           {pendingReviews.map((r) => (
@@ -97,7 +97,7 @@ function flagLabel(flags: string | null): string {
                   <a href={`/orgs/${r.org_slug}`} class="font-medium text-white hover:text-green-300">{r.org_name}</a>
                   <p class="text-xs text-green-500">{r.user_email} · {'★'.repeat(r.rating)} · {r.volunteered_in_year}</p>
                   {r.moderation_flags && (
-                    <p class="mt-1 text-xs text-yellow-400">⚠ Flagged: {flagLabel(r.moderation_flags)}</p>
+                    <p class="mt-1 text-xs text-yellow-400">Flagged: {flagLabel(r.moderation_flags)}</p>
                   )}
                 </div>
                 <p class="text-xs text-green-600">{new Date(r.created_at).toLocaleString()}</p>
@@ -119,7 +119,7 @@ function flagLabel(flags: string | null): string {
                 <button
                   onclick={`adminAction('/api/admin/reviews/${r.id}/remove', {reason:'Defamation/policy violation'}, this)`}
                   class="rounded-lg bg-red-900/50 px-4 py-2 text-sm font-medium text-red-300 hover:bg-red-900/80 transition-colors">
-                  🗑 Remove
+                  Remove
                 </button>
               </div>
             </div>
@@ -138,7 +138,7 @@ function flagLabel(flags: string | null): string {
       </h2>
 
       {openReports.length === 0 ? (
-        <p class="text-sm text-green-500">No open reports. 🎉</p>
+        <p class="text-sm text-green-500">No open reports.</p>
       ) : (
         <div class="space-y-4">
           {openReports.map((rp) => (

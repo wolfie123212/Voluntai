@@ -1,6 +1,8 @@
 ---
+import PixelIcon, { type PixelIconName } from './PixelIcon.astro';
+
 interface Props {
-  icon: string;
+  icon: PixelIconName;
   name: string;
   description: string;
   earnedAt?: string; // If undefined, the badge is locked
@@ -19,12 +21,12 @@ const isLocked = !earnedAt;
   <div class="flex items-start gap-4">
     <!-- Icon Container -->
     <div class:list={[
-      'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-2xl shadow-inner transition-all duration-300',
+      'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-inner transition-all duration-300',
       isLocked 
         ? 'bg-(--cream-dark) grayscale' 
         : 'bg-(--cream) group-hover:scale-110'
     ]}>
-      {icon}
+      <PixelIcon name={icon} size={32} />
     </div>
 
     <!-- Badge Info -->

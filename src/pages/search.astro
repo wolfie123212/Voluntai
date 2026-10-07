@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import PixelIcon, { type PixelIconName } from '../components/PixelIcon.astro';
 import SearchBar from '../components/SearchBar.astro';
 import OrgCard from '../components/OrgCard.astro';
 import { searchOrgs } from '../lib/search';
@@ -25,15 +26,15 @@ const resultSummary = q
   ? `${orgs.length} organization${orgs.length !== 1 ? 's' : ''} matching "${q}"`
   : `${orgs.length} verified organization${orgs.length !== 1 ? 's' : ''} in the East Village`;
 
-const QUICK_FILTERS = [
-  { label: 'Food & Hunger',  q: 'food',        icon: '🍽️' },
-  { label: 'Seniors',        q: 'seniors',      icon: '🤝' },
-  { label: 'Youth',          q: 'youth',        icon: '🎓' },
-  { label: 'Housing',        q: 'housing',      icon: '🏠' },
-  { label: 'Animals',        q: 'animals',      icon: '🐾' },
-  { label: 'Health',         q: 'health',       icon: '💚' },
-  { label: 'Environment',    q: 'environment',  icon: '🌱' },
-  { label: 'Arts & Culture', q: 'arts',         icon: '🎨' },
+const QUICK_FILTERS: { label: string; q: string; icon: PixelIconName }[] = [
+  { label: 'Food & Hunger',  q: 'food',        icon: 'plate' },
+  { label: 'Seniors',        q: 'seniors',      icon: 'handshake' },
+  { label: 'Youth',          q: 'youth',        icon: 'cap' },
+  { label: 'Housing',        q: 'housing',      icon: 'house' },
+  { label: 'Animals',        q: 'animals',      icon: 'paw' },
+  { label: 'Health',         q: 'health',       icon: 'heart' },
+  { label: 'Environment',    q: 'environment',  icon: 'sprout' },
+  { label: 'Arts & Culture', q: 'arts',         icon: 'palette' },
 ];
 ---
 
@@ -62,13 +63,13 @@ const QUICK_FILTERS = [
                 : 'border-(--border) bg-(--cream) text-(--forest-light) hover:border-(--leaf) hover:text-(--forest) hover:bg-white'
             ]}
           >
-            <span aria-hidden="true">{icon}</span>
+            <PixelIcon name={icon} size={16} />
             {label}
           </a>
         ))}
         {q && !QUICK_FILTERS.some(f => f.q === q) && (
           <span class="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
-            🔎 "{q}"
+            "{q}"
           </span>
         )}
         {q && (
@@ -91,7 +92,7 @@ const QUICK_FILTERS = [
       <div class="mb-6">
         <p class="text-sm text-(--text-muted)">
           {error
-            ? '⚠️ Search unavailable right now — try again shortly.'
+            ? 'Search is unavailable right now. Try again in a moment.'
             : resultSummary}
         </p>
       </div>
@@ -102,9 +103,6 @@ const QUICK_FILTERS = [
         </div>
       ) : !error && (
         <div class="flex flex-col items-center gap-4 py-24 text-center">
-          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-(--border) shadow-[var(--shadow)] text-3xl" aria-hidden="true">
-            🔍
-          </div>
           <p class="text-lg font-semibold text-(--forest)">
             {q ? `No results for "${q}"` : 'No organizations found'}
           </p>

@@ -3,7 +3,6 @@ import Base from '../layouts/Base.astro';
 
 const SIGNALS = [
   {
-    icon: '🏛️',
     label: 'IRS 501(c)(3) Status',
     source: 'IRS Exempt Organizations database + ProPublica Nonprofit Explorer',
     points: '+20 (and +5 if status is not Revoked)',
@@ -12,7 +11,6 @@ const SIGNALS = [
     note: 'Revoked status is tracked separately and reduces the bonus.',
   },
   {
-    icon: '🎓',
     label: 'Staff Verified',
     source: 'Friends Seminary Service Office',
     points: '+10',
@@ -21,7 +19,6 @@ const SIGNALS = [
     note: `This is a transparency signal, not an endorsement of the organization's work or impact.`,
   },
   {
-    icon: '🇺🇸',
     label: 'AmeriCorps Grantee',
     source: 'Corporation for National and Community Service open data',
     points: '+15',
@@ -30,7 +27,6 @@ const SIGNALS = [
     note: `Not all excellent nonprofits apply for AmeriCorps grants; absence here doesn't indicate a problem.`,
   },
   {
-    icon: '⭐',
     label: 'Charity Navigator Rating',
     source: 'Charity Navigator API',
     points: '+4 per star (max +20 for 5 stars)',
@@ -39,7 +35,6 @@ const SIGNALS = [
     note: 'Many small community organizations are not large enough to be rated by Charity Navigator yet.',
   },
   {
-    icon: '🌐',
     label: 'Domain Age',
     source: 'WHOIS / first-seen date in our records',
     points: '+1 per year online, max +5',
@@ -48,7 +43,6 @@ const SIGNALS = [
     note: 'New but legitimate organizations will improve here naturally over time.',
   },
   {
-    icon: '💬',
     label: 'Community Reviews',
     source: 'CityServ volunteers',
     points: '±10 based on average rating (requires 3+ reviews)',
@@ -57,7 +51,6 @@ const SIGNALS = [
     note: 'We edit nothing. Reviews are published or rejected in full only.',
   },
   {
-    icon: '⚠️',
     label: 'Open Reports',
     source: 'CityServ internal reports',
     points: '−15 if 2 or more open, unresolved reports',
@@ -68,10 +61,10 @@ const SIGNALS = [
 ];
 
 const TIERS = [
-  { range: '80–100', label: 'Highly Trusted', icon: '🌟', color: 'bg-(--forest) text-white', desc: 'Multiple independent verifications — IRS 501(c)(3), at least one additional source (AmeriCorps or Charity Navigator), and staff review.' },
-  { range: '60–79',  label: 'Trusted',        icon: '✅', color: 'bg-(--leaf)/20 text-(--forest)', desc: 'IRS 501(c)(3) status confirmed plus good community reputation.' },
-  { range: '40–59',  label: 'Verified',        icon: '🔍', color: 'bg-(--cream) text-(--forest)', desc: 'At least one third-party data source confirms the organization exists and is legitimate.' },
-  { range: '0–39',   label: 'Listed',          icon: '📋', color: 'bg-white text-(--text-muted)', desc: 'Basic presence on our platform. Not enough data yet for third-party verification.' },
+  { range: '80–100', label: 'Highly Trusted', color: 'bg-(--forest) text-white', desc: 'Multiple independent verifications — IRS 501(c)(3), at least one additional source (AmeriCorps or Charity Navigator), and staff review.' },
+  { range: '60–79',  label: 'Trusted',        color: 'bg-(--leaf)/20 text-(--forest)', desc: 'IRS 501(c)(3) status confirmed plus good community reputation.' },
+  { range: '40–59',  label: 'Verified',        color: 'bg-(--cream) text-(--forest)', desc: 'At least one third-party data source confirms the organization exists and is legitimate.' },
+  { range: '0–39',   label: 'Listed',          color: 'bg-white text-(--text-muted)', desc: 'Basic presence on our platform. Not enough data yet for third-party verification.' },
 ];
 ---
 
@@ -98,10 +91,9 @@ const TIERS = [
       <section aria-label="Trust tiers">
         <h2 class="text-lg font-semibold text-(--forest) mb-5">Score tiers at a glance</h2>
         <div class="grid gap-3 sm:grid-cols-2">
-          {TIERS.map(({ range, label, icon, color, desc }) => (
+          {TIERS.map(({ range, label, color, desc }) => (
             <div class={`rounded-2xl border border-(--border) p-5 ${color === 'bg-white text-(--text-muted)' ? 'bg-white' : ''}`}>
               <div class:list={['inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold mb-3', color]}>
-                <span aria-hidden="true">{icon}</span>
                 {label} · {range}
               </div>
               <p class="text-sm leading-relaxed text-(--text-muted)">{desc}</p>
@@ -117,11 +109,10 @@ const TIERS = [
       <section aria-label="Verification signals">
         <h2 class="text-lg font-semibold text-(--forest) mb-5">The signals we check</h2>
         <div class="space-y-4">
-          {SIGNALS.map(({ icon, label, source, points, description, note }) => (
+          {SIGNALS.map(({ label, source, points, description, note }) => (
             <div class="rounded-2xl border border-(--border) bg-white p-6 shadow-[var(--shadow)]">
               <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
-                <h3 class="flex items-center gap-2.5 text-base font-semibold text-(--forest)">
-                  <span class="text-xl" aria-hidden="true">{icon}</span>
+                <h3 class="text-base font-semibold text-(--forest)">
                   {label}
                 </h3>
                 <span class="shrink-0 rounded-full bg-(--cream) border border-(--border) px-3 py-0.5 text-xs font-mono font-semibold text-(--forest-light)">
@@ -149,7 +140,7 @@ const TIERS = [
       + 20  (IRS 501c3 confirmed)
       + 5   (IRS status ≠ REVOKED)
       + 15  (AmeriCorps grantee)
-      + 4×⭐ (Charity Navigator stars)
+      + 4×stars (Charity Navigator)
       + 10  (staff verified)
       + min(5, years_online)
       + 2   (logo present)

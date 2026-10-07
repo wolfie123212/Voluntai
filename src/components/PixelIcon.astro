@@ -1,0 +1,296 @@
+---
+// 16×16 pixel-art icons drawn from character grids ('.' = transparent).
+// Matches the 8-bit city hero; renders crisp at any multiple of 16px.
+export type PixelIconName = 'bank' | 'chart' | 'cap' | 'globe' | 'star' | 'plate' | 'handshake' | 'house' | 'paw' | 'heart' | 'sprout' | 'palette';
+
+interface Props {
+  name: PixelIconName;
+  size?: number;
+  class?: string;
+}
+
+interface Sprite { rows: string[]; colors: Record<string, string> }
+
+const SPRITES: Record<PixelIconName, Sprite> = {
+  bank: {
+    colors: { K: '#3A3326', S: '#EDE6D2', D: '#B8AC8C' },
+    rows: [
+      '................',
+      '.......KK.......',
+      '.....KKSSKK.....',
+      '...KKSSSSSSKK...',
+      '.KKSSSSSSSSSSKK.',
+      '.KKKKKKKKKKKKKK.',
+      '..SD.SD..SD.SD..',
+      '..SD.SD..SD.SD..',
+      '..SD.SD..SD.SD..',
+      '..SD.SD..SD.SD..',
+      '..SD.SD..SD.SD..',
+      '..SD.SD..SD.SD..',
+      '.KKKKKKKKKKKKKK.',
+      'KKKKKKKKKKKKKKKK',
+      '................',
+      '................',
+    ],
+  },
+  chart: {
+    colors: { K: '#3A4450', G: '#4CAF50', g: '#2E7D32', R: '#E0533D', r: '#A8321F', B: '#3B6FD6', b: '#24489A' },
+    rows: [
+      '................',
+      '................',
+      '.K.........BBb..',
+      '.K.........BBb..',
+      '.K.........BBb..',
+      '.K.....RRr.BBb..',
+      '.K.....RRr.BBb..',
+      '.K.....RRr.BBb..',
+      '.K.GGg.RRr.BBb..',
+      '.K.GGg.RRr.BBb..',
+      '.K.GGg.RRr.BBb..',
+      '.K.GGg.RRr.BBb..',
+      '.K.GGg.RRr.BBb..',
+      '.KKKKKKKKKKKKKK.',
+      '................',
+      '................',
+    ],
+  },
+  cap: {
+    colors: { H: '#55556A', D: '#2E2E3C', K: '#1C1C26', Y: '#F2B830' },
+    rows: [
+      '................',
+      '................',
+      '.......HH.......',
+      '.....HHHHHH.....',
+      '...HHHHHHHHHH...',
+      '.DDDDDDDDDDDDDD.',
+      '...DDDDDDDDDDY..',
+      '.....DDDDDD..Y..',
+      '....KKKKKKKK.Y..',
+      '....KKKKKKKK.YY.',
+      '....KKKKKKKK.YY.',
+      '.....KKKKKK.....',
+      '................',
+      '................',
+      '................',
+      '................',
+    ],
+  },
+  globe: {
+    colors: { O: '#1F5A8C', W: '#58A6E0', L: '#4CAF50' },
+    rows: [
+      '................',
+      '.....OOOOOO.....',
+      '...OOWWWWWWOO...',
+      '..OWWLLWWWWWWO..',
+      '.OWWLLLLWWWLLWO.',
+      '.OWLLLLLWWWLLWO.',
+      'OWWWLLLWWWWWLLWO',
+      'OWWWWLLWWWWWWWWO',
+      'OWWWWWLLWWWLLWWO',
+      'OWWWWWLWWWLLLLWO',
+      '.OWWWWWWWWLLLWO.',
+      '.OWWWWWWWWWLLWO.',
+      '..OWWWWWWWWWWO..',
+      '...OOWWWWWWOO...',
+      '.....OOOOOO.....',
+      '................',
+    ],
+  },
+  star: {
+    colors: { O: '#B07A0A', Y: '#FFC93C', h: '#FFF1A8' },
+    rows: [
+      '................',
+      '.......OO.......',
+      '.......OO.......',
+      '......OhYO......',
+      '......OhYO......',
+      'OOOOOOhYYYOOOOOO',
+      '.OhhYYYYYYYYYYO.',
+      '..OYYYYYYYYYYO..',
+      '...OYYYYYYYYO...',
+      '....OYYYYYYO....',
+      '....OYYYYYYO....',
+      '...OYYYOOYYYO...',
+      '...OYYO..OYYO...',
+      '..OYO......OYO..',
+      '..OO........OO..',
+      '................',
+    ],
+  },
+  plate: {
+    colors: { F: '#8A939C', K: '#B9C1C9', k: '#6B4A2E', P: '#8F99A3', w: '#FFFFFF', S: '#D6DDE3' },
+    rows: [
+      '................',
+      '................',
+      'F.F..........K..',
+      'F.F..PPPPPP..KK.',
+      'F.F.PwwwwwwP.KK.',
+      'FFFPwwSSSSwwPKK.',
+      '.F.PwSwwwwSwPKK.',
+      '.F.PwSwwwwSwP.k.',
+      '.F.PwSwwwwSwP.k.',
+      '.F.PwwSSSSwwP.k.',
+      '.F..PwwwwwwP..k.',
+      '.F...PPPPPP...k.',
+      '.F............k.',
+      '.F............k.',
+      '................',
+      '................',
+    ],
+  },
+  handshake: {
+    colors: { B: '#3B6FD6', C: '#4CAF50', w: '#FFFFFF', Y: '#F6C25B', o: '#A86A1E' },
+    rows: [
+      '................',
+      '................',
+      '................',
+      '................',
+      '......oooo......',
+      'BBw.ooYYYYoo.wCC',
+      'BBwoYYYYYYYYowCC',
+      'BBwYYoYYoYYoYwCC',
+      'BBwYYYoYYoYYYwCC',
+      'BBwoYYYoYYoYowCC',
+      'BBw.ooYYYYYYowCC',
+      '......oooooo....',
+      '................',
+      '................',
+      '................',
+      '................',
+    ],
+  },
+  house: {
+    colors: { R: '#C8392B', C: '#7A4A3A', K: '#5A3A2A', W: '#F6EAD0', G: '#7CC4E0', D: '#7A4A2E', d: '#F2C230', S: '#8A8F99' },
+    rows: [
+      '................',
+      '.......RR.......',
+      '......RRRR..CC..',
+      '.....RRRRRR.CC..',
+      '....RRRRRRRRCC..',
+      '...RRRRRRRRRR...',
+      '..RRRRRRRRRRRR..',
+      '.RRRRRRRRRRRRRR.',
+      '...KWWWWWWWWK...',
+      '...KGGWDDWGGK...',
+      '...KGGWDDWGGK...',
+      '...KWWWDDWWWK...',
+      '...KWWWDdWWWK...',
+      '...KWWWDDWWWK...',
+      '..SSSSSSSSSSSS..',
+      '................',
+    ],
+  },
+  paw: {
+    colors: { P: '#5B3A29', h: '#8A5A3E' },
+    rows: [
+      '................',
+      '................',
+      '....PP....PP....',
+      '...hPPP..hPPP...',
+      '...PPPP..PPPP...',
+      '....PP....PP....',
+      '.PP..........PP.',
+      'hPPP........hPPP',
+      'PPPP..PPPP..PPPP',
+      '.PP..PPPPPP..PP.',
+      '....hPPPPPPP....',
+      '...hPPPPPPPPP...',
+      '...PPPPPPPPPP...',
+      '....PPPPPPPP....',
+      '.....PPPPPP.....',
+      '................',
+    ],
+  },
+  heart: {
+    colors: { O: '#1E6B3A', G: '#3DBB6A', h: '#A6F0C0' },
+    rows: [
+      '................',
+      '................',
+      '..OOOO....OOOO..',
+      '.OGGGGO..OGGGGO.',
+      'OGhhGGGOOGGGGGGO',
+      'OGhGGGGGGGGGGGGO',
+      'OGGGGGGGGGGGGGGO',
+      'OGGGGGGGGGGGGGGO',
+      '.OGGGGGGGGGGGGO.',
+      '..OGGGGGGGGGGO..',
+      '...OGGGGGGGGO...',
+      '....OGGGGGGO....',
+      '.....OGGGGO.....',
+      '......OGGO......',
+      '.......OO.......',
+      '................',
+    ],
+  },
+  sprout: {
+    colors: { L: '#6CC24A', l: '#3E8E2E', S: '#3E8E2E', D: '#7A5434' },
+    rows: [
+      '................',
+      '................',
+      '..........LLLL..',
+      '..LLL....LLLLLL.',
+      '.LLLLL..LLLLLLl.',
+      '.LLLLLL.LLLLll..',
+      '..lLLLL.SLlll...',
+      '...llLLSS.......',
+      '.......S........',
+      '.......S........',
+      '.......S........',
+      '......SS........',
+      '......S.........',
+      '.....DDDDDD.....',
+      '...DDDDDDDDDD...',
+      '................',
+    ],
+  },
+  palette: {
+    colors: { O: '#8A5A2E', T: '#E8C48A', R: '#E0533D', B: '#3B6FD6', Y: '#F2C230', G: '#4CAF50', P: '#9B59B6' },
+    rows: [
+      '................',
+      '................',
+      '................',
+      '.....OOOOOO.....',
+      '...OOTTTTTTOO...',
+      '..OTTRRTTBBTTO..',
+      '.OTTTRRTTBBTTTO.',
+      '.OTYYTTTTTTGGTO.',
+      'OTTYYTO..OTGGTTO',
+      'OTTTTTO..OTTTTTO',
+      'OTTPPTTOOTTTTTTO',
+      '.OTPPTTTTTTTOOO.',
+      '..OTTTTTTTO.....',
+      '...OOOOOOO......',
+      '................',
+      '................',
+    ],
+  },
+};
+
+const { name, size = 24, class: className } = Astro.props;
+const sprite = SPRITES[name];
+
+// Merge horizontal runs of the same color into one rect each.
+const rects: { x: number; y: number; w: number; fill: string }[] = [];
+sprite.rows.forEach((row, y) => {
+  let x = 0;
+  while (x < row.length) {
+    const ch = row[x];
+    let w = 1;
+    while (row[x + w] === ch) w++;
+    if (ch !== '.' && sprite.colors[ch]) rects.push({ x, y, w, fill: sprite.colors[ch] });
+    x += w;
+  }
+});
+---
+
+<svg
+  viewBox="0 0 16 16"
+  width={size}
+  height={size}
+  class={className}
+  shape-rendering="crispEdges"
+  aria-hidden="true"
+  focusable="false"
+>
+  {rects.map((r) => <rect x={r.x} y={r.y} width={r.w} height="1" fill={r.fill} />)}
+</svg>

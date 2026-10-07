@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import type { PixelIconName } from '../components/PixelIcon.astro';
 import { createAuth } from '../lib/auth';
 import BadgeCard from '../components/BadgeCard.astro';
 import QuestCard from '../components/QuestCard.astro';
@@ -126,12 +127,12 @@ const userXP = reviews.length * 150 + 50; // base + 150XP per review
 const nextLevelXP = userLevel === 1 ? 200 : userLevel === 2 ? 500 : 1000;
 const xpPercentage = Math.min(100, Math.round((userXP / nextLevelXP) * 100));
 
-const BADGES = [
-  { icon: '🌱', name: 'First Steps', desc: 'Create your account and complete registration.', earnedAt: user.createdAt },
-  { icon: '⭐', name: 'Reviewer', desc: 'Leave your first review for a verified organization.', earnedAt: reviews.length >= 1 ? reviews[reviews.length - 1].created_at : undefined },
-  { icon: '🍽️', name: 'Hunger Hero', desc: 'Complete 3 shifts at a local East Village food pantry.', earnedAt: reviews.some(r => r.org_slug.includes('mission') || r.org_slug.includes('cares')) ? user.createdAt : undefined },
-  { icon: '🔥', name: 'On Fire', desc: 'Volunteer 3 times in a single calendar month.', earnedAt: undefined },
-  { icon: '🏆', name: 'Community Leader', desc: 'Reach volunteer Level 5 with 1,500+ XP.', earnedAt: undefined },
+const BADGES: { icon: PixelIconName; name: string; description: string; earnedAt?: string }[] = [
+  { icon: 'sprout', name: 'First Steps', description: 'Create your account and complete registration.', earnedAt: user.createdAt },
+  { icon: 'star', name: 'Reviewer', description: 'Leave your first review for a verified organization.', earnedAt: reviews.length >= 1 ? reviews[reviews.length - 1].created_at : undefined },
+  { icon: 'plate', name: 'Hunger Hero', description: 'Complete 3 shifts at a local East Village food pantry.', earnedAt: reviews.some(r => r.org_slug.includes('mission') || r.org_slug.includes('cares')) ? user.createdAt : undefined },
+  { icon: 'heart', name: 'On Fire', description: 'Volunteer 3 times in a single calendar month.', earnedAt: undefined },
+  { icon: 'handshake', name: 'Community Leader', description: 'Reach volunteer Level 5 with 1,500+ XP.', earnedAt: undefined },
 ];
 
 const QUESTS = [
@@ -162,10 +163,10 @@ const QUESTS = [
               <p class="text-xs text-(--text-muted)">{user.email}</p>
               <div class="mt-2 flex items-center gap-2">
                 <span class="inline-flex items-center gap-1 rounded-full bg-(--cream) px-2.5 py-0.5 text-[10px] font-semibold text-(--forest-light)">
-                  🛡️ Role: {user.role || 'Volunteer'}
+                  Role: {user.role || 'Volunteer'}
                 </span>
                 <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-200">
-                  ⚡ Level {userLevel} Volunteer
+                  Level {userLevel} Volunteer
                 </span>
               </div>
             </div>
@@ -276,7 +277,6 @@ const QUESTS = [
 
       {volunteerActivity.length === 0 ? (
         <div class="rounded-2xl border border-(--border) bg-white px-6 py-10 text-center shadow-[var(--shadow)]">
-          <div class="mx-auto mb-3 text-3xl" aria-hidden="true">🌿</div>
           <p class="text-(--text-muted) text-sm leading-relaxed max-w-sm mx-auto">
             When you click "Sign up directly" on an opportunity, it'll appear here so you can mark it done.
           </p>
@@ -290,10 +290,10 @@ const QUESTS = [
             <div class="flex items-center gap-4 rounded-xl border border-(--border) bg-white px-4 py-3 shadow-[var(--shadow)]">
               <!-- Status icon -->
               <div class:list={[
-                'flex h-9 w-9 items-center justify-center rounded-full shrink-0 text-lg',
-                va.completed_at ? 'bg-green-50 text-green-600' : 'bg-(--cream) text-(--text-muted)'
-              ]}>
-                {va.completed_at ? '✅' : '🔗'}
+                'flex h-9 w-9 items-center justify-center rounded-full shrink-0 text-base font-bold',
+                va.completed_at ? 'bg-green-50 text-green-700' : 'bg-(--cream) text-(--text-muted)'
+              ]} aria-hidden="true">
+                {va.completed_at ? '✓' : '↗'}
               </div>
 
               <!-- Info -->
@@ -333,7 +333,6 @@ const QUESTS = [
 
       {reviews.length === 0 ? (
         <div class="rounded-2xl border border-(--border) bg-white px-6 py-12 text-center shadow-[var(--shadow)]">
-          <div class="mx-auto mb-4 text-4xl" aria-hidden="true">✍️</div>
           <p class="text-(--text-muted) text-sm leading-relaxed max-w-sm mx-auto">
             You haven't left any reviews yet. Share your honest volunteer experience to unlock badges and level up!
           </p>
@@ -417,7 +416,7 @@ const QUESTS = [
           const row = btn.closest('div.flex');
           if (row) {
             const icon = row.querySelector('.rounded-full.shrink-0');
-            if (icon) { icon.textContent = '✅'; (icon as HTMLElement).className = 'flex h-9 w-9 items-center justify-center rounded-full shrink-0 text-lg bg-green-50 text-green-600'; }
+            if (icon) { icon.textContent = '✓'; (icon as HTMLElement).className = 'flex h-9 w-9 items-center justify-center rounded-full shrink-0 text-base font-bold bg-green-50 text-green-700'; }
             const meta = row.querySelector('p.text-xs');
             if (meta) {
               const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });

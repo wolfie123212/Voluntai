@@ -27,12 +27,11 @@ const LAST_UPDATED = 'October 2026';
         <p class="text-xs font-semibold uppercase tracking-widest text-(--text-muted) mb-4">The short version</p>
         <div class="grid gap-3 sm:grid-cols-3">
           {[
-            { icon: '🚫', title: 'We never sell your data', sub: 'Not to anyone, ever' },
-            { icon: '📍', title: 'No ad tracking', sub: 'Cloudflare analytics uses no cookies' },
-            { icon: '🗑️', title: 'Delete anytime', sub: 'Email us and we remove your account' },
-          ].map(({ icon, title, sub }) => (
+            { title: 'We never sell your data', sub: 'Not to anyone, ever' },
+            { title: 'No ad tracking', sub: 'Cloudflare analytics uses no cookies' },
+            { title: 'Delete anytime', sub: 'Email us and we remove your account' },
+          ].map(({ title, sub }) => (
             <div class="rounded-xl border border-(--border) bg-(--cream) px-4 py-4 text-center">
-              <div class="text-2xl mb-2" aria-hidden="true">{icon}</div>
               <p class="text-sm font-semibold text-(--forest)">{title}</p>
               <p class="text-xs text-(--text-muted) mt-0.5">{sub}</p>
             </div>

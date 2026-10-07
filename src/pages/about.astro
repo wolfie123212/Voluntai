@@ -2,18 +2,18 @@
 import Base from '../layouts/Base.astro';
 
 const TRUST_TIERS = [
-  { label: 'Highly Trusted', range: '80–100', color: 'bg-(--forest)', textColor: 'text-white', icon: '⭐', desc: 'Multiple independent verifications — IRS, AmeriCorps, Charity Navigator, and admin-reviewed.' },
+  { label: 'Highly Trusted', range: '80–100', color: 'bg-(--forest)', textColor: 'text-white', icon: '★', desc: 'Multiple independent verifications — IRS, AmeriCorps, Charity Navigator, and admin-reviewed.' },
   { label: 'Trusted',        range: '60–79',  color: 'bg-(--forest-light)', textColor: 'text-white', icon: '✓', desc: 'IRS 501(c)(3) verified plus admin review. Solid track record.' },
   { label: 'Verified',       range: '40–59',  color: 'bg-(--leaf-light)', textColor: 'text-(--forest)', icon: '✓', desc: 'Basic verification complete — at minimum one independent source confirmed.' },
   { label: 'Listed',         range: '0–39',   color: 'bg-(--cream-dark)', textColor: 'text-(--forest)', icon: '○', desc: 'Organization listed but not yet independently verified. We\'re working on it.' },
 ];
 
 const VERIFICATION_SOURCES = [
-  { icon: '🏛️', title: 'IRS 501(c)(3)',           desc: 'Tax-exempt status confirmed via ProPublica Nonprofit Explorer and IRS Exempt Organizations data.', badge: 'Government' },
-  { icon: '🇺🇸', title: 'AmeriCorps Grantee',      desc: 'Organization is a current or recent AmeriCorps grantee, verified via AmeriCorps Open Data.', badge: 'Government' },
-  { icon: '⭐',  title: 'Charity Navigator Rated', desc: 'Rated by Charity Navigator with a published star rating and accountability score.', badge: 'Independent' },
-  { icon: '🎓', title: 'School Verified',          desc: 'Reviewed and approved by the Friends Seminary Service Office as a partner organization.', badge: 'School' },
-  { icon: '👤', title: 'Admin Verified',           desc: 'Manually reviewed by a CityServ administrator. Not a government or regulator endorsement.', badge: 'Admin' },
+  { title: 'IRS 501(c)(3)',           desc: 'Tax-exempt status confirmed via ProPublica Nonprofit Explorer and IRS Exempt Organizations data.', badge: 'Government' },
+  { title: 'AmeriCorps Grantee',      desc: 'Organization is a current or recent AmeriCorps grantee, verified via AmeriCorps Open Data.', badge: 'Government' },
+  { title: 'Charity Navigator Rated', desc: 'Rated by Charity Navigator with a published star rating and accountability score.', badge: 'Independent' },
+  { title: 'School Verified',          desc: 'Reviewed and approved by the Friends Seminary Service Office as a partner organization.', badge: 'School' },
+  { title: 'Admin Verified',           desc: 'Manually reviewed by a CityServ administrator. Not a government or regulator endorsement.', badge: 'Admin' },
 ];
 
 const HOW_SCORE_WORKS = [
@@ -52,9 +52,6 @@ const HOW_SCORE_WORKS = [
     <div class="mx-auto max-w-3xl">
       <div class="rounded-2xl border border-(--border) bg-white p-8 shadow-[var(--shadow)]">
         <div class="flex items-start gap-4">
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-(--cream) text-2xl shadow-inner">
-            🌿
-          </div>
           <div>
             <h2 class="text-xl font-bold text-(--forest) mb-3">Our mission</h2>
             <div class="space-y-4 text-(--text-muted) leading-relaxed">
@@ -92,11 +89,8 @@ const HOW_SCORE_WORKS = [
       </div>
 
       <div class="space-y-4">
-        {VERIFICATION_SOURCES.map(({ icon, title, desc, badge }) => (
+        {VERIFICATION_SOURCES.map(({ title, desc, badge }) => (
           <div class="rounded-xl border border-(--border) bg-white p-5 shadow-sm flex items-start gap-4 hover:shadow-[var(--shadow)] transition-shadow">
-            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-(--cream) text-xl">
-              {icon}
-            </div>
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-1">
                 <h3 class="font-semibold text-(--forest)">{title}</h3>

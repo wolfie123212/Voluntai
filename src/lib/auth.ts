@@ -132,7 +132,7 @@ export async function sendEmail(
 export function emailHtml(title: string, body: string): string {
   return `<!DOCTYPE html><html><body style="margin:0;padding:40px 20px;font-family:Inter,system-ui,sans-serif;background:#052e16">
     <div style="max-width:480px;margin:0 auto;background:#14532d;border-radius:16px;padding:32px">
-      <p style="margin:0 0 24px;font-size:22px;font-weight:700;color:#4ade80">🌿 CityServ</p>
+      <p style="margin:0 0 24px;font-size:22px;font-weight:700;color:#4ade80">CityServ</p>
       <h1 style="margin:0 0 16px;font-size:20px;color:white">${title}</h1>
       ${body}
       <p style="margin:24px 0 0;color:#166534;font-size:12px;border-top:1px solid #166534;padding-top:16px">

@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import PixelIcon, { type PixelIconName } from '../../components/PixelIcon.astro';
 import TrustBadge from '../../components/TrustBadge.astro';
 import OpportunityCard from '../../components/OpportunityCard.astro';
 import { parseCategories, getOrgOpportunities } from '../../lib/search';
@@ -67,11 +68,11 @@ const categories = parseCategories(org.categories);
 const tier = trustTier(org.reputability_cached);
 
 const verificationBadges = [
-  org.is_irs_501c3 && { label: 'IRS 501(c)(3)', detail: org.irs_status === 'PUBLIC_CHARITY' ? 'Public Charity' : org.irs_status ?? 'Tax-exempt', icon: '🏛️' },
-  org.admin_verified_by && { label: 'Staff Verified', detail: 'Friends Seminary Service Office', icon: '🎓' },
-  org.is_americorps_grantee && { label: 'AmeriCorps Grantee', detail: 'Federal service program partner', icon: '🇺🇸' },
-  org.charity_nav_stars && { label: `${org.charity_nav_stars}-Star Rating`, detail: 'Charity Navigator', icon: '⭐' },
-].filter(Boolean) as Array<{ label: string; detail: string; icon: string }>;
+  org.is_irs_501c3 && { label: 'IRS 501(c)(3)', detail: org.irs_status === 'PUBLIC_CHARITY' ? 'Public Charity' : org.irs_status ?? 'Tax-exempt', icon: 'bank' },
+  org.admin_verified_by && { label: 'Staff Verified', detail: 'Friends Seminary Service Office', icon: 'cap' },
+  org.is_americorps_grantee && { label: 'AmeriCorps Grantee', detail: 'Federal service program partner', icon: 'globe' },
+  org.charity_nav_stars && { label: `${org.charity_nav_stars}-Star Rating`, detail: 'Charity Navigator', icon: 'star' },
+].filter(Boolean) as Array<{ label: string; detail: string; icon: PixelIconName }>;
 
 // Average rating
 const avgRating = reviews.length
@@ -270,7 +271,7 @@ const avgRating = reviews.length
               <ul class="space-y-3">
                 {verificationBadges.map(({ label, detail, icon }) => (
                   <li class="flex items-start gap-3">
-                    <span class="text-lg mt-0.5 shrink-0" aria-hidden="true">{icon}</span>
+                    <PixelIcon name={icon} size={24} class="mt-0.5 shrink-0" />
                     <div>
                       <p class="text-sm font-medium text-(--forest)">{label}</p>
                       <p class="text-xs text-(--text-muted)">{detail}</p>
